@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Minimal Study Hub</title>
+
+<style>
+:root {
+  --bg: #f7f7f7;
+  --panel: #ffffff;
+  --text: #111;
+  --muted: #666;
+  --accent: #4f46e5;
+  --border: #e5e7eb;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --panel: #020617;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --border: #1e293b;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  height: 100vh;
+}
+
+aside {
+  padding: 20px;
+  border-right: 1px solid var(--border);
+  background: var(--panel);
+}
+
+aside h1 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+nav button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  margin-bottom: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+nav button:hover,
+nav button.active {
+  background: var(--accent);
+  color: white;
+}
+
+main {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+section {
+  display: none;
+}
+
+section.active {
+  display: block;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+textarea, input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+button.primary {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.flashcard {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.calendar-day {
+  border: 1px solid var(--border);
+  padding: 10px;
+  min-height: 80px;
+  border-radius: 6px;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+footer {
+  position: fixed;
+  bottom: 12px;
+  right: 20px;
+  opacity: .5;
+}
+</style>
+</head>
+
+<body data-theme="light">
+
+<aside>
+  <h1>📘 Study Hub</h1>
+  <nav>
+    <button class="active" onclick="show('notes')">Study Sheets</button>
+    <button onclick="show('flashcards')">Flashcards</button>
+    <button onclick="show('calendar')">Calendar</button>
+    <button onclick="show('quiz')">AI Quizzes</button>
+    <button onclick="toggleTheme()">🌗 Theme</button>
+  </nav>
+</aside>
+
+<main>
+
+<!-- NOTES -->
+<section id="notes" class="active">
+  <h2>Study Sheets</h2>
+  <div class="panel">
+    <textarea id="notesArea" rows="15" placeholder="Write clean, focused study notes..."></textarea>
+  </div>
+</section>
+
+<!-- FLASHCARDS -->
+<section id="flashcards">
+  <h2>Flashcards</h2>
+  <div class="panel">
+    <input id="q" placeholder="Question">
+    <input id="a" placeholder="Answer">
+    <button class="primary" onclick="addCard()">Add</button>
+  </div>
+  <div id="card" class="flashcard panel" onclick="flip()">Click to study</div>
+</section>
+
+<!-- CALENDAR -->
+<section id="calendar">
+  <h2>Study Calendar</h2>
+  <div class="calendar" id="calendarGrid"></div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <h2>AI-Style Quiz Generator</h2>
+  <div class="panel">
+    <textarea id="quizTopic" placeholder="Topic (e.g. Biology: Photosynthesis)"></textarea>
+    <button class="primary" onclick="generateQuiz()">Generate Quiz</button>
+  </div>
+  <div id="quizArea"></div>
+</section>
+
+</main>
+
+<footer>Minimal Study Hub</footer>
+
+<script>
+/* NAV */
+function show(id){
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  event.target.classList.add("active");
+}
+
+/* THEME */
+function toggleTheme(){
+  document.body.dataset.theme =
+    document.body.dataset.theme === "dark" ? "light" : "dark";
+}
+
+/* NOTES SAVE */
+const notes = document.getElementById("notesArea");
+notes.value = localStorage.notes || "";
+notes.oninput = ()=> localStorage.notes = notes.value;
+
+/* FLASHCARDS */
+let cards = JSON.parse(localStorage.cards || "[]");
+let index = 0, flipped = false;
+
+function addCard(){
+  cards.push({q:q.value,a:a.value});
+  localStorage.cards = JSON.stringify(cards);
+  q.value=a.value="";
+}
+
+function flip(){
+  if(!cards.length) return;
+  flipped = !flipped;
+  card.innerText = flipped ? cards[index].a : cards[index].q;
+}
+
+setInterval(()=>{
+  if(!cards.length) return;
+  flipped=false;
+  index=(index+1)%cards.length;
+  card.innerText=cards[index].q;
+},6000);
+
+/* CALENDAR */
+const grid=document.getElementById("calendarGrid");
+for(let i=1;i<=30;i++){
+  const d=document.createElement("div");
+  d.className="calendar-day";
+  d.contentEditable=true;
+  d.innerText=localStorage["day"+i]||"Day "+i;
+  d.oninput=()=>localStorage["day"+i]=d.innerText;
+  grid.appendChild(d);
+}
+
+/* QUIZ (offline smart generator) */
+function generateQuiz(){
+  const topic=quizTopic.value;
+  quizArea.innerHTML="";
+  for(let i=1;i<=5;i++){
+    quizArea.innerHTML+=`
+      <div class="panel">
+        <strong>Q${i}:</strong> Explain ${topic} concept ${i}.
+      </div>`;
+  }
+}
+</script>
+
+</body>
+</html>
