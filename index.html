@@ -2,351 +2,201 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>StudyOS Pro</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <script src="https://unpkg.com/@mlc-ai/web-llm/dist/index.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <title>StudyOS | Professional Study Sheets</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-
         :root {
-            --bg: #0b0c14;
-            --panel: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
-            --text: #e8e9f1;
-            --muted: #9ba0b3;
-            --accent: #8b8bff;
-            --danger: #ff5f5f;
-            --blur: blur(24px);
+            --bg: #0a0b10; --sidebar: #11121a; --card: #1c1e29;
+            --accent: #6366f1; --accent-hover: #818cf8;
+            --text: #f8fafc; --muted: #94a3b8; --border: #2d313e;
         }
-
-        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
-
-        body {
-            margin: 0;
-            height: 100vh;
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            background: radial-gradient(circle at top left, #1b1c44, var(--bg));
-            color: var(--text);
-            overflow: hidden;
-        }
+        * { box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
 
         /* Sidebar */
-        aside {
-            padding: 24px;
-            background: var(--panel);
-            backdrop-filter: var(--blur);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        aside { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; }
+        .logo { font-size: 1.5rem; font-weight: 800; margin-bottom: 30px; color: var(--accent); letter-spacing: -1px; }
+        #note-list { flex: 1; overflow-y: auto; }
+        .note-item { 
+            padding: 12px; border-radius: 10px; cursor: pointer; margin-bottom: 8px;
+            border: 1px solid transparent; transition: 0.2s; display: flex; justify-content: space-between; align-items: center;
         }
+        .note-item:hover { background: var(--card); border-color: var(--border); }
+        .note-item.active { background: var(--accent); color: white; }
+        .fav-badge { color: #fbbf24; font-size: 1.2rem; }
 
-        .nav-group { display: flex; flex-direction: column; gap: 8px; }
+        /* Main Workspace */
+        main { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow-y: auto; }
+        .workspace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .controls { display: flex; gap: 10px; }
         
-        nav button {
-            width: 100%;
-            padding: 12px;
-            background: transparent;
-            border: 1px solid transparent;
-            color: var(--text);
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: left;
-            transition: 0.2s;
+        .editor-container { max-width: 900px; margin: 0 auto; width: 100%; }
+        input#note-title { 
+            background: transparent; border: none; font-size: 2.5rem; font-weight: 700; 
+            color: var(--text); width: 100%; outline: none; margin-bottom: 10px;
         }
-
-        nav button:hover { background: rgba(255,255,255,0.05); }
-        nav button.active { background: var(--accent); color: #000; font-weight: 600; }
-
-        #saved-notes-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            margin-top: 10px;
-            border-top: 1px solid var(--border);
-            padding-top: 15px;
+        textarea#note-body { 
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+            width: 100%; height: 60vh; padding: 30px; color: var(--text); font-size: 1.1rem;
+            line-height: 1.7; outline: none; resize: none; transition: border-color 0.3s;
         }
+        textarea#note-body:focus { border-color: var(--accent); }
 
-        .note-item {
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Buttons */
+        button { 
+            padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; 
+            font-weight: 600; font-size: 0.9rem; transition: 0.2s; display: flex; align-items: center; gap: 6px;
         }
-        .note-item:hover { background: rgba(255,255,255,0.05); }
-        .note-item.fav::after { content: '★'; color: #ffd700; }
+        .btn-new { background: var(--accent); color: white; width: 100%; margin-bottom: 20px; justify-content: center; }
+        .btn-save { background: #10b981; color: white; }
+        .btn-export { background: #6366f1; color: white; }
+        .btn-del { background: #ef4444; color: white; }
+        .btn-fav { background: #334155; color: white; }
+        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-        /* Main Content */
-        main { padding: 40px; overflow-y: auto; position: relative; }
-        section { display: none; max-width: 900px; margin: 0 auto; }
-        section.active { display: block; animation: fadeIn 0.3s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .panel {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-        }
-
-        input, textarea {
-            width: 100%;
-            background: rgba(0,0,0,0.2);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
-        button.primary { background: var(--accent); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: 8px; cursor: pointer; }
-        button.danger { background: rgba(255, 95, 95, 0.15); color: var(--danger); border: 1px solid var(--danger); padding: 10px 20px; border-radius: 8px; cursor: pointer; }
-
-        #timer { font-size: 80px; text-align: center; font-weight: 700; margin: 20px 0; font-variant-numeric: tabular-nums; }
+        /* Focus Mode */
+        body.focus-mode aside { display: none; }
+        body.focus-mode main { padding: 60px 10%; }
     </style>
 </head>
 <body>
 
 <aside>
-    <h2>StudyOS</h2>
-    <nav class="nav-group">
-        <button class="active" onclick="show('notes')">📝 Notes</button>
-        <button onclick="show('quiz')">🤖 AI Quiz</button>
-        <button onclick="show('pomodoro')">⏳ Pomodoro</button>
-    </nav>
-    
-    <div id="saved-notes-list">
-        <small style="color:var(--muted)">SAVED NOTES</small>
-        <div id="notesContainer"></div>
+    <div class="logo">StudyOS.</div>
+    <button class="btn-new" onclick="createNewNote()">+ New Study Sheet</button>
+    <div id="note-list"></div>
+    <div style="margin-top: 20px;">
+        <button class="btn-fav" style="width:100%; justify-content: center;" onclick="toggleFocus()">Toggle Focus Mode</button>
     </div>
 </aside>
 
 <main>
-    <section id="notes" class="active">
-        <h2>Study Workspace</h2>
-        <div class="panel">
-            <input type="text" id="noteTitle" placeholder="Note Title (e.g. Biology 101)">
-            <input type="file" id="filePicker" onchange="handleFileUpload(this.files[0])" style="display:none">
-            <button class="secondary" onclick="document.getElementById('filePicker').click()">📁 Import PDF/Text</button>
-            <textarea id="noteContent" rows="15" placeholder="Start typing or upload a file..."></textarea>
-            
-            <div class="btn-row">
-                <button class="primary" onclick="saveCurrentNote()">💾 Save Note</button>
-                <button class="secondary" onclick="exportPDF()">📄 Export PDF</button>
-                <button class="secondary" onclick="toggleFavorite()">⭐ Favorite</button>
-                <button class="danger" onclick="deleteNote()">🗑️ Delete</button>
-            </div>
+    <div class="workspace-header">
+        <div class="status" id="save-status" style="color: var(--muted); font-size: 0.8rem;">Ready</div>
+        <div class="controls">
+            <button class="btn-fav" onclick="toggleFavorite()">⭐ Favorite</button>
+            <button class="btn-export" onclick="exportPDF()">📄 PDF</button>
+            <button class="btn-save" onclick="saveNote()">Save</button>
+            <button class="btn-del" onclick="deleteNote()">Delete</button>
         </div>
-    </section>
+    </div>
 
-    <section id="quiz">
-        <h2>AI Knowledge Check</h2>
-        <div class="panel">
-            <p>Generate a quiz based on your current note.</p>
-            <button class="primary" onclick="makeQuiz()">✨ Generate Quiz</button>
-        </div>
-        <div id="quizOut"></div>
-    </section>
-
-    <section id="pomodoro">
-        <h2>Focus Timer</h2>
-        <div class="panel" style="text-align: center;">
-            <div id="timer">25:00</div>
-            <div class="btn-row" style="justify-content: center;">
-                <button class="primary" id="pomoBtn" onclick="togglePomodoro()">Start Session</button>
-                <button class="secondary" onclick="resetPomodoro()">Reset</button>
-            </div>
-        </div>
-    </section>
+    <div class="editor-container">
+        <input type="text" id="note-title" placeholder="Topic: Quantum Physics...">
+        <textarea id="note-body" placeholder="Drop your knowledge here... Use dashes for points, or just start writing."></textarea>
+    </div>
 </main>
 
 <script>
-    let notes = JSON.parse(localStorage.getItem('study_notes') || '[]');
-    let currentNoteId = localStorage.getItem('current_note_id') || null;
-    let engine = null;
+    let notes = JSON.parse(localStorage.getItem('study_sheets') || '[]');
+    let currentNoteId = null;
 
-    // --- NAVIGATION ---
-    function show(id) {
-        document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
-        document.getElementById(id).classList.add("active");
-        document.querySelectorAll("nav button").forEach(b => {
-            b.classList.remove("active");
-            if(b.innerText.toLowerCase().includes(id)) b.classList.add("active");
-        });
+    // --- CORE LOGIC ---
+    function createNewNote() {
+        const newNote = {
+            id: Date.now().toString(),
+            title: "",
+            content: "",
+            favorite: false,
+            lastUpdated: new Date().toISOString()
+        };
+        notes.unshift(newNote);
+        currentNoteId = newNote.id;
+        renderNoteList();
+        loadNoteIntoEditor(newNote.id);
     }
 
-    // --- NOTE LOGIC ---
-    function saveCurrentNote() {
-        const title = document.getElementById('noteTitle').value || "Untitled Note";
-        const content = document.getElementById('noteContent').value;
+    function saveNote() {
+        const title = document.getElementById('note-title').value;
+        const content = document.getElementById('note-body').value;
         
-        if (!content) return alert("Note is empty!");
+        if (!currentNoteId && !title) return;
 
-        if (currentNoteId) {
-            const index = notes.findIndex(n => n.id === currentNoteId);
-            notes[index] = { ...notes[index], title, content };
-        } else {
-            const newNote = { id: Date.now().toString(), title, content, favorite: false };
-            notes.push(newNote);
-            currentNoteId = newNote.id;
+        const index = notes.findIndex(n => n.id === currentNoteId);
+        if (index > -1) {
+            notes[index].title = title || "Untitled Sheet";
+            notes[index].content = content;
+            notes[index].lastUpdated = new Date().toISOString();
         }
+
+        localStorage.setItem('study_sheets', JSON.stringify(notes));
+        renderNoteList();
         
-        sync();
+        const status = document.getElementById('save-status');
+        status.innerText = "Changes saved locally";
+        setTimeout(() => status.innerText = "Ready", 2000);
     }
 
-    function loadNote(id) {
+    function loadNoteIntoEditor(id) {
+        currentNoteId = id;
         const note = notes.find(n => n.id === id);
-        if (note) {
-            currentNoteId = note.id;
-            document.getElementById('noteTitle').value = note.title;
-            document.getElementById('noteContent').value = note.content;
-            show('notes');
-            sync();
-        }
+        document.getElementById('note-title').value = note.title;
+        document.getElementById('note-body').value = note.content;
+        renderNoteList();
     }
 
     function deleteNote() {
         if (!currentNoteId) return;
-        notes = notes.filter(n => n.id !== currentNoteId);
-        currentNoteId = null;
-        document.getElementById('noteTitle').value = "";
-        document.getElementById('noteContent').value = "";
-        sync();
+        if (confirm("Delete this study sheet forever?")) {
+            notes = notes.filter(n => n.id !== currentNoteId);
+            currentNoteId = null;
+            document.getElementById('note-title').value = "";
+            document.getElementById('note-body').value = "";
+            localStorage.setItem('study_sheets', JSON.stringify(notes));
+            renderNoteList();
+        }
     }
 
     function toggleFavorite() {
         if (!currentNoteId) return;
         const note = notes.find(n => n.id === currentNoteId);
         note.favorite = !note.favorite;
-        sync();
+        saveNote();
     }
 
-    function sync() {
-        localStorage.setItem('study_notes', JSON.stringify(notes));
-        localStorage.setItem('current_note_id', currentNoteId);
-        renderNotesList();
+    function toggleFocus() {
+        document.body.classList.toggle('focus-mode');
     }
 
-    function renderNotesList() {
-        const container = document.getElementById('notesContainer');
-        container.innerHTML = notes.map(n => `
-            <div class="note-item ${n.id === currentNoteId ? 'active' : ''} ${n.favorite ? 'fav' : ''}" 
-                 onclick="loadNote('${n.id}')">
-                ${n.title.substring(0, 20)}
+    // --- UI RENDERING ---
+    function renderNoteList() {
+        const list = document.getElementById('note-list');
+        list.innerHTML = notes.map(n => `
+            <div class="note-item ${n.id === currentNoteId ? 'active' : ''}" onclick="loadNoteIntoEditor('${n.id}')">
+                <span>${n.title || 'Untitled'}</span>
+                ${n.favorite ? '<span class="fav-badge">★</span>' : ''}
             </div>
         `).join('');
     }
 
-    // --- FILE HANDLING ---
-    async function handleFileUpload(file) {
-        if (!file) return;
-        let text = "";
-        if (file.type === "application/pdf") {
-            const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const content = await page.getTextContent();
-                text += content.items.map(t => t.str).join(" ") + "\n";
-            }
-        } else {
-            text = await file.text();
-        }
-        document.getElementById('noteContent').value = text;
-        document.getElementById('noteTitle').value = file.name.replace(/\.[^/.]+$/, "");
-    }
-
+    // --- PDF EXPORT ---
     function exportPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const content = document.getElementById('noteContent').value;
-        const title = document.getElementById('noteTitle').value || "Notes";
+        const title = document.getElementById('note-title').value || "Study Sheet";
+        const body = document.getElementById('note-body').value;
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(22);
+        doc.text(title.toUpperCase(), 20, 30);
         
-        doc.setFontSize(18);
-        doc.text(title, 10, 20);
-        doc.setFontSize(11);
-        const splitText = doc.splitTextToSize(content, 180);
-        doc.text(splitText, 10, 30);
-        doc.save(`${title}.pdf`);
+        doc.setLineWidth(0.5);
+        doc.line(20, 35, 190, 35);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        const splitContent = doc.splitTextToSize(body, 170);
+        doc.text(splitContent, 20, 50);
+
+        doc.save(`${title.replace(/\s+/g, '_')}_StudySheet.pdf`);
     }
 
-    // --- POMODORO ---
-    let timeLeft = 1500, timerId = null;
-    function togglePomodoro() {
-        const btn = document.getElementById('pomoBtn');
-        if (timerId) {
-            clearInterval(timerId);
-            timerId = null;
-            btn.innerText = "Resume Session";
-        } else {
-            btn.innerText = "Pause Session";
-            timerId = setInterval(() => {
-                timeLeft--;
-                updateTimerDisplay();
-                if (timeLeft <= 0) {
-                    clearInterval(timerId);
-                    alert("Time's up! Take a break.");
-                }
-            }, 1000);
-        }
+    // Init
+    if (notes.length > 0) {
+        loadNoteIntoEditor(notes[0].id);
+    } else {
+        createNewNote();
     }
-
-    function resetPomodoro() {
-        clearInterval(timerId);
-        timerId = null;
-        timeLeft = 1500;
-        updateTimerDisplay();
-        document.getElementById('pomoBtn').innerText = "Start Session";
-    }
-
-    function updateTimerDisplay() {
-        const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-        const s = (timeLeft % 60).toString().padStart(2, '0');
-        document.getElementById('timer').innerText = `${m}:${s}`;
-    }
-
-    // --- LOCAL AI ---
-    async function makeQuiz() {
-        const quizOut = document.getElementById('quizOut');
-        const content = document.getElementById('noteContent').value;
-        if (!content) return alert("No notes to generate quiz from!");
-
-        quizOut.innerHTML = `<div class="panel">🧠 AI is thinking (this may take a minute)...</div>`;
-        
-        try {
-            if (!engine) {
-                engine = await webllm.createEngine("Llama-3-8B-Instruct-q4f32_1");
-            }
-            
-            const prompt = `Create a 5-question multiple choice quiz based on these notes. Format: 
-            Q1: [Question]
-            A) [Opt] B) [Opt] C) [Opt] D) [Opt]
-            Correct: [Letter]
-            
-            NOTES: ${content}`;
-
-            const r = await engine.chat.completions.create({ messages: [{ role: "user", content: prompt }] });
-            quizOut.innerHTML = `<div class="panel">${r.choices[0].message.content.replace(/\n/g, "<br>")}</div>`;
-        } catch (e) {
-            quizOut.innerHTML = `<div class="panel" style="color:red">Error: Local AI failed to load. Ensure your browser supports WebGPU.</div>`;
-        }
-    }
-
-    // Initialize
-    renderNotesList();
-    if(currentNoteId) loadNote(currentNoteId);
-
 </script>
 </body>
 </html>
