@@ -1,150 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>StudyOS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- WebLLM -->
 <script src="https://unpkg.com/@mlc-ai/web-llm/dist/index.js"></script>
-
-<!-- PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-:root {
-  --bg: #0a0a0f;
-  --panel: rgba(255,255,255,0.05);
-  --border: rgba(255,255,255,0.12);
-  --text: #eaeaf0;
-  --muted: #9aa0b3;
-  --accent: #7c7cff;
-  --blur: blur(18px);
+:root{
+  --bg:#07080d;
+  --panel:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.12);
+  --text:#e8e9f1;
+  --muted:#9ba0b3;
+  --accent:#8b8bff;
+  --blur:blur(20px);
 }
 
-* {
-  box-sizing: border-box;
-  font-family: Inter, system-ui, sans-serif;
-}
+*{box-sizing:border-box;font-family:Inter,system-ui}
 
-body {
-  margin: 0;
-  height: 100vh;
-  display: grid;
-  grid-template-columns: 260px 1fr;
+body{
+  margin:0;
+  height:100vh;
+  display:grid;
+  grid-template-columns:260px 1fr;
   background:
-    radial-gradient(1200px 600px at top left, #1b1b3a, transparent),
-    radial-gradient(800px 400px at bottom right, #2a2a5a, transparent),
+    radial-gradient(900px 500px at top left,#1b1c44,transparent),
+    radial-gradient(700px 400px at bottom right,#2c2c6c,transparent),
     var(--bg);
-  color: var(--text);
+  color:var(--text);
 }
 
-/* SIDEBAR */
-aside {
-  padding: 22px;
-  backdrop-filter: var(--blur);
-  background: var(--panel);
-  border-right: 1px solid var(--border);
+aside{
+  padding:24px;
+  background:var(--panel);
+  backdrop-filter:var(--blur);
+  border-right:1px solid var(--border);
 }
 
-aside h1 {
-  font-weight: 600;
-  letter-spacing: .4px;
-  margin-bottom: 24px;
+aside h1{font-weight:600;margin-bottom:26px}
+
+nav button{
+  width:100%;
+  padding:12px;
+  margin-bottom:8px;
+  background:transparent;
+  border:none;
+  color:var(--text);
+  border-radius:12px;
+  cursor:pointer;
+  transition:.25s;
 }
 
-nav button {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 8px;
-  background: transparent;
-  color: var(--text);
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  text-align: left;
+nav button:hover{
+  background:rgba(139,139,255,.18);
+  transform:translateY(-1px);
 }
 
-nav button.active,
-nav button:hover {
-  background: rgba(124,124,255,.15);
+nav button.active{
+  background:linear-gradient(135deg,#8b8bff,#b5b5ff);
+  color:#000;
 }
 
-/* MAIN */
-main {
-  padding: 28px;
-  overflow-y: auto;
+main{
+  padding:28px;
+  overflow-y:auto;
 }
 
-section {
-  display: none;
+section{display:none;animation:fade .4s ease}
+section.active{display:block}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:none}
 }
 
-section.active {
-  display: block;
+.panel{
+  background:var(--panel);
+  backdrop-filter:var(--blur);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:18px;
+  transition:.3s;
 }
 
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 18px;
-  margin-bottom: 18px;
-  backdrop-filter: var(--blur);
+.panel:hover{
+  transform:translateY(-2px);
+  box-shadow:0 20px 40px rgba(0,0,0,.3);
 }
 
-textarea, input {
-  width: 100%;
-  background: transparent;
-  border: none;
-  color: var(--text);
-  resize: none;
-  outline: none;
-  font-size: 15px;
+textarea,input{
+  width:100%;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:var(--text);
+  resize:none;
 }
 
-textarea::placeholder,
-input::placeholder {
-  color: var(--muted);
+button.primary{
+  background:linear-gradient(135deg,#8b8bff,#b5b5ff);
+  border:none;
+  padding:10px 18px;
+  border-radius:12px;
+  font-weight:500;
+  cursor:pointer;
+  transition:.25s;
 }
 
-button.primary {
-  background: linear-gradient(135deg, #7c7cff, #9f9fff);
-  color: black;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 500;
+button.primary:hover{
+  transform:scale(1.04);
+  filter:brightness(1.1);
 }
 
-/* FLASHCARD */
-.flashcard {
-  min-height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  text-align: center;
-  cursor: pointer;
+/* Pomodoro */
+#timer{
+  font-size:48px;
+  text-align:center;
+  font-weight:600;
 }
 
-/* QUIZ */
-.quiz-q {
-  margin-bottom: 12px;
+/* Quiz */
+.choice{
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  margin:6px 0;
+  cursor:pointer;
+  transition:.2s;
 }
-
-/* PRINT */
-@media print {
-  body {
-    background: white;
-    color: black;
-  }
-  aside {
-    display: none;
-  }
+.choice:hover{
+  background:rgba(139,139,255,.18);
 }
 </style>
 </head>
@@ -152,44 +144,43 @@ button.primary {
 <body>
 
 <aside>
-  <h1>StudyOS</h1>
-  <nav>
-    <button class="active" onclick="show('notes')">Study Sheets</button>
-    <button onclick="show('flash')">Flashcards</button>
-    <button onclick="show('quiz')">AI Quizzes</button>
-    <button onclick="exportPDF()">Export PDF</button>
-  </nav>
+<h1>StudyOS</h1>
+<nav>
+  <button class="active" onclick="show('notes')">Notes</button>
+  <button onclick="show('quiz')">AI Quiz</button>
+  <button onclick="show('pomodoro')">Pomodoro</button>
+  <button onclick="exportPDF()">Export PDF</button>
+</nav>
 </aside>
 
 <main>
 
-<!-- NOTES -->
 <section id="notes" class="active">
-  <h2>Study Sheets</h2>
-  <div class="panel">
-    <textarea id="notes" rows="18" placeholder="Write beautiful, printable notes..."></textarea>
-  </div>
+<h2>Upload & Study</h2>
+
+<div class="panel">
+<input type="file" onchange="uploadFile(this.files[0])">
+</div>
+
+<div class="panel">
+<textarea id="notes" rows="18" placeholder="Your extracted notes appear here..."></textarea>
+</div>
 </section>
 
-<!-- FLASHCARDS -->
-<section id="flash">
-  <h2>Flashcards</h2>
-  <div class="panel">
-    <input id="fq" placeholder="Question">
-    <input id="fa" placeholder="Answer">
-    <button class="primary" onclick="addCard()">Add</button>
-  </div>
-  <div id="card" class="panel flashcard" onclick="flip()">Tap to study</div>
-</section>
-
-<!-- QUIZ -->
 <section id="quiz">
-  <h2>AI Quiz Generator (Local)</h2>
-  <div class="panel">
-    <textarea id="topic" placeholder="Topic (e.g. Neural Networks backpropagation)"></textarea>
-    <button class="primary" onclick="makeQuiz()">Generate Quiz</button>
-  </div>
-  <div id="quizOut"></div>
+<h2>AI Multiple-Choice Quiz</h2>
+<div class="panel">
+<button class="primary" onclick="makeQuiz()">Generate Quiz from Notes</button>
+</div>
+<div id="quizOut"></div>
+</section>
+
+<section id="pomodoro">
+<h2>Pomodoro Focus</h2>
+<div class="panel">
+<div id="timer">25:00</div>
+<button class="primary" onclick="startPomodoro()">Start</button>
+</div>
 </section>
 
 </main>
@@ -197,75 +188,71 @@ button.primary {
 <script>
 /* NAV */
 function show(id){
-  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-  event.target.classList.add("active");
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"))
+  document.getElementById(id).classList.add("active")
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"))
+  event.target.classList.add("active")
 }
 
-/* NOTES SAVE */
-notes.value = localStorage.notes || "";
-notes.oninput = () => localStorage.notes = notes.value;
+/* NOTES */
+notes.value=localStorage.notes||""
+notes.oninput=()=>localStorage.notes=notes.value
+
+/* FILE UPLOAD */
+async function uploadFile(file){
+  if(file.type==="application/pdf"){
+    const pdf=await pdfjsLib.getDocument(URL.createObjectURL(file)).promise
+    let text=""
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i)
+      const content=await page.getTextContent()
+      text+=content.items.map(t=>t.str).join(" ")+"\n"
+    }
+    notes.value=text
+  } else {
+    notes.value=await file.text()
+  }
+  localStorage.notes=notes.value
+}
 
 /* PDF EXPORT */
 function exportPDF(){
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF();
-  pdf.text(notes.value, 10, 10, { maxWidth: 180 });
-  pdf.save("study-notes.pdf");
+  const {jsPDF}=window.jspdf
+  const pdf=new jsPDF()
+  pdf.text(notes.value,10,10,{maxWidth:180})
+  pdf.save("study-notes.pdf")
 }
 
-/* FLASHCARDS */
-let cards = JSON.parse(localStorage.cards || "[]");
-let i = 0, flipped=false;
-
-function addCard(){
-  cards.push({q:fq.value,a:fa.value});
-  localStorage.cards = JSON.stringify(cards);
-  fq.value = fa.value = "";
+/* POMODORO */
+let time=1500,interval
+function startPomodoro(){
+  clearInterval(interval)
+  interval=setInterval(()=>{
+    if(time<=0) return clearInterval(interval)
+    time--
+    timer.innerText=
+      String(Math.floor(time/60)).padStart(2,"0")+":"+
+      String(time%60).padStart(2,"0")
+  },1000)
 }
-
-function flip(){
-  if(!cards.length) return;
-  flipped=!flipped;
-  card.innerText = flipped ? cards[i].a : cards[i].q;
-}
-
-setInterval(()=>{
-  if(!cards.length) return;
-  flipped=false;
-  i=(i+1)%cards.length;
-  card.innerText=cards[i].q;
-},5000);
 
 /* LOCAL AI QUIZ */
-let engine;
-
-async function loadAI(){
-  engine = await webllm.createEngine("Llama-3-8B-Instruct-q4f32_1");
-}
-
-loadAI();
+let engine
+webllm.createEngine("Llama-3-8B-Instruct-q4f32_1").then(e=>engine=e)
 
 async function makeQuiz(){
-  quizOut.innerHTML="Thinking...";
-  const prompt = `
-Create a 5-question study quiz on:
-${topic.value}
+  quizOut.innerHTML="Generating..."
+  const prompt=`
+Create 5 MULTIPLE CHOICE questions from the notes below.
+Each question must have 4 options (A–D) and mark the correct answer.
 
-Include:
-- 3 multiple choice
-- 2 short answer
-`;
-
-  const reply = await engine.chat.completions.create({
-    messages: [{ role: "user", content: prompt }]
-  });
-
-  quizOut.innerHTML = `
-    <div class="panel">
-      ${reply.choices[0].message.content.replace(/\n/g,"<br>")}
-    </div>`;
+NOTES:
+${notes.value}
+`
+  const r=await engine.chat.completions.create({
+    messages:[{role:"user",content:prompt}]
+  })
+  quizOut.innerHTML=`<div class="panel">${r.choices[0].message.content.replace(/\n/g,"<br>")}</div>`
 }
 </script>
 
