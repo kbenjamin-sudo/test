@@ -24,7 +24,7 @@
 
     /* --- LOGIN MODAL (Glassmorphism) --- */
     #auth-overlay {
-        position: fixed; inset: 0; background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(12px);
+        position: fixed; inset: 0; background: rgba(3, 7, 18, 0.95); backdrop-filter: blur(12px);
         z-index: 999; display: flex; align-items: center; justify-content: center;
         transition: opacity 0.3s;
     }
@@ -147,9 +147,9 @@
 <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    // --- 1. CONFIGURATION (FILL THESE IN) ---
-    const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
-    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+    // --- YOUR CREDENTIALS (INJECTED) ---
+    const SUPABASE_URL = 'https://cgmazcvmpcgistoimqlw.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc';
     
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     
@@ -177,17 +177,26 @@
             : await supabase.auth.signInWithPassword({ email, password });
 
         if (error) errorDiv.innerText = error.message;
-        else if (isSignUp) alert("Check your email for the confirmation link!");
+        else {
+            if (isSignUp) alert("Account created! You can now Sign In."); // Auto-login sometimes requires email confirm
+            else {
+                 // Force reload to clear UI
+                 location.reload();
+            }
+        }
     }
 
-    window.signOut = async () => await supabase.auth.signOut();
+    window.signOut = async () => {
+        await supabase.auth.signOut();
+        location.reload();
+    }
 
     // Listen for Auth Changes
     supabase.auth.onAuthStateChange((event, session) => {
         if (session) {
             currentUser = session.user;
             document.getElementById('auth-overlay').style.display = 'none';
-            fetchNotes(); // Load data on login
+            fetchNotes(); 
         } else {
             document.getElementById('auth-overlay').style.display = 'flex';
             notes = []; renderList();
