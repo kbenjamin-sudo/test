@@ -1,260 +1,352 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>StudyOS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>StudyOS Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<script src="https://unpkg.com/@mlc-ai/web-llm/dist/index.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/@mlc-ai/web-llm/dist/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-:root{
-  --bg:#07080d;
-  --panel:rgba(255,255,255,.06);
-  --border:rgba(255,255,255,.12);
-  --text:#e8e9f1;
-  --muted:#9ba0b3;
-  --accent:#8b8bff;
-  --blur:blur(20px);
-}
+        :root {
+            --bg: #0b0c14;
+            --panel: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #e8e9f1;
+            --muted: #9ba0b3;
+            --accent: #8b8bff;
+            --danger: #ff5f5f;
+            --blur: blur(24px);
+        }
 
-*{box-sizing:border-box;font-family:Inter,system-ui}
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
-body{
-  margin:0;
-  height:100vh;
-  display:grid;
-  grid-template-columns:260px 1fr;
-  background:
-    radial-gradient(900px 500px at top left,#1b1c44,transparent),
-    radial-gradient(700px 400px at bottom right,#2c2c6c,transparent),
-    var(--bg);
-  color:var(--text);
-}
+        body {
+            margin: 0;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            background: radial-gradient(circle at top left, #1b1c44, var(--bg));
+            color: var(--text);
+            overflow: hidden;
+        }
 
-aside{
-  padding:24px;
-  background:var(--panel);
-  backdrop-filter:var(--blur);
-  border-right:1px solid var(--border);
-}
+        /* Sidebar */
+        aside {
+            padding: 24px;
+            background: var(--panel);
+            backdrop-filter: var(--blur);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-aside h1{font-weight:600;margin-bottom:26px}
+        .nav-group { display: flex; flex-direction: column; gap: 8px; }
+        
+        nav button {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text);
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            transition: 0.2s;
+        }
 
-nav button{
-  width:100%;
-  padding:12px;
-  margin-bottom:8px;
-  background:transparent;
-  border:none;
-  color:var(--text);
-  border-radius:12px;
-  cursor:pointer;
-  transition:.25s;
-}
+        nav button:hover { background: rgba(255,255,255,0.05); }
+        nav button.active { background: var(--accent); color: #000; font-weight: 600; }
 
-nav button:hover{
-  background:rgba(139,139,255,.18);
-  transform:translateY(-1px);
-}
+        #saved-notes-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-top: 10px;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+        }
 
-nav button.active{
-  background:linear-gradient(135deg,#8b8bff,#b5b5ff);
-  color:#000;
-}
+        .note-item {
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .note-item:hover { background: rgba(255,255,255,0.05); }
+        .note-item.fav::after { content: '★'; color: #ffd700; }
 
-main{
-  padding:28px;
-  overflow-y:auto;
-}
+        /* Main Content */
+        main { padding: 40px; overflow-y: auto; position: relative; }
+        section { display: none; max-width: 900px; margin: 0 auto; }
+        section.active { display: block; animation: fadeIn 0.3s ease; }
 
-section{display:none;animation:fade .4s ease}
-section.active{display:block}
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-@keyframes fade{
-  from{opacity:0;transform:translateY(8px)}
-  to{opacity:1;transform:none}
-}
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
 
-.panel{
-  background:var(--panel);
-  backdrop-filter:var(--blur);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:18px;
-  margin-bottom:18px;
-  transition:.3s;
-}
+        input, textarea {
+            width: 100%;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
 
-.panel:hover{
-  transform:translateY(-2px);
-  box-shadow:0 20px 40px rgba(0,0,0,.3);
-}
+        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        button.primary { background: var(--accent); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+        button.danger { background: rgba(255, 95, 95, 0.15); color: var(--danger); border: 1px solid var(--danger); padding: 10px 20px; border-radius: 8px; cursor: pointer; }
 
-textarea,input{
-  width:100%;
-  background:transparent;
-  border:none;
-  outline:none;
-  color:var(--text);
-  resize:none;
-}
-
-button.primary{
-  background:linear-gradient(135deg,#8b8bff,#b5b5ff);
-  border:none;
-  padding:10px 18px;
-  border-radius:12px;
-  font-weight:500;
-  cursor:pointer;
-  transition:.25s;
-}
-
-button.primary:hover{
-  transform:scale(1.04);
-  filter:brightness(1.1);
-}
-
-/* Pomodoro */
-#timer{
-  font-size:48px;
-  text-align:center;
-  font-weight:600;
-}
-
-/* Quiz */
-.choice{
-  padding:10px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  margin:6px 0;
-  cursor:pointer;
-  transition:.2s;
-}
-.choice:hover{
-  background:rgba(139,139,255,.18);
-}
-</style>
+        #timer { font-size: 80px; text-align: center; font-weight: 700; margin: 20px 0; font-variant-numeric: tabular-nums; }
+    </style>
 </head>
-
 <body>
 
 <aside>
-<h1>StudyOS</h1>
-<nav>
-  <button class="active" onclick="show('notes')">Notes</button>
-  <button onclick="show('quiz')">AI Quiz</button>
-  <button onclick="show('pomodoro')">Pomodoro</button>
-  <button onclick="exportPDF()">Export PDF</button>
-</nav>
+    <h2>StudyOS</h2>
+    <nav class="nav-group">
+        <button class="active" onclick="show('notes')">📝 Notes</button>
+        <button onclick="show('quiz')">🤖 AI Quiz</button>
+        <button onclick="show('pomodoro')">⏳ Pomodoro</button>
+    </nav>
+    
+    <div id="saved-notes-list">
+        <small style="color:var(--muted)">SAVED NOTES</small>
+        <div id="notesContainer"></div>
+    </div>
 </aside>
 
 <main>
+    <section id="notes" class="active">
+        <h2>Study Workspace</h2>
+        <div class="panel">
+            <input type="text" id="noteTitle" placeholder="Note Title (e.g. Biology 101)">
+            <input type="file" id="filePicker" onchange="handleFileUpload(this.files[0])" style="display:none">
+            <button class="secondary" onclick="document.getElementById('filePicker').click()">📁 Import PDF/Text</button>
+            <textarea id="noteContent" rows="15" placeholder="Start typing or upload a file..."></textarea>
+            
+            <div class="btn-row">
+                <button class="primary" onclick="saveCurrentNote()">💾 Save Note</button>
+                <button class="secondary" onclick="exportPDF()">📄 Export PDF</button>
+                <button class="secondary" onclick="toggleFavorite()">⭐ Favorite</button>
+                <button class="danger" onclick="deleteNote()">🗑️ Delete</button>
+            </div>
+        </div>
+    </section>
 
-<section id="notes" class="active">
-<h2>Upload & Study</h2>
+    <section id="quiz">
+        <h2>AI Knowledge Check</h2>
+        <div class="panel">
+            <p>Generate a quiz based on your current note.</p>
+            <button class="primary" onclick="makeQuiz()">✨ Generate Quiz</button>
+        </div>
+        <div id="quizOut"></div>
+    </section>
 
-<div class="panel">
-<input type="file" onchange="uploadFile(this.files[0])">
-</div>
-
-<div class="panel">
-<textarea id="notes" rows="18" placeholder="Your extracted notes appear here..."></textarea>
-</div>
-</section>
-
-<section id="quiz">
-<h2>AI Multiple-Choice Quiz</h2>
-<div class="panel">
-<button class="primary" onclick="makeQuiz()">Generate Quiz from Notes</button>
-</div>
-<div id="quizOut"></div>
-</section>
-
-<section id="pomodoro">
-<h2>Pomodoro Focus</h2>
-<div class="panel">
-<div id="timer">25:00</div>
-<button class="primary" onclick="startPomodoro()">Start</button>
-</div>
-</section>
-
+    <section id="pomodoro">
+        <h2>Focus Timer</h2>
+        <div class="panel" style="text-align: center;">
+            <div id="timer">25:00</div>
+            <div class="btn-row" style="justify-content: center;">
+                <button class="primary" id="pomoBtn" onclick="togglePomodoro()">Start Session</button>
+                <button class="secondary" onclick="resetPomodoro()">Reset</button>
+            </div>
+        </div>
+    </section>
 </main>
 
 <script>
-/* NAV */
-function show(id){
-  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"))
-  document.getElementById(id).classList.add("active")
-  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"))
-  event.target.classList.add("active")
-}
+    let notes = JSON.parse(localStorage.getItem('study_notes') || '[]');
+    let currentNoteId = localStorage.getItem('current_note_id') || null;
+    let engine = null;
 
-/* NOTES */
-notes.value=localStorage.notes||""
-notes.oninput=()=>localStorage.notes=notes.value
-
-/* FILE UPLOAD */
-async function uploadFile(file){
-  if(file.type==="application/pdf"){
-    const pdf=await pdfjsLib.getDocument(URL.createObjectURL(file)).promise
-    let text=""
-    for(let i=1;i<=pdf.numPages;i++){
-      const page=await pdf.getPage(i)
-      const content=await page.getTextContent()
-      text+=content.items.map(t=>t.str).join(" ")+"\n"
+    // --- NAVIGATION ---
+    function show(id) {
+        document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        document.querySelectorAll("nav button").forEach(b => {
+            b.classList.remove("active");
+            if(b.innerText.toLowerCase().includes(id)) b.classList.add("active");
+        });
     }
-    notes.value=text
-  } else {
-    notes.value=await file.text()
-  }
-  localStorage.notes=notes.value
-}
 
-/* PDF EXPORT */
-function exportPDF(){
-  const {jsPDF}=window.jspdf
-  const pdf=new jsPDF()
-  pdf.text(notes.value,10,10,{maxWidth:180})
-  pdf.save("study-notes.pdf")
-}
+    // --- NOTE LOGIC ---
+    function saveCurrentNote() {
+        const title = document.getElementById('noteTitle').value || "Untitled Note";
+        const content = document.getElementById('noteContent').value;
+        
+        if (!content) return alert("Note is empty!");
 
-/* POMODORO */
-let time=1500,interval
-function startPomodoro(){
-  clearInterval(interval)
-  interval=setInterval(()=>{
-    if(time<=0) return clearInterval(interval)
-    time--
-    timer.innerText=
-      String(Math.floor(time/60)).padStart(2,"0")+":"+
-      String(time%60).padStart(2,"0")
-  },1000)
-}
+        if (currentNoteId) {
+            const index = notes.findIndex(n => n.id === currentNoteId);
+            notes[index] = { ...notes[index], title, content };
+        } else {
+            const newNote = { id: Date.now().toString(), title, content, favorite: false };
+            notes.push(newNote);
+            currentNoteId = newNote.id;
+        }
+        
+        sync();
+    }
 
-/* LOCAL AI QUIZ */
-let engine
-webllm.createEngine("Llama-3-8B-Instruct-q4f32_1").then(e=>engine=e)
+    function loadNote(id) {
+        const note = notes.find(n => n.id === id);
+        if (note) {
+            currentNoteId = note.id;
+            document.getElementById('noteTitle').value = note.title;
+            document.getElementById('noteContent').value = note.content;
+            show('notes');
+            sync();
+        }
+    }
 
-async function makeQuiz(){
-  quizOut.innerHTML="Generating..."
-  const prompt=`
-Create 5 MULTIPLE CHOICE questions from the notes below.
-Each question must have 4 options (A–D) and mark the correct answer.
+    function deleteNote() {
+        if (!currentNoteId) return;
+        notes = notes.filter(n => n.id !== currentNoteId);
+        currentNoteId = null;
+        document.getElementById('noteTitle').value = "";
+        document.getElementById('noteContent').value = "";
+        sync();
+    }
 
-NOTES:
-${notes.value}
-`
-  const r=await engine.chat.completions.create({
-    messages:[{role:"user",content:prompt}]
-  })
-  quizOut.innerHTML=`<div class="panel">${r.choices[0].message.content.replace(/\n/g,"<br>")}</div>`
-}
+    function toggleFavorite() {
+        if (!currentNoteId) return;
+        const note = notes.find(n => n.id === currentNoteId);
+        note.favorite = !note.favorite;
+        sync();
+    }
+
+    function sync() {
+        localStorage.setItem('study_notes', JSON.stringify(notes));
+        localStorage.setItem('current_note_id', currentNoteId);
+        renderNotesList();
+    }
+
+    function renderNotesList() {
+        const container = document.getElementById('notesContainer');
+        container.innerHTML = notes.map(n => `
+            <div class="note-item ${n.id === currentNoteId ? 'active' : ''} ${n.favorite ? 'fav' : ''}" 
+                 onclick="loadNote('${n.id}')">
+                ${n.title.substring(0, 20)}
+            </div>
+        `).join('');
+    }
+
+    // --- FILE HANDLING ---
+    async function handleFileUpload(file) {
+        if (!file) return;
+        let text = "";
+        if (file.type === "application/pdf") {
+            const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                text += content.items.map(t => t.str).join(" ") + "\n";
+            }
+        } else {
+            text = await file.text();
+        }
+        document.getElementById('noteContent').value = text;
+        document.getElementById('noteTitle').value = file.name.replace(/\.[^/.]+$/, "");
+    }
+
+    function exportPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const content = document.getElementById('noteContent').value;
+        const title = document.getElementById('noteTitle').value || "Notes";
+        
+        doc.setFontSize(18);
+        doc.text(title, 10, 20);
+        doc.setFontSize(11);
+        const splitText = doc.splitTextToSize(content, 180);
+        doc.text(splitText, 10, 30);
+        doc.save(`${title}.pdf`);
+    }
+
+    // --- POMODORO ---
+    let timeLeft = 1500, timerId = null;
+    function togglePomodoro() {
+        const btn = document.getElementById('pomoBtn');
+        if (timerId) {
+            clearInterval(timerId);
+            timerId = null;
+            btn.innerText = "Resume Session";
+        } else {
+            btn.innerText = "Pause Session";
+            timerId = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    alert("Time's up! Take a break.");
+                }
+            }, 1000);
+        }
+    }
+
+    function resetPomodoro() {
+        clearInterval(timerId);
+        timerId = null;
+        timeLeft = 1500;
+        updateTimerDisplay();
+        document.getElementById('pomoBtn').innerText = "Start Session";
+    }
+
+    function updateTimerDisplay() {
+        const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+        const s = (timeLeft % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${m}:${s}`;
+    }
+
+    // --- LOCAL AI ---
+    async function makeQuiz() {
+        const quizOut = document.getElementById('quizOut');
+        const content = document.getElementById('noteContent').value;
+        if (!content) return alert("No notes to generate quiz from!");
+
+        quizOut.innerHTML = `<div class="panel">🧠 AI is thinking (this may take a minute)...</div>`;
+        
+        try {
+            if (!engine) {
+                engine = await webllm.createEngine("Llama-3-8B-Instruct-q4f32_1");
+            }
+            
+            const prompt = `Create a 5-question multiple choice quiz based on these notes. Format: 
+            Q1: [Question]
+            A) [Opt] B) [Opt] C) [Opt] D) [Opt]
+            Correct: [Letter]
+            
+            NOTES: ${content}`;
+
+            const r = await engine.chat.completions.create({ messages: [{ role: "user", content: prompt }] });
+            quizOut.innerHTML = `<div class="panel">${r.choices[0].message.content.replace(/\n/g, "<br>")}</div>`;
+        } catch (e) {
+            quizOut.innerHTML = `<div class="panel" style="color:red">Error: Local AI failed to load. Ensure your browser supports WebGPU.</div>`;
+        }
+    }
+
+    // Initialize
+    renderNotesList();
+    if(currentNoteId) loadNote(currentNoteId);
+
 </script>
-
 </body>
 </html>
