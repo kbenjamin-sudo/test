@@ -2,25 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Minimal Study Hub</title>
+<title>StudyOS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- WebLLM -->
+<script src="https://unpkg.com/@mlc-ai/web-llm/dist/index.js"></script>
+
+<!-- PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-:root {
-  --bg: #f7f7f7;
-  --panel: #ffffff;
-  --text: #111;
-  --muted: #666;
-  --accent: #4f46e5;
-  --border: #e5e7eb;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-[data-theme="dark"] {
-  --bg: #0f172a;
-  --panel: #020617;
-  --text: #e5e7eb;
-  --muted: #94a3b8;
-  --border: #1e293b;
+:root {
+  --bg: #0a0a0f;
+  --panel: rgba(255,255,255,0.05);
+  --border: rgba(255,255,255,0.12);
+  --text: #eaeaf0;
+  --muted: #9aa0b3;
+  --accent: #7c7cff;
+  --blur: blur(18px);
 }
 
 * {
@@ -30,45 +31,50 @@
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
+  height: 100vh;
   display: grid;
   grid-template-columns: 260px 1fr;
-  height: 100vh;
+  background:
+    radial-gradient(1200px 600px at top left, #1b1b3a, transparent),
+    radial-gradient(800px 400px at bottom right, #2a2a5a, transparent),
+    var(--bg);
+  color: var(--text);
 }
 
+/* SIDEBAR */
 aside {
-  padding: 20px;
-  border-right: 1px solid var(--border);
+  padding: 22px;
+  backdrop-filter: var(--blur);
   background: var(--panel);
+  border-right: 1px solid var(--border);
 }
 
 aside h1 {
-  font-size: 18px;
-  margin-bottom: 20px;
+  font-weight: 600;
+  letter-spacing: .4px;
+  margin-bottom: 24px;
 }
 
 nav button {
-  display: block;
   width: 100%;
-  text-align: left;
-  padding: 10px;
-  margin-bottom: 6px;
-  border: none;
+  padding: 12px;
+  margin-bottom: 8px;
   background: transparent;
   color: var(--text);
+  border: none;
+  border-radius: 10px;
   cursor: pointer;
-  border-radius: 6px;
+  text-align: left;
 }
 
-nav button:hover,
-nav button.active {
-  background: var(--accent);
-  color: white;
+nav button.active,
+nav button:hover {
+  background: rgba(124,124,255,.15);
 }
 
+/* MAIN */
 main {
-  padding: 24px;
+  padding: 28px;
   overflow-y: auto;
 }
 
@@ -83,70 +89,75 @@ section.active {
 .panel {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 16px;
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 18px;
+  backdrop-filter: var(--blur);
 }
 
 textarea, input {
   width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
   background: transparent;
+  border: none;
   color: var(--text);
+  resize: none;
+  outline: none;
+  font-size: 15px;
+}
+
+textarea::placeholder,
+input::placeholder {
+  color: var(--muted);
 }
 
 button.primary {
-  background: var(--accent);
-  color: white;
+  background: linear-gradient(135deg, #7c7cff, #9f9fff);
+  color: black;
   border: none;
-  padding: 10px 14px;
-  border-radius: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
   cursor: pointer;
+  font-weight: 500;
 }
 
+/* FLASHCARD */
 .flashcard {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 40px;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
   text-align: center;
   cursor: pointer;
-  font-size: 18px;
 }
 
-.calendar-day {
-  border: 1px solid var(--border);
-  padding: 10px;
-  min-height: 80px;
-  border-radius: 6px;
+/* QUIZ */
+.quiz-q {
+  margin-bottom: 12px;
 }
 
-.calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-}
-
-footer {
-  position: fixed;
-  bottom: 12px;
-  right: 20px;
-  opacity: .5;
+/* PRINT */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  aside {
+    display: none;
+  }
 }
 </style>
 </head>
 
-<body data-theme="light">
+<body>
 
 <aside>
-  <h1>📘 Study Hub</h1>
+  <h1>StudyOS</h1>
   <nav>
     <button class="active" onclick="show('notes')">Study Sheets</button>
-    <button onclick="show('flashcards')">Flashcards</button>
-    <button onclick="show('calendar')">Calendar</button>
+    <button onclick="show('flash')">Flashcards</button>
     <button onclick="show('quiz')">AI Quizzes</button>
-    <button onclick="toggleTheme()">🌗 Theme</button>
+    <button onclick="exportPDF()">Export PDF</button>
   </nav>
 </aside>
 
@@ -156,40 +167,32 @@ footer {
 <section id="notes" class="active">
   <h2>Study Sheets</h2>
   <div class="panel">
-    <textarea id="notesArea" rows="15" placeholder="Write clean, focused study notes..."></textarea>
+    <textarea id="notes" rows="18" placeholder="Write beautiful, printable notes..."></textarea>
   </div>
 </section>
 
 <!-- FLASHCARDS -->
-<section id="flashcards">
+<section id="flash">
   <h2>Flashcards</h2>
   <div class="panel">
-    <input id="q" placeholder="Question">
-    <input id="a" placeholder="Answer">
+    <input id="fq" placeholder="Question">
+    <input id="fa" placeholder="Answer">
     <button class="primary" onclick="addCard()">Add</button>
   </div>
-  <div id="card" class="flashcard panel" onclick="flip()">Click to study</div>
-</section>
-
-<!-- CALENDAR -->
-<section id="calendar">
-  <h2>Study Calendar</h2>
-  <div class="calendar" id="calendarGrid"></div>
+  <div id="card" class="panel flashcard" onclick="flip()">Tap to study</div>
 </section>
 
 <!-- QUIZ -->
 <section id="quiz">
-  <h2>AI-Style Quiz Generator</h2>
+  <h2>AI Quiz Generator (Local)</h2>
   <div class="panel">
-    <textarea id="quizTopic" placeholder="Topic (e.g. Biology: Photosynthesis)"></textarea>
-    <button class="primary" onclick="generateQuiz()">Generate Quiz</button>
+    <textarea id="topic" placeholder="Topic (e.g. Neural Networks backpropagation)"></textarea>
+    <button class="primary" onclick="makeQuiz()">Generate Quiz</button>
   </div>
-  <div id="quizArea"></div>
+  <div id="quizOut"></div>
 </section>
 
 </main>
-
-<footer>Minimal Study Hub</footer>
 
 <script>
 /* NAV */
@@ -200,61 +203,69 @@ function show(id){
   event.target.classList.add("active");
 }
 
-/* THEME */
-function toggleTheme(){
-  document.body.dataset.theme =
-    document.body.dataset.theme === "dark" ? "light" : "dark";
-}
-
 /* NOTES SAVE */
-const notes = document.getElementById("notesArea");
 notes.value = localStorage.notes || "";
-notes.oninput = ()=> localStorage.notes = notes.value;
+notes.oninput = () => localStorage.notes = notes.value;
+
+/* PDF EXPORT */
+function exportPDF(){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  pdf.text(notes.value, 10, 10, { maxWidth: 180 });
+  pdf.save("study-notes.pdf");
+}
 
 /* FLASHCARDS */
 let cards = JSON.parse(localStorage.cards || "[]");
-let index = 0, flipped = false;
+let i = 0, flipped=false;
 
 function addCard(){
-  cards.push({q:q.value,a:a.value});
+  cards.push({q:fq.value,a:fa.value});
   localStorage.cards = JSON.stringify(cards);
-  q.value=a.value="";
+  fq.value = fa.value = "";
 }
 
 function flip(){
   if(!cards.length) return;
-  flipped = !flipped;
-  card.innerText = flipped ? cards[index].a : cards[index].q;
+  flipped=!flipped;
+  card.innerText = flipped ? cards[i].a : cards[i].q;
 }
 
 setInterval(()=>{
   if(!cards.length) return;
   flipped=false;
-  index=(index+1)%cards.length;
-  card.innerText=cards[index].q;
-},6000);
+  i=(i+1)%cards.length;
+  card.innerText=cards[i].q;
+},5000);
 
-/* CALENDAR */
-const grid=document.getElementById("calendarGrid");
-for(let i=1;i<=30;i++){
-  const d=document.createElement("div");
-  d.className="calendar-day";
-  d.contentEditable=true;
-  d.innerText=localStorage["day"+i]||"Day "+i;
-  d.oninput=()=>localStorage["day"+i]=d.innerText;
-  grid.appendChild(d);
+/* LOCAL AI QUIZ */
+let engine;
+
+async function loadAI(){
+  engine = await webllm.createEngine("Llama-3-8B-Instruct-q4f32_1");
 }
 
-/* QUIZ (offline smart generator) */
-function generateQuiz(){
-  const topic=quizTopic.value;
-  quizArea.innerHTML="";
-  for(let i=1;i<=5;i++){
-    quizArea.innerHTML+=`
-      <div class="panel">
-        <strong>Q${i}:</strong> Explain ${topic} concept ${i}.
-      </div>`;
-  }
+loadAI();
+
+async function makeQuiz(){
+  quizOut.innerHTML="Thinking...";
+  const prompt = `
+Create a 5-question study quiz on:
+${topic.value}
+
+Include:
+- 3 multiple choice
+- 2 short answer
+`;
+
+  const reply = await engine.chat.completions.create({
+    messages: [{ role: "user", content: prompt }]
+  });
+
+  quizOut.innerHTML = `
+    <div class="panel">
+      ${reply.choices[0].message.content.replace(/\n/g,"<br>")}
+    </div>`;
 }
 </script>
 
