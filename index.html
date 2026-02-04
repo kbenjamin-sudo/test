@@ -1,201 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>StudyOS | Professional Study Sheets</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        :root {
-            --bg: #0a0b10; --sidebar: #11121a; --card: #1c1e29;
-            --accent: #6366f1; --accent-hover: #818cf8;
-            --text: #f8fafc; --muted: #94a3b8; --border: #2d313e;
-        }
-        * { box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-        body { margin: 0; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+<meta charset="UTF-8">
+<title>StudyOS | Cloud</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script type="module" src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
 
-        /* Sidebar */
-        aside { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; }
-        .logo { font-size: 1.5rem; font-weight: 800; margin-bottom: 30px; color: var(--accent); letter-spacing: -1px; }
-        #note-list { flex: 1; overflow-y: auto; }
-        .note-item { 
-            padding: 12px; border-radius: 10px; cursor: pointer; margin-bottom: 8px;
-            border: 1px solid transparent; transition: 0.2s; display: flex; justify-content: space-between; align-items: center;
-        }
-        .note-item:hover { background: var(--card); border-color: var(--border); }
-        .note-item.active { background: var(--accent); color: white; }
-        .fav-badge { color: #fbbf24; font-size: 1.2rem; }
+    :root {
+        --bg: #030712; --panel: #111827; --surface: #1f2937;
+        --border: #374151; --text: #f9fafb; --muted: #9ca3af;
+        --accent: #6366f1; --accent-glow: rgba(99, 102, 241, 0.15);
+        --danger: #ef4444;
+    }
 
-        /* Main Workspace */
-        main { flex: 1; display: flex; flex-direction: column; padding: 40px; overflow-y: auto; }
-        .workspace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .controls { display: flex; gap: 10px; }
-        
-        .editor-container { max-width: 900px; margin: 0 auto; width: 100%; }
-        input#note-title { 
-            background: transparent; border: none; font-size: 2.5rem; font-weight: 700; 
-            color: var(--text); width: 100%; outline: none; margin-bottom: 10px;
-        }
-        textarea#note-body { 
-            background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-            width: 100%; height: 60vh; padding: 30px; color: var(--text); font-size: 1.1rem;
-            line-height: 1.7; outline: none; resize: none; transition: border-color 0.3s;
-        }
-        textarea#note-body:focus { border-color: var(--accent); }
+    * { box-sizing: border-box; font-family: 'Inter', sans-serif; outline: none; }
+    
+    body { 
+        margin: 0; background: var(--bg); color: var(--text); 
+        height: 100vh; overflow: hidden; display: flex; 
+    }
 
-        /* Buttons */
-        button { 
-            padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; 
-            font-weight: 600; font-size: 0.9rem; transition: 0.2s; display: flex; align-items: center; gap: 6px;
-        }
-        .btn-new { background: var(--accent); color: white; width: 100%; margin-bottom: 20px; justify-content: center; }
-        .btn-save { background: #10b981; color: white; }
-        .btn-export { background: #6366f1; color: white; }
-        .btn-del { background: #ef4444; color: white; }
-        .btn-fav { background: #334155; color: white; }
-        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    /* --- LOGIN MODAL (Glassmorphism) --- */
+    #auth-overlay {
+        position: fixed; inset: 0; background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(12px);
+        z-index: 999; display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.3s;
+    }
+    .auth-box {
+        background: var(--panel); border: 1px solid var(--border); padding: 40px;
+        border-radius: 24px; width: 360px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        text-align: center;
+    }
+    .auth-box h2 { margin: 0 0 20px 0; font-weight: 800; letter-spacing: -1px; }
+    .input-group { margin-bottom: 15px; text-align: left; }
+    .input-group label { display: block; color: var(--muted); font-size: 0.85rem; margin-bottom: 5px; }
+    .auth-input {
+        width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border);
+        color: white; border-radius: 8px; transition: 0.2s;
+    }
+    .auth-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+    
+    .btn-auth {
+        width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px;
+        background: var(--accent); color: white; font-weight: 600; cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-auth:hover { filter: brightness(1.1); }
+    .auth-link { margin-top: 15px; font-size: 0.9rem; color: var(--muted); cursor: pointer; }
+    .auth-link:hover { color: var(--accent); }
 
-        /* Focus Mode */
-        body.focus-mode aside { display: none; }
-        body.focus-mode main { padding: 60px 10%; }
-    </style>
+    /* --- MAIN APP --- */
+    aside {
+        width: 280px; background: var(--panel); border-right: 1px solid var(--border);
+        display: flex; flex-direction: column; padding: 20px;
+    }
+    .brand { font-size: 1.4rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 24px; color: white; }
+    .brand span { color: var(--accent); }
+    
+    .note-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .note-card {
+        padding: 12px 16px; border-radius: 10px; cursor: pointer; border: 1px solid transparent;
+        transition: 0.2s; display: flex; justify-content: space-between; align-items: center;
+        color: var(--muted);
+    }
+    .note-card:hover { background: var(--surface); color: var(--text); }
+    .note-card.active { background: var(--surface); border-color: var(--border); color: var(--text); font-weight: 600; }
+    .note-card.fav::after { content: '★'; color: #fbbf24; }
+
+    main { flex: 1; display: flex; flex-direction: column; position: relative; }
+    
+    .toolbar {
+        padding: 15px 30px; border-bottom: 1px solid var(--border); display: flex; 
+        justify-content: space-between; align-items: center; background: rgba(3, 7, 18, 0.5);
+    }
+    .status { font-size: 0.85rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .status.saved::before { content: ''; width: 8px; height: 8px; background: #10b981; border-radius: 50%; }
+    .status.unsaved::before { content: ''; width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; }
+
+    .actions { display: flex; gap: 8px; }
+    .btn {
+        background: var(--surface); border: 1px solid var(--border); color: var(--text);
+        padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 500;
+        transition: 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn:hover { background: var(--border); }
+    .btn-danger { color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.1); }
+    
+    .editor { flex: 1; padding: 40px; overflow-y: auto; max-width: 900px; margin: 0 auto; width: 100%; }
+    #title-in {
+        width: 100%; background: transparent; border: none; font-size: 2.5rem; 
+        font-weight: 800; color: var(--text); margin-bottom: 20px;
+    }
+    #body-in {
+        width: 100%; height: 70vh; background: transparent; border: none; 
+        font-size: 1.15rem; line-height: 1.7; color: #d1d5db; resize: none;
+    }
+</style>
 </head>
 <body>
 
+<div id="auth-overlay">
+    <div class="auth-box">
+        <h2>StudyOS<span style="color:var(--accent)">.</span></h2>
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="email" class="auth-input" placeholder="student@example.com">
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="password" class="auth-input" placeholder="••••••••">
+        </div>
+        <button class="btn-auth" onclick="handleAuth()">Sign In</button>
+        <div class="auth-link" onclick="toggleAuthMode()" id="auth-switch">New here? Create Account</div>
+        <div id="auth-error" style="color: var(--danger); margin-top: 10px; font-size: 0.9rem;"></div>
+    </div>
+</div>
+
 <aside>
-    <div class="logo">StudyOS.</div>
-    <button class="btn-new" onclick="createNewNote()">+ New Study Sheet</button>
-    <div id="note-list"></div>
-    <div style="margin-top: 20px;">
-        <button class="btn-fav" style="width:100%; justify-content: center;" onclick="toggleFocus()">Toggle Focus Mode</button>
+    <div class="brand">StudyOS<span>.</span></div>
+    <button class="btn" style="width:100%; justify-content:center; margin-bottom:20px; background:var(--accent); color:white; border:none" onclick="createNote()">+ New Note</button>
+    <div class="note-list" id="list"></div>
+    <div style="margin-top:auto; padding-top:20px; border-top:1px solid var(--border)">
+        <button class="btn" style="width:100%" onclick="signOut()">Sign Out</button>
     </div>
 </aside>
 
 <main>
-    <div class="workspace-header">
-        <div class="status" id="save-status" style="color: var(--muted); font-size: 0.8rem;">Ready</div>
-        <div class="controls">
-            <button class="btn-fav" onclick="toggleFavorite()">⭐ Favorite</button>
-            <button class="btn-export" onclick="exportPDF()">📄 PDF</button>
-            <button class="btn-save" onclick="saveNote()">Save</button>
-            <button class="btn-del" onclick="deleteNote()">Delete</button>
+    <div class="toolbar">
+        <div class="status unsaved" id="status">Unsaved</div>
+        <div class="actions">
+            <button class="btn" onclick="toggleFav()">⭐ Fav</button>
+            <button class="btn" onclick="exportPDF()">📄 PDF</button>
+            <button class="btn" onclick="saveNote()">💾 Save</button>
+            <button class="btn btn-danger" onclick="deleteNote()">🗑️</button>
         </div>
     </div>
-
-    <div class="editor-container">
-        <input type="text" id="note-title" placeholder="Topic: Quantum Physics...">
-        <textarea id="note-body" placeholder="Drop your knowledge here... Use dashes for points, or just start writing."></textarea>
+    <div class="editor">
+        <input type="text" id="title-in" placeholder="Untitled Note...">
+        <textarea id="body-in" placeholder="Start typing your study notes..."></textarea>
     </div>
 </main>
 
-<script>
-    let notes = JSON.parse(localStorage.getItem('study_sheets') || '[]');
-    let currentNoteId = null;
+<script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    // --- CORE LOGIC ---
-    function createNewNote() {
-        const newNote = {
-            id: Date.now().toString(),
-            title: "",
-            content: "",
-            favorite: false,
-            lastUpdated: new Date().toISOString()
-        };
-        notes.unshift(newNote);
-        currentNoteId = newNote.id;
-        renderNoteList();
-        loadNoteIntoEditor(newNote.id);
+    // --- 1. CONFIGURATION (FILL THESE IN) ---
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+    
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // --- 2. STATE ---
+    let notes = [];
+    let activeId = null;
+    let isSignUp = false;
+    let currentUser = null;
+
+    // --- 3. AUTH LOGIC ---
+    window.toggleAuthMode = () => {
+        isSignUp = !isSignUp;
+        document.querySelector('.btn-auth').innerText = isSignUp ? "Create Account" : "Sign In";
+        document.getElementById('auth-switch').innerText = isSignUp ? "Have an account? Sign In" : "New here? Create Account";
     }
 
-    function saveNote() {
-        const title = document.getElementById('note-title').value;
-        const content = document.getElementById('note-body').value;
-        
-        if (!currentNoteId && !title) return;
+    window.handleAuth = async () => {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('auth-error');
+        errorDiv.innerText = "";
 
-        const index = notes.findIndex(n => n.id === currentNoteId);
-        if (index > -1) {
-            notes[index].title = title || "Untitled Sheet";
-            notes[index].content = content;
-            notes[index].lastUpdated = new Date().toISOString();
+        const { data, error } = isSignUp 
+            ? await supabase.auth.signUp({ email, password })
+            : await supabase.auth.signInWithPassword({ email, password });
+
+        if (error) errorDiv.innerText = error.message;
+        else if (isSignUp) alert("Check your email for the confirmation link!");
+    }
+
+    window.signOut = async () => await supabase.auth.signOut();
+
+    // Listen for Auth Changes
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+            currentUser = session.user;
+            document.getElementById('auth-overlay').style.display = 'none';
+            fetchNotes(); // Load data on login
+        } else {
+            document.getElementById('auth-overlay').style.display = 'flex';
+            notes = []; renderList();
         }
+    });
 
-        localStorage.setItem('study_sheets', JSON.stringify(notes));
-        renderNoteList();
+    // --- 4. NOTE LOGIC ---
+    async function fetchNotes() {
+        const { data, error } = await supabase.from('notes').select('*').order('updated_at', { ascending: false });
+        if (data) { notes = data; renderList(); if(notes.length) loadNote(notes[0].id); }
+    }
+
+    window.createNote = async () => {
+        const newNote = { user_id: currentUser.id, title: "", content: "" };
+        const { data } = await supabase.from('notes').insert(newNote).select();
+        if(data) { notes.unshift(data[0]); loadNote(data[0].id); renderList(); }
+    }
+
+    window.saveNote = async () => {
+        if(!activeId) return;
+        const title = document.getElementById('title-in').value;
+        const content = document.getElementById('body-in').value;
         
-        const status = document.getElementById('save-status');
-        status.innerText = "Changes saved locally";
-        setTimeout(() => status.innerText = "Ready", 2000);
+        // Update Local
+        const n = notes.find(n => n.id === activeId);
+        n.title = title; n.content = content;
+        
+        // Update Cloud
+        document.getElementById('status').className = "status unsaved";
+        document.getElementById('status').innerText = "Syncing...";
+        
+        await supabase.from('notes').update({ title, content, updated_at: new Date() }).eq('id', activeId);
+        
+        document.getElementById('status').className = "status saved";
+        document.getElementById('status').innerText = "Saved to Cloud";
+        renderList();
     }
 
-    function loadNoteIntoEditor(id) {
-        currentNoteId = id;
-        const note = notes.find(n => n.id === id);
-        document.getElementById('note-title').value = note.title;
-        document.getElementById('note-body').value = note.content;
-        renderNoteList();
+    window.deleteNote = async () => {
+        if(!activeId || !confirm("Delete this note?")) return;
+        await supabase.from('notes').delete().eq('id', activeId);
+        notes = notes.filter(n => n.id !== activeId);
+        if(notes.length) loadNote(notes[0].id);
+        else { activeId = null; document.getElementById('title-in').value = ""; document.getElementById('body-in').value = ""; }
+        renderList();
     }
 
-    function deleteNote() {
-        if (!currentNoteId) return;
-        if (confirm("Delete this study sheet forever?")) {
-            notes = notes.filter(n => n.id !== currentNoteId);
-            currentNoteId = null;
-            document.getElementById('note-title').value = "";
-            document.getElementById('note-body').value = "";
-            localStorage.setItem('study_sheets', JSON.stringify(notes));
-            renderNoteList();
-        }
+    window.loadNote = (id) => {
+        activeId = id;
+        const n = notes.find(n => n.id === id);
+        document.getElementById('title-in').value = n.title || "";
+        document.getElementById('body-in').value = n.content || "";
+        document.getElementById('status').innerText = "Ready";
+        renderList();
     }
 
-    function toggleFavorite() {
-        if (!currentNoteId) return;
-        const note = notes.find(n => n.id === currentNoteId);
-        note.favorite = !note.favorite;
-        saveNote();
+    window.toggleFav = async () => {
+        if(!activeId) return;
+        const n = notes.find(n => n.id === activeId);
+        n.is_fav = !n.is_fav;
+        await supabase.from('notes').update({ is_fav: n.is_fav }).eq('id', activeId);
+        renderList();
     }
 
-    function toggleFocus() {
-        document.body.classList.toggle('focus-mode');
-    }
-
-    // --- UI RENDERING ---
-    function renderNoteList() {
-        const list = document.getElementById('note-list');
+    function renderList() {
+        const list = document.getElementById('list');
         list.innerHTML = notes.map(n => `
-            <div class="note-item ${n.id === currentNoteId ? 'active' : ''}" onclick="loadNoteIntoEditor('${n.id}')">
-                <span>${n.title || 'Untitled'}</span>
-                ${n.favorite ? '<span class="fav-badge">★</span>' : ''}
+            <div class="note-card ${n.id === activeId ? 'active' : ''} ${n.is_fav ? 'fav' : ''}" 
+                 onclick="loadNote('${n.id}')">
+                ${n.title || 'Untitled Note'}
             </div>
         `).join('');
     }
 
-    // --- PDF EXPORT ---
-    function exportPDF() {
+    window.exportPDF = () => {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const title = document.getElementById('note-title').value || "Study Sheet";
-        const body = document.getElementById('note-body').value;
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(22);
-        doc.text(title.toUpperCase(), 20, 30);
-        
-        doc.setLineWidth(0.5);
-        doc.line(20, 35, 190, 35);
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(12);
-        const splitContent = doc.splitTextToSize(body, 170);
-        doc.text(splitContent, 20, 50);
-
-        doc.save(`${title.replace(/\s+/g, '_')}_StudySheet.pdf`);
-    }
-
-    // Init
-    if (notes.length > 0) {
-        loadNoteIntoEditor(notes[0].id);
-    } else {
-        createNewNote();
+        doc.setFontSize(20); doc.text(document.getElementById('title-in').value, 20, 20);
+        doc.setFontSize(12); doc.text(doc.splitTextToSize(document.getElementById('body-in').value, 170), 20, 40);
+        doc.save("StudyOS_Note.pdf");
     }
 </script>
 </body>
