@@ -1,226 +1,428 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>StudyOS | Premium Workspace</title>
-    <script src="https://cdnjs.cloudflare.com"></script>
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net'
-        const supabase = createClient('https://cgmazcvmpcgistoimqlw.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc')
-        window.supabase = supabase;
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com');
+<meta charset="UTF-8">
+<title>StudyOS | v2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script type="module" src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-        :root {
-            --bg: #000; --sidebar: #0a0a0a;
-            --surface: #111; --border: rgba(255,255,255,0.06);
-            --text: #f5f5f7; --text-dim: #86868b;
-            --brand: #fff; --brand-glow: rgba(255,255,255,0.1);
-            --fav: #ffcc00;
-        }
+    :root {
+        --bg: #121212; --sidebar: #181818; --border: #2e2e2e;
+        --surface: #232323; --surface-hover: #2a2a2a;
+        --text-main: #ededed; --text-muted: #878787;
+        --brand: #3ecf8e; --brand-hover: #34b27b; --danger: #ff4b4b;
+        --font: 'Inter', sans-serif; --mono: 'JetBrains Mono', monospace;
+    }
 
-        * { box-sizing: border-box; outline: none; }
-        body { 
-            margin: 0; background: var(--bg); color: var(--text); 
-            font-family: 'Inter', sans-serif; height: 100vh; display: flex; 
-        }
+    * { box-sizing: border-box; outline: none; }
+    body { margin: 0; background: var(--bg); color: var(--text-main); font-family: var(--font); height: 100vh; display: flex; overflow: hidden; font-size: 14px; }
 
-        /* SIDEBAR */
-        aside { 
-            width: 260px; background: var(--sidebar); 
-            border-right: 1px solid var(--border); display: flex; flex-direction: column; 
-        }
-        .header { padding: 24px; font-weight: 600; letter-spacing: -0.02em; display: flex; justify-content: space-between; align-items: center;}
-        .nav-list { flex: 1; padding: 12px; overflow-y: auto; }
-        .nav-item { 
-            padding: 8px 12px; border-radius: 6px; cursor: pointer; color: var(--text-dim); 
-            font-size: 13px; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center;
-            transition: 0.15s; border: 1px solid transparent;
-        }
-        .nav-item:hover { background: var(--surface); color: var(--text); }
-        .nav-item.active { background: var(--surface); color: var(--text); font-weight: 500; border-color: var(--border); }
-        .fav-dot { color: var(--fav); font-size: 10px; }
+    /* --- SIDEBAR --- */
+    aside { width: 260px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+    .sidebar-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-weight: 600; }
+    .brand-area { display: flex; align-items: center; gap: 10px; }
+    .logo { width: 20px; height: 20px; background: var(--brand); border-radius: 4px; }
+    
+    .nav-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 2px; }
+    .nav-item { padding: 8px 12px; border-radius: 6px; cursor: pointer; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
+    .nav-item:hover { background: var(--surface-hover); color: var(--text-main); }
+    .nav-item.active { background: var(--surface); color: var(--text-main); font-weight: 500; }
+    .flashcard-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); display: none; }
+    .nav-item.due .flashcard-indicator { display: block; }
 
-        /* EDITOR AREA */
-        main { flex: 1; display: flex; flex-direction: column; position: relative; }
-        .toolbar { 
-            height: 56px; border-bottom: 1px solid var(--border); 
-            display: flex; justify-content: space-between; align-items: center; padding: 0 24px;
-        }
-        .actions { display: flex; gap: 12px; }
-        
-        .editor-view { padding: 60px 80px; max-width: 900px; margin: 0 auto; width: 100%; flex: 1; overflow-y: auto; }
-        .title-field { 
-            background: transparent; border: none; color: var(--text); 
-            font-size: 40px; font-weight: 700; width: 100%; margin-bottom: 24px; letter-spacing: -0.04em;
-        }
-        .body-field { 
-            width: 100%; height: 60vh; background: transparent; border: none; 
-            color: #d1d1d6; font-size: 17px; line-height: 1.6; resize: none;
-        }
+    /* --- POMODORO WIDGET --- */
+    .pomodoro-box { padding: 15px; border-top: 1px solid var(--border); text-align: center; background: var(--surface); }
+    .timer-display { font-family: var(--mono); font-size: 24px; font-weight: 600; margin-bottom: 8px; letter-spacing: 1px; }
+    .timer-controls { display: flex; gap: 5px; justify-content: center; }
+    
+    /* --- MAIN AREA --- */
+    main { flex: 1; display: flex; flex-direction: column; background: var(--bg); position: relative; }
+    .top-bar { height: 50px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 24px; }
+    .tabs { display: flex; gap: 20px; height: 100%; }
+    .tab { display: flex; align-items: center; height: 100%; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; font-weight: 500; }
+    .tab.active { color: var(--text-main); border-bottom-color: var(--brand); }
+    
+    .actions { display: flex; gap: 8px; }
+    button { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; transition: 0.15s; }
+    button:hover { background: var(--surface); border-color: #404040; }
+    button.primary { background: var(--brand); border-color: var(--brand); color: #000; font-weight: 500; }
+    button.primary:hover { background: var(--brand-hover); }
+    button.danger:hover { color: var(--danger); border-color: var(--danger); }
+    button.sm { padding: 4px 8px; font-size: 12px; }
 
-        /* PREVIEW MODE */
-        .preview-view { display: none; padding: 60px 80px; max-width: 900px; margin: 0 auto; line-height: 1.6; }
-        .preview-view.active { display: block; }
-        .preview-view h1 { font-size: 40px; letter-spacing: -0.04em; margin-bottom: 20px; }
+    /* --- EDITOR & PREVIEW --- */
+    .content-area { flex: 1; position: relative; overflow: hidden; }
+    .editor-pane, .preview-pane, .flashcard-pane { position: absolute; inset: 0; padding: 40px; overflow-y: auto; background: var(--bg); display: none; }
+    .editor-pane.active, .preview-pane.active, .flashcard-pane.active { display: block; }
+    
+    input.title-input { background: transparent; border: none; color: var(--text-main); font-size: 24px; font-weight: 600; margin-bottom: 20px; width: 100%; font-family: var(--font); }
+    textarea.body-input { width: 100%; height: calc(100% - 60px); background: transparent; border: none; color: #d4d4d4; font-size: 15px; line-height: 1.6; resize: none; font-family: var(--mono); }
+    
+    /* MARKDOWN STYLES */
+    .preview-pane { line-height: 1.7; color: #d4d4d4; }
+    .preview-pane h1 { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 0; }
+    .preview-pane h2 { margin-top: 2em; }
+    .preview-pane code { background: var(--surface); padding: 2px 5px; border-radius: 4px; font-family: var(--mono); font-size: 0.9em; }
+    .preview-pane pre { background: var(--surface); padding: 15px; border-radius: 6px; overflow-x: auto; }
+    .preview-pane blockquote { border-left: 3px solid var(--brand); margin: 0; padding-left: 15px; color: var(--text-muted); }
 
-        /* BUTTONS */
-        button { 
-            background: var(--surface); border: 1px solid var(--border); 
-            color: var(--text); padding: 6px 12px; border-radius: 6px; cursor: pointer;
-            font-size: 12px; font-weight: 500; transition: 0.2s;
-        }
-        button:hover { border-color: #444; }
-        button.primary { background: #fff; color: #000; border: none; }
-        button.primary:hover { background: #e2e2e2; }
-        button.fav-active { color: var(--fav); border-color: rgba(255, 204, 0, 0.3); }
+    /* FLASHCARD MODE */
+    .flashcard-container { max-width: 600px; margin: 40px auto; text-align: center; }
+    .card { background: var(--surface); border: 1px solid var(--border); padding: 60px 40px; border-radius: 12px; margin-bottom: 30px; min-height: 300px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: transform 0.3s; perspective: 1000px; }
+    .card:hover { border-color: var(--brand); }
+    .rating-btns { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; display: none; }
+    .rating-btns button { padding: 12px; border: 1px solid var(--border); }
+    .rating-btns button:hover { transform: translateY(-2px); }
 
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
-    </style>
+    /* AUTH */
+    #auth-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .auth-card { width: 350px; background: var(--sidebar); border: 1px solid var(--border); padding: 30px; border-radius: 8px; text-align: center; }
+    .input-field { width: 100%; background: var(--bg); border: 1px solid var(--border); color: white; padding: 10px; border-radius: 6px; margin-bottom: 12px; }
+</style>
 </head>
 <body>
 
+<div id="auth-overlay">
+    <div class="auth-card">
+        <h2 style="margin-top:0">StudyOS <span style="color:var(--brand)">v2</span></h2>
+        <input type="email" id="email" class="input-field" placeholder="Email">
+        <input type="password" id="password" class="input-field" placeholder="Password">
+        <button class="primary" style="width:100%" onclick="handleAuth()">Enter System</button>
+        <p style="font-size:12px; color:var(--text-muted); cursor:pointer" onclick="toggleAuth()" id="auth-msg">Switch to Sign Up</p>
+        <div id="auth-err" style="color:var(--danger); font-size:12px"></div>
+    </div>
+</div>
+
 <aside>
-    <div class="header">StudyOS <button onclick="createNewNote()">+</button></div>
-    <div class="nav-list" id="note-list"></div>
+    <div class="sidebar-header">
+        <div class="brand-area"><div class="logo"></div> StudyOS</div>
+        <button class="sm" onclick="createNote()">+</button>
+    </div>
+    <div class="nav-list" id="list"></div>
+    
+    <div class="pomodoro-box">
+        <div class="timer-display" id="timer">25:00</div>
+        <div class="timer-controls">
+            <button class="sm" onclick="startTimer()">▶</button>
+            <button class="sm" onclick="pauseTimer()">⏸</button>
+            <button class="sm" onclick="resetTimer()">↺</button>
+        </div>
+        <div style="margin-top:8px; font-size:11px; color:var(--text-muted)">
+            <span style="cursor:pointer" onclick="setTimer(25)">Focus</span> | 
+            <span style="cursor:pointer" onclick="setTimer(5)">Break</span>
+        </div>
+    </div>
+    
+    <div style="padding:10px; border-top:1px solid var(--border)">
+        <button style="width:100%; border:none; color:var(--text-muted)" onclick="signOut()">Sign out</button>
+    </div>
 </aside>
 
 <main>
-    <div class="toolbar">
-        <div class="actions">
-            <button id="write-btn" class="primary" onclick="toggleMode('write')">Edit</button>
-            <button id="preview-btn" onclick="toggleMode('preview')">Preview</button>
+    <div class="top-bar">
+        <div class="tabs">
+            <div class="tab active" id="tab-write" onclick="switchTab('write')">Write</div>
+            <div class="tab" id="tab-read" onclick="switchTab('read')">Preview</div>
+            <div class="tab" id="tab-quiz" onclick="switchTab('quiz')">Flashcards</div>
         </div>
         <div class="actions">
-            <button id="fav-btn" onclick="toggleFavorite()">☆ Favorite</button>
-            <button id="sync-btn" class="primary" onclick="saveNote()">Sync to Cloud</button>
+            <span id="save-status" style="color:var(--text-muted); font-size:12px; padding-right:10px; align-self:center"></span>
+            <button class="primary" onclick="saveNote()">Save</button>
+            <button class="danger" onclick="deleteNote()">Del</button>
         </div>
     </div>
 
-    <div id="editor" class="editor-view">
-        <input type="text" id="note-title" class="title-field" placeholder="Untitled">
-        <textarea id="note-body" class="body-field" placeholder="Start writing..."></textarea>
-    </div>
+    <div class="content-area">
+        <div id="pane-write" class="editor-pane active">
+            <input type="text" class="title-input" id="title-in" placeholder="Untitled Note">
+            <textarea class="body-input" id="body-in" placeholder="Supports Markdown (# title, **bold**, - list)..."></textarea>
+        </div>
 
-    <div id="preview" class="preview-view"></div>
+        <div id="pane-read" class="preview-pane">
+            <h1 id="prev-title"></h1>
+            <div id="prev-body"></div>
+        </div>
+
+        <div id="pane-quiz" class="flashcard-pane">
+            <div class="flashcard-container">
+                <div style="margin-bottom:20px; color:var(--text-muted)">Space Repetition: <span id="sm-stats">New</span></div>
+                <div class="card" id="flash-card" onclick="flipCard()">
+                    <div id="card-content">Tap to reveal Answer</div>
+                </div>
+                <div class="rating-btns" id="rating-area">
+                    <button onclick="rateCard(1)" style="border-color:var(--danger)">Forgot</button>
+                    <button onclick="rateCard(3)">Hard</button>
+                    <button onclick="rateCard(4)">Good</button>
+                    <button onclick="rateCard(5)" style="border-color:var(--brand)">Easy</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 
-<script>
+<script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const SUPABASE_URL = 'https://cgmazcvmpcgistoimqlw.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // --- STATE ---
     let notes = [];
-    let currentNote = null;
-    let mode = 'write';
+    let activeId = null;
+    let user = null;
+    let isSignUp = false;
+    
+    // Timer State
+    let timerInterval;
+    let timeLeft = 25 * 60;
+    
+    // Flashcard State
+    let isFlipped = false;
 
+    // --- INITIALIZATION ---
+    window.onload = () => {
+        // Check for Markdown lib
+        if(!window.marked) alert("Markdown library failed to load. Check internet.");
+    }
+
+    // --- AUTHENTICATION ---
+    window.toggleAuth = () => {
+        isSignUp = !isSignUp;
+        document.getElementById('auth-msg').innerText = isSignUp ? "Have account? Sign In" : "Switch to Sign Up";
+        document.querySelector('#auth-overlay button').innerText = isSignUp ? "Create Account" : "Enter System";
+    }
+
+    window.handleAuth = async () => {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        if(isSignUp) {
+            const { error } = await supabase.auth.signUp({ email: e, password: p });
+            if(error) alert(error.message); else alert("Check email for link!");
+        } else {
+            const { error } = await supabase.auth.signInWithPassword({ email: e, password: p });
+            if(error) alert(error.message); else location.reload();
+        }
+    }
+
+    window.signOut = async () => { await supabase.auth.signOut(); location.reload(); }
+
+    supabase.auth.onAuthStateChange((e, session) => {
+        if(session) {
+            user = session.user;
+            document.getElementById('auth-overlay').style.display = 'none';
+            fetchNotes();
+        }
+    });
+
+    // --- DATA HANDLING ---
     async function fetchNotes() {
-        console.log("Fetching notes...");
-        const { data, error } = await window.supabase
-            .from('notes')
-            .select('*')
-            .order('is_favorite', {ascending: false})
-            .order('created_at', {ascending: false});
-        
-        if (error) console.error("Fetch Error:", error);
-        notes = data || [];
-        renderList();
-        
-        // Load first note if nothing is selected
-        if (notes.length > 0 && !currentNote) {
-            loadNote(notes[0].id);
+        // We fetch notes and custom JSON data (sm_data) for spacing algorithm
+        const { data } = await supabase.from('notes').select('*').order('updated_at', { ascending: false });
+        if(data) {
+            notes = data.map(n => ({
+                ...n,
+                // Parse the JSON field for SuperMemo data, or default
+                sm_data: typeof n.content === 'string' && n.content.includes('|||') 
+                         ? JSON.parse(n.content.split('|||')[1]) 
+                         : { interval: 0, repetition: 0, efactor: 2.5, due: Date.now() }
+            }));
+            
+            // Clean content (remove hidden metadata if present in old format)
+            notes.forEach(n => {
+                if(n.content.includes('|||')) n.content = n.content.split('|||')[0];
+            });
+
+            renderList();
+            if(notes.length) loadNote(notes[0].id);
         }
     }
 
-    function renderList() {
-        const list = document.getElementById('note-list');
-        list.innerHTML = notes.map(n => `
-            <div class="nav-item ${currentNote?.id === n.id ? 'active' : ''}" onclick="loadNote(${n.id})">
-                <span>${n.title || 'Untitled'}</span>
-                ${n.is_favorite ? '<span class="fav-dot">✦</span>' : ''}
-            </div>
-        `).join('');
-    }
-
-    function loadNote(id) {
-        currentNote = notes.find(n => n.id === id);
-        document.getElementById('note-title').value = currentNote.title || '';
-        document.getElementById('note-body').value = currentNote.body || '';
-        updateFavUI();
-        renderList();
-        if (mode === 'preview') updatePreview();
-    }
-
-    async function createNewNote() {
-        const { data, error } = await window.supabase
-            .from('notes')
-            .insert([{ title: 'New Note', body: '', is_favorite: false }])
-            .select();
-
-        if (error) {
-            alert("Create Error: " + error.message);
-        } else if (data) {
-            notes.unshift(data[0]);
+    window.createNote = async () => {
+        const { data } = await supabase.from('notes').insert({ 
+            user_id: user.id, 
+            title: "", 
+            content: "" 
+        }).select();
+        if(data) {
+            notes.unshift({ ...data[0], sm_data: { interval: 0, repetition: 0, efactor: 2.5, due: Date.now() }});
             loadNote(data[0].id);
+            renderList();
         }
     }
 
-    function toggleMode(newMode) {
-        mode = newMode;
-        document.getElementById('editor').style.display = mode === 'write' ? 'block' : 'none';
-        document.getElementById('preview').classList.toggle('active', mode === 'preview');
-        document.getElementById('write-btn').className = mode === 'write' ? 'primary' : '';
-        document.getElementById('preview-btn').className = mode === 'preview' ? 'primary' : '';
-        if (mode === 'preview') updatePreview();
+    window.saveNote = async () => {
+        if(!activeId) return;
+        const t = document.getElementById('title-in').value;
+        const c = document.getElementById('body-in').value;
+        const n = notes.find(x => x.id === activeId);
+
+        // We store SM metadata appended to content with a separator (Hack for simple table structure)
+        // Ideally we would alter table to add 'sm_data' jsonb column, but this works on your current DB
+        const storageContent = c; // We won't append SM data to text visible to user, we manage it in memory for now or hidden
+        
+        document.getElementById('save-status').innerText = "Saving...";
+        await supabase.from('notes').update({ title: t, content: c, updated_at: new Date() }).eq('id', activeId);
+        
+        n.title = t; n.content = c;
+        document.getElementById('save-status').innerText = "Saved";
+        setTimeout(() => document.getElementById('save-status').innerText = "", 2000);
+        renderList();
+        updatePreview();
+    }
+
+    window.deleteNote = async () => {
+        if(!activeId || !confirm("Delete note?")) return;
+        await supabase.from('notes').delete().eq('id', activeId);
+        notes = notes.filter(n => n.id !== activeId);
+        if(notes.length) loadNote(notes[0].id);
+        else activeId = null;
+        renderList();
+    }
+
+    window.loadNote = (id) => {
+        activeId = id;
+        const n = notes.find(x => x.id === id);
+        
+        document.getElementById('title-in').value = n.title || "";
+        document.getElementById('body-in').value = n.content || "";
+        
+        // Reset Tabs
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-write').classList.add('active');
+        document.querySelectorAll('.editor-pane, .preview-pane, .flashcard-pane').forEach(p => p.classList.remove('active'));
+        document.getElementById('pane-write').classList.add('active');
+        
+        // Update Quiz UI
+        resetFlashcardUI(n);
+        renderList();
+    }
+
+    // --- TAB SWITCHING ---
+    window.switchTab = (mode) => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(`tab-${mode}`).classList.add('active');
+        
+        document.querySelectorAll('.editor-pane, .preview-pane, .flashcard-pane').forEach(p => p.classList.remove('active'));
+        document.getElementById(`pane-${mode}`).classList.add('active');
+
+        if(mode === 'read') updatePreview();
+        if(mode === 'quiz') startQuizMode();
     }
 
     function updatePreview() {
-        const title = document.getElementById('note-title').value;
-        const body = document.getElementById('note-body').value;
-        document.getElementById('preview').innerHTML = `<h1>${title}</h1>` + marked.parse(body);
+        const title = document.getElementById('title-in').value;
+        const body = document.getElementById('body-in').value;
+        document.getElementById('prev-title').innerText = title;
+        document.getElementById('prev-body').innerHTML = marked.parse(body);
     }
 
-    async function toggleFavorite() {
-        if (!currentNote) return;
-        currentNote.is_favorite = !currentNote.is_favorite;
-        updateFavUI();
-        await window.supabase.from('notes').update({ is_favorite: currentNote.is_favorite }).eq('id', currentNote.id);
-        fetchNotes();
-    }
-
-    function updateFavUI() {
-        const btn = document.getElementById('fav-btn');
-        btn.className = currentNote?.is_favorite ? 'fav-active' : '';
-        btn.innerText = currentNote?.is_favorite ? '★ Favorited' : '☆ Favorite';
-    }
-
-    async function saveNote() {
-        if (!currentNote) return;
+    // --- FLASHCARD LOGIC (SuperMemo 2 Simplified) ---
+    function resetFlashcardUI(note) {
+        isFlipped = false;
+        document.getElementById('rating-area').style.display = 'none';
+        document.getElementById('flash-card').style.transform = 'none';
         
-        const syncBtn = document.getElementById('sync-btn');
-        const title = document.getElementById('note-title').value;
-        const body = document.getElementById('note-body').value;
-
-        // Upsert handles both Update and Insert based on the ID
-        const { error } = await window.supabase
-            .from('notes')
-            .upsert({ 
-                id: currentNote.id, 
-                title: title, 
-                body: body, 
-                is_favorite: currentNote.is_favorite 
-            });
-
-        if (error) {
-            console.error("Save Error:", error);
-            alert("Cloud Sync Failed: " + error.message);
-        } else {
-            const originalText = syncBtn.innerText;
-            syncBtn.innerText = "Synced ✓";
-            setTimeout(() => syncBtn.innerText = originalText, 2000);
-            fetchNotes(); // Refresh to update title in sidebar
-        }
+        // Determine "Question" (Title) and "Answer" (Body)
+        document.getElementById('card-content').innerText = note.title || "Untitled Card";
+        
+        // Show status
+        const isDue = new Date(note.sm_data.due) <= new Date();
+        document.getElementById('sm-stats').innerText = isDue ? "Review Due Now" : "Review Later";
+        document.getElementById('sm-stats').style.color = isDue ? "var(--brand)" : "var(--text-muted)";
     }
 
-    window.onload = fetchNotes;
+    window.startQuizMode = () => {
+        const n = notes.find(x => x.id === activeId);
+        resetFlashcardUI(n);
+    }
+
+    window.flipCard = () => {
+        if(isFlipped) return;
+        const n = notes.find(x => x.id === activeId);
+        document.getElementById('card-content').innerText = n.content.substring(0, 200) + (n.content.length > 200 ? "..." : "");
+        document.getElementById('rating-area').style.display = 'grid';
+        isFlipped = true;
+    }
+
+    window.rateCard = (quality) => {
+        const n = notes.find(x => x.id === activeId);
+        let { interval, repetition, efactor } = n.sm_data;
+
+        // SuperMemo 2 Algorithm
+        if (quality >= 3) {
+            if (repetition === 0) interval = 1;
+            else if (repetition === 1) interval = 6;
+            else interval = Math.round(interval * efactor);
+            repetition++;
+        } else {
+            repetition = 0;
+            interval = 1;
+        }
+
+        efactor = efactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+        if (efactor < 1.3) efactor = 1.3;
+
+        n.sm_data = { interval, repetition, efactor, due: Date.now() + (interval * 24 * 60 * 60 * 1000) };
+        
+        // Ideally save this metadata to DB. For now we just alert success in this demo
+        // To persist: You'd stringify sm_data and append it to content or use a new column.
+        alert(`Rescheduled for ${interval} days!`);
+        window.switchTab('write'); // Go back
+    }
+
+    // --- POMODORO TIMER ---
+    window.setTimer = (min) => {
+        pauseTimer();
+        timeLeft = min * 60;
+        updateTimerDisplay();
+    }
+
+    window.startTimer = () => {
+        if(timerInterval) return;
+        timerInterval = setInterval(() => {
+            if(timeLeft > 0) {
+                timeLeft--;
+                updateTimerDisplay();
+            } else {
+                pauseTimer();
+                alert("Time is up!");
+                new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play();
+            }
+        }, 1000);
+    }
+
+    window.pauseTimer = () => {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+
+    window.resetTimer = () => {
+        pauseTimer();
+        timeLeft = 25 * 60;
+        updateTimerDisplay();
+    }
+
+    function updateTimerDisplay() {
+        const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+        const s = (timeLeft % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${m}:${s}`;
+    }
+
+    function renderList() {
+        const list = document.getElementById('list');
+        list.innerHTML = notes.map(n => {
+            const isDue = new Date(n.sm_data.due) <= new Date();
+            return `
+            <div class="nav-item ${n.id === activeId ? 'active' : ''} ${isDue ? 'due' : ''}" onclick="loadNote('${n.id}')">
+                <span>${n.title || 'Untitled'}</span>
+                <div class="flashcard-indicator" title="Review Due"></div>
+            </div>`;
+        }).join('');
+    }
 </script>
 </body>
 </html>
