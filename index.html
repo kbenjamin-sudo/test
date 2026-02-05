@@ -26,7 +26,7 @@
             font-family: 'Inter', sans-serif; height: 100vh; display: flex; 
         }
 
-        /* SIDEBAR (Linear/Vercel Style) */
+        /* SIDEBAR */
         aside { 
             width: 260px; background: var(--sidebar); 
             border-right: 1px solid var(--border); display: flex; flex-direction: column; 
@@ -36,10 +36,10 @@
         .nav-item { 
             padding: 8px 12px; border-radius: 6px; cursor: pointer; color: var(--text-dim); 
             font-size: 13px; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center;
-            transition: 0.15s;
+            transition: 0.15s; border: 1px solid transparent;
         }
         .nav-item:hover { background: var(--surface); color: var(--text); }
-        .nav-item.active { background: var(--surface); color: var(--text); font-weight: 500; }
+        .nav-item.active { background: var(--surface); color: var(--text); font-weight: 500; border-color: var(--border); }
         .fav-dot { color: var(--fav); font-size: 10px; }
 
         /* EDITOR AREA */
@@ -63,7 +63,7 @@
         /* PREVIEW MODE */
         .preview-view { display: none; padding: 60px 80px; max-width: 900px; margin: 0 auto; line-height: 1.6; }
         .preview-view.active { display: block; }
-        .preview-view h1 { font-size: 40px; letter-spacing: -0.04em; }
+        .preview-view h1 { font-size: 40px; letter-spacing: -0.04em; margin-bottom: 20px; }
 
         /* BUTTONS */
         button { 
@@ -74,7 +74,7 @@
         button:hover { border-color: #444; }
         button.primary { background: #fff; color: #000; border: none; }
         button.primary:hover { background: #e2e2e2; }
-        button.fav-active { color: var(--fav); border-color: var(--fav); }
+        button.fav-active { color: var(--fav); border-color: rgba(255, 204, 0, 0.3); }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
@@ -83,10 +83,7 @@
 <body>
 
 <aside>
-    <div class="header">
-        StudyOS 
-        <button onclick="createNewNote()">+</button>
-    </div>
+    <div class="header">StudyOS <button onclick="createNewNote()">+</button></div>
     <div class="nav-list" id="note-list"></div>
 </aside>
 
@@ -97,8 +94,8 @@
             <button id="preview-btn" onclick="toggleMode('preview')">Preview</button>
         </div>
         <div class="actions">
-            <button id="fav-btn" onclick="toggleFavorite()">★ Favorite</button>
-            <button class="primary" onclick="saveNote()">Sync to Cloud</button>
+            <button id="fav-btn" onclick="toggleFavorite()">☆ Favorite</button>
+            <button id="sync-btn" class="primary" onclick="saveNote()">Sync to Cloud</button>
         </div>
     </div>
 
@@ -116,10 +113,21 @@
     let mode = 'write';
 
     async function fetchNotes() {
-        const { data } = await window.supabase.from('notes').select('*').order('is_favorite', {ascending: false}).order('created_at', {ascending: false});
+        console.log("Fetching notes...");
+        const { data, error } = await window.supabase
+            .from('notes')
+            .select('*')
+            .order('is_favorite', {ascending: false})
+            .order('created_at', {ascending: false});
+        
+        if (error) console.error("Fetch Error:", error);
         notes = data || [];
         renderList();
-        if (notes.length > 0 && !currentNote) loadNote(notes[0].id);
+        
+        // Load first note if nothing is selected
+        if (notes.length > 0 && !currentNote) {
+            loadNote(notes[0].id);
+        }
     }
 
     function renderList() {
@@ -142,8 +150,14 @@
     }
 
     async function createNewNote() {
-        const { data } = await window.supabase.from('notes').insert([{ title: '', body: '', is_favorite: false }]).select();
-        if (data) {
+        const { data, error } = await window.supabase
+            .from('notes')
+            .insert([{ title: 'New Note', body: '', is_favorite: false }])
+            .select();
+
+        if (error) {
+            alert("Create Error: " + error.message);
+        } else if (data) {
             notes.unshift(data[0]);
             loadNote(data[0].id);
         }
@@ -153,10 +167,8 @@
         mode = newMode;
         document.getElementById('editor').style.display = mode === 'write' ? 'block' : 'none';
         document.getElementById('preview').classList.toggle('active', mode === 'preview');
-        
         document.getElementById('write-btn').className = mode === 'write' ? 'primary' : '';
         document.getElementById('preview-btn').className = mode === 'preview' ? 'primary' : '';
-
         if (mode === 'preview') updatePreview();
     }
 
@@ -182,16 +194,29 @@
 
     async function saveNote() {
         if (!currentNote) return;
-        currentNote.title = document.getElementById('note-title').value;
-        currentNote.body = document.getElementById('note-body').value;
         
-        const { error } = await window.supabase.from('notes').upsert(currentNote);
-        if (!error) {
-            const btn = event.target;
-            const originalText = btn.innerText;
-            btn.innerText = "Synced ✓";
-            setTimeout(() => btn.innerText = originalText, 2000);
-            fetchNotes();
+        const syncBtn = document.getElementById('sync-btn');
+        const title = document.getElementById('note-title').value;
+        const body = document.getElementById('note-body').value;
+
+        // Upsert handles both Update and Insert based on the ID
+        const { error } = await window.supabase
+            .from('notes')
+            .upsert({ 
+                id: currentNote.id, 
+                title: title, 
+                body: body, 
+                is_favorite: currentNote.is_favorite 
+            });
+
+        if (error) {
+            console.error("Save Error:", error);
+            alert("Cloud Sync Failed: " + error.message);
+        } else {
+            const originalText = syncBtn.innerText;
+            syncBtn.innerText = "Synced ✓";
+            setTimeout(() => syncBtn.innerText = originalText, 2000);
+            fetchNotes(); // Refresh to update title in sidebar
         }
     }
 
@@ -199,3 +224,4 @@
 </script>
 </body>
 </html>
+
