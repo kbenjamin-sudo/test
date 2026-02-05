@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>StudyOS | v2</title>
+<title>StudyOS | v3 Enhanced</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="module" src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -10,10 +10,11 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
     :root {
-        --bg: #121212; --sidebar: #181818; --border: #2e2e2e;
-        --surface: #232323; --surface-hover: #2a2a2a;
-        --text-main: #ededed; --text-muted: #878787;
-        --brand: #3ecf8e; --brand-hover: #34b27b; --danger: #ff4b4b;
+        --bg: #0a0a0a; --sidebar: #141414; --border: #2e2e2e;
+        --surface: #1a1a1a; --surface-hover: #252525;
+        --text-main: #f5f5f5; --text-muted: #8a8a8a;
+        --brand: #00d9ff; --brand-hover: #00b8d4; --danger: #ff4b4b;
+        --success: #3ecf8e; --warning: #ffa726;
         --font: 'Inter', sans-serif; --mono: 'JetBrains Mono', monospace;
     }
 
@@ -21,87 +22,194 @@
     body { margin: 0; background: var(--bg); color: var(--text-main); font-family: var(--font); height: 100vh; display: flex; overflow: hidden; font-size: 14px; }
 
     /* --- SIDEBAR --- */
-    aside { width: 260px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-    .sidebar-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-weight: 600; }
-    .brand-area { display: flex; align-items: center; gap: 10px; }
-    .logo { width: 20px; height: 20px; background: var(--brand); border-radius: 4px; }
+    aside { width: 280px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+    .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
+    .brand-area { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .logo { width: 32px; height: 32px; background: linear-gradient(135deg, var(--brand), var(--success)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #000; }
+    .brand-text { font-weight: 700; font-size: 18px; }
+    .version { color: var(--brand); font-size: 12px; font-weight: 600; }
+    
+    .search-box { width: 100%; background: var(--surface); border: 1px solid var(--border); color: white; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; transition: border-color 0.2s; }
+    .search-box:focus { border-color: var(--brand); }
     
     .nav-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 2px; }
-    .nav-item { padding: 8px 12px; border-radius: 6px; cursor: pointer; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
-    .nav-item:hover { background: var(--surface-hover); color: var(--text-main); }
-    .nav-item.active { background: var(--surface); color: var(--text-main); font-weight: 500; }
-    .flashcard-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); display: none; }
+    .nav-item { padding: 10px 14px; border-radius: 8px; cursor: pointer; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; position: relative; }
+    .nav-item:hover { background: var(--surface-hover); color: var(--text-main); transform: translateX(2px); }
+    .nav-item.active { background: var(--surface); color: var(--text-main); font-weight: 500; border-left: 3px solid var(--brand); }
+    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; background: var(--brand); border-radius: 0 3px 3px 0; }
+    
+    .flashcard-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: none; animation: pulse 2s infinite; }
     .nav-item.due .flashcard-indicator { display: block; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    
+    .linked-indicator { font-size: 10px; color: var(--brand); margin-left: 4px; }
+
+    /* --- STATS WIDGET (NEW) --- */
+    .stats-widget { padding: 16px; border-top: 1px solid var(--border); background: var(--surface); }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .stat-card { background: var(--bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border); }
+    .stat-value { font-size: 20px; font-weight: 700; color: var(--brand); font-family: var(--mono); }
+    .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
 
     /* --- POMODORO WIDGET --- */
-    .pomodoro-box { padding: 15px; border-top: 1px solid var(--border); text-align: center; background: var(--surface); }
-    .timer-display { font-family: var(--mono); font-size: 24px; font-weight: 600; margin-bottom: 8px; letter-spacing: 1px; }
-    .timer-controls { display: flex; gap: 5px; justify-content: center; }
+    .pomodoro-box { padding: 16px; border-top: 1px solid var(--border); background: var(--surface); }
+    .timer-display { font-family: var(--mono); font-size: 28px; font-weight: 700; margin-bottom: 10px; letter-spacing: 2px; background: linear-gradient(135deg, var(--brand), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .timer-controls { display: flex; gap: 6px; justify-content: center; }
+    .timer-mode { margin-top: 10px; font-size: 11px; color: var(--text-muted); display: flex; gap: 12px; justify-content: center; }
+    .timer-mode span { cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: all 0.2s; }
+    .timer-mode span:hover { background: var(--surface-hover); color: var(--brand); }
     
     /* --- MAIN AREA --- */
     main { flex: 1; display: flex; flex-direction: column; background: var(--bg); position: relative; }
-    .top-bar { height: 50px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 24px; }
-    .tabs { display: flex; gap: 20px; height: 100%; }
-    .tab { display: flex; align-items: center; height: 100%; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; font-weight: 500; }
-    .tab.active { color: var(--text-main); border-bottom-color: var(--brand); }
+    .top-bar { height: 56px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 28px; background: var(--sidebar); }
+    .tabs { display: flex; gap: 24px; height: 100%; }
+    .tab { display: flex; align-items: center; gap: 6px; height: 100%; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; font-weight: 500; padding: 0 4px; transition: all 0.2s; }
+    .tab:hover { color: var(--text-main); }
+    .tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+    .tab-icon { font-size: 16px; }
     
-    .actions { display: flex; gap: 8px; }
-    button { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; transition: 0.15s; }
-    button:hover { background: var(--surface); border-color: #404040; }
-    button.primary { background: var(--brand); border-color: var(--brand); color: #000; font-weight: 500; }
-    button.primary:hover { background: var(--brand-hover); }
-    button.danger:hover { color: var(--danger); border-color: var(--danger); }
-    button.sm { padding: 4px 8px; font-size: 12px; }
+    .actions { display: flex; gap: 10px; align-items: center; }
+    button { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; font-weight: 500; }
+    button:hover { background: var(--surface); border-color: #404040; transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    button.primary { background: linear-gradient(135deg, var(--brand), var(--success)); border: none; color: #000; font-weight: 600; }
+    button.primary:hover { opacity: 0.9; }
+    button.danger:hover { color: var(--danger); border-color: var(--danger); background: transparent; }
+    button.sm { padding: 5px 10px; font-size: 12px; }
 
     /* --- EDITOR & PREVIEW --- */
     .content-area { flex: 1; position: relative; overflow: hidden; }
-    .editor-pane, .preview-pane, .flashcard-pane { position: absolute; inset: 0; padding: 40px; overflow-y: auto; background: var(--bg); display: none; }
-    .editor-pane.active, .preview-pane.active, .flashcard-pane.active { display: block; }
+    .editor-pane, .preview-pane, .flashcard-pane, .graph-pane { position: absolute; inset: 0; padding: 48px; overflow-y: auto; background: var(--bg); display: none; }
+    .editor-pane.active, .preview-pane.active, .flashcard-pane.active, .graph-pane.active { display: block; }
     
-    input.title-input { background: transparent; border: none; color: var(--text-main); font-size: 24px; font-weight: 600; margin-bottom: 20px; width: 100%; font-family: var(--font); }
-    textarea.body-input { width: 100%; height: calc(100% - 60px); background: transparent; border: none; color: #d4d4d4; font-size: 15px; line-height: 1.6; resize: none; font-family: var(--mono); }
+    input.title-input { background: transparent; border: none; color: var(--text-main); font-size: 28px; font-weight: 700; margin-bottom: 24px; width: 100%; font-family: var(--font); }
+    textarea.body-input { width: 100%; height: calc(100% - 100px); background: var(--surface); border: 1px solid var(--border); color: #e0e0e0; font-size: 15px; line-height: 1.7; resize: none; font-family: var(--mono); padding: 20px; border-radius: 8px; }
+    
+    /* AI Suggestions Box (NEW) */
+    .ai-suggestions { background: linear-gradient(135deg, rgba(0,217,255,0.1), rgba(62,207,142,0.1)); border: 1px solid var(--brand); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .ai-suggestions h4 { margin: 0 0 10px 0; color: var(--brand); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .ai-chip { display: inline-block; background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; border-radius: 16px; margin: 4px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .ai-chip:hover { background: var(--brand); color: #000; border-color: var(--brand); }
+    
+    /* Link Input (NEW) */
+    .link-input-container { margin-bottom: 16px; display: flex; gap: 8px; }
+    .link-input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: white; padding: 8px 12px; border-radius: 6px; font-size: 13px; }
     
     /* MARKDOWN STYLES */
-    .preview-pane { line-height: 1.7; color: #d4d4d4; }
-    .preview-pane h1 { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 0; }
-    .preview-pane h2 { margin-top: 2em; }
-    .preview-pane code { background: var(--surface); padding: 2px 5px; border-radius: 4px; font-family: var(--mono); font-size: 0.9em; }
-    .preview-pane pre { background: var(--surface); padding: 15px; border-radius: 6px; overflow-x: auto; }
-    .preview-pane blockquote { border-left: 3px solid var(--brand); margin: 0; padding-left: 15px; color: var(--text-muted); }
+    .preview-pane { line-height: 1.8; color: #e0e0e0; max-width: 900px; }
+    .preview-pane h1 { border-bottom: 2px solid var(--brand); padding-bottom: 12px; margin-top: 0; background: linear-gradient(135deg, var(--brand), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .preview-pane h2 { margin-top: 2.5em; color: var(--brand); }
+    .preview-pane code { background: var(--surface); padding: 3px 6px; border-radius: 4px; font-family: var(--mono); font-size: 0.9em; border: 1px solid var(--border); }
+    .preview-pane pre { background: var(--surface); padding: 20px; border-radius: 8px; overflow-x: auto; border: 1px solid var(--border); }
+    .preview-pane blockquote { border-left: 4px solid var(--brand); margin: 0; padding-left: 20px; color: var(--text-muted); background: var(--surface); padding: 16px 16px 16px 20px; border-radius: 0 8px 8px 0; }
+    .preview-pane a { color: var(--brand); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+    .preview-pane a:hover { border-bottom-color: var(--brand); }
 
     /* FLASHCARD MODE */
-    .flashcard-container { max-width: 600px; margin: 40px auto; text-align: center; }
-    .card { background: var(--surface); border: 1px solid var(--border); padding: 60px 40px; border-radius: 12px; margin-bottom: 30px; min-height: 300px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: transform 0.3s; perspective: 1000px; }
-    .card:hover { border-color: var(--brand); }
-    .rating-btns { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; display: none; }
-    .rating-btns button { padding: 12px; border: 1px solid var(--border); }
-    .rating-btns button:hover { transform: translateY(-2px); }
+    .flashcard-container { max-width: 700px; margin: 60px auto; text-align: center; }
+    .card { background: linear-gradient(135deg, var(--surface), var(--sidebar)); border: 2px solid var(--border); padding: 80px 50px; border-radius: 16px; margin-bottom: 30px; min-height: 350px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; transition: all 0.3s; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+    .card:hover { border-color: var(--brand); box-shadow: 0 12px 48px rgba(0,217,255,0.2); transform: translateY(-4px); }
+    .rating-btns { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; display: none; }
+    .rating-btns button { padding: 14px; border: 2px solid var(--border); font-weight: 600; }
+    .rating-btns button:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
+    /* GRAPH VIEW (NEW) */
+    .graph-pane { background: var(--bg); padding: 0; }
+    #graph-canvas { width: 100%; height: 100%; }
+    .graph-controls { position: absolute; top: 20px; right: 20px; background: var(--sidebar); border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; gap: 8px; }
+    .graph-legend { position: absolute; bottom: 20px; left: 20px; background: var(--sidebar); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 12px; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
 
     /* AUTH */
     #auth-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 100; }
-    .auth-card { width: 350px; background: var(--sidebar); border: 1px solid var(--border); padding: 30px; border-radius: 8px; text-align: center; }
-    .input-field { width: 100%; background: var(--bg); border: 1px solid var(--border); color: white; padding: 10px; border-radius: 6px; margin-bottom: 12px; }
+    .auth-card { width: 400px; background: var(--sidebar); border: 1px solid var(--border); padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 16px 64px rgba(0,0,0,0.6); }
+    .input-field { width: 100%; background: var(--surface); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 6px; margin-bottom: 14px; transition: border-color 0.2s; }
+    .input-field:focus { border-color: var(--brand); }
+    
+    /* PDF Export Modal (NEW) */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 200; }
+    .modal { background: var(--sidebar); border: 1px solid var(--border); border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; }
+    .modal h3 { margin-top: 0; color: var(--brand); }
+    
+    /* Linked Notes Display */
+    .linked-notes-section { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); }
+    .linked-note-tag { display: inline-block; background: var(--surface); border: 1px solid var(--brand); color: var(--brand); padding: 4px 10px; border-radius: 12px; margin: 4px; font-size: 11px; cursor: pointer; transition: all 0.2s; }
+    .linked-note-tag:hover { background: var(--brand); color: #000; }
+    
+    /* Autosave indicator */
+    .autosave-indicator { font-size: 11px; color: var(--success); display: flex; align-items: center; gap: 6px; }
+    .autosave-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: blink 1.5s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 </style>
 </head>
 <body>
 
 <div id="auth-overlay">
     <div class="auth-card">
-        <h2 style="margin-top:0">StudyOS <span style="color:var(--brand)">v2</span></h2>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 24px;">
+            <div class="logo">S</div>
+            <div>
+                <h2 style="margin: 0;">StudyOS <span class="version">v3</span></h2>
+                <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--text-muted);">Enhanced Study System</p>
+            </div>
+        </div>
         <input type="email" id="email" class="input-field" placeholder="Email">
         <input type="password" id="password" class="input-field" placeholder="Password">
-        <button class="primary" style="width:100%" onclick="handleAuth()">Enter System</button>
-        <p style="font-size:12px; color:var(--text-muted); cursor:pointer" onclick="toggleAuth()" id="auth-msg">Switch to Sign Up</p>
+        <button class="primary" style="width:100%; padding: 12px;" onclick="handleAuth()">Enter System</button>
+        <p style="font-size:12px; color:var(--text-muted); cursor:pointer; margin-top: 16px;" onclick="toggleAuth()" id="auth-msg">Switch to Sign Up</p>
         <div id="auth-err" style="color:var(--danger); font-size:12px"></div>
+    </div>
+</div>
+
+<!-- PDF Export Modal -->
+<div class="modal-overlay" id="pdf-modal">
+    <div class="modal">
+        <h3>📄 Export to PDF</h3>
+        <p style="color: var(--text-muted); font-size: 13px;">Your note will be exported as a beautifully formatted PDF document.</p>
+        <div style="margin: 20px 0;">
+            <label style="display: block; margin-bottom: 8px; font-size: 13px;">Include:</label>
+            <label style="display: block; margin: 8px 0; font-size: 13px;">
+                <input type="checkbox" id="pdf-include-links" checked> Linked notes references
+            </label>
+            <label style="display: block; margin: 8px 0; font-size: 13px;">
+                <input type="checkbox" id="pdf-include-date" checked> Creation date
+            </label>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 24px;">
+            <button style="flex: 1;" onclick="closePDFModal()">Cancel</button>
+            <button class="primary" style="flex: 1;" onclick="confirmPDFExport()">Export PDF</button>
+        </div>
     </div>
 </div>
 
 <aside>
     <div class="sidebar-header">
-        <div class="brand-area"><div class="logo"></div> StudyOS</div>
-        <button class="sm" onclick="createNote()">+</button>
+        <div class="brand-area">
+            <div class="logo">S</div>
+            <div>
+                <div class="brand-text">StudyOS</div>
+                <div class="version">v3 Enhanced</div>
+            </div>
+        </div>
+        <input type="text" class="search-box" id="search-box" placeholder="🔍 Search notes..." onkeyup="searchNotes()">
+        <button class="primary" style="width:100%; margin-top: 10px;" onclick="createNote()">+ New Note</button>
     </div>
     <div class="nav-list" id="list"></div>
+    
+    <!-- Stats Widget -->
+    <div class="stats-widget">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-notes">0</div>
+                <div class="stat-label">Notes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-reviews">0</div>
+                <div class="stat-label">Reviews Due</div>
+            </div>
+        </div>
+    </div>
     
     <div class="pomodoro-box">
         <div class="timer-display" id="timer">25:00</div>
@@ -110,13 +218,14 @@
             <button class="sm" onclick="pauseTimer()">⏸</button>
             <button class="sm" onclick="resetTimer()">↺</button>
         </div>
-        <div style="margin-top:8px; font-size:11px; color:var(--text-muted)">
-            <span style="cursor:pointer" onclick="setTimer(25)">Focus</span> | 
-            <span style="cursor:pointer" onclick="setTimer(5)">Break</span>
+        <div class="timer-mode">
+            <span onclick="setTimer(25)">Focus</span>
+            <span onclick="setTimer(5)">Break</span>
+            <span onclick="setTimer(15)">Long Break</span>
         </div>
     </div>
     
-    <div style="padding:10px; border-top:1px solid var(--border)">
+    <div style="padding:12px; border-top:1px solid var(--border)">
         <button style="width:100%; border:none; color:var(--text-muted)" onclick="signOut()">Sign out</button>
     </div>
 </aside>
@@ -124,39 +233,105 @@
 <main>
     <div class="top-bar">
         <div class="tabs">
-            <div class="tab active" id="tab-write" onclick="switchTab('write')">Write</div>
-            <div class="tab" id="tab-read" onclick="switchTab('read')">Preview</div>
-            <div class="tab" id="tab-quiz" onclick="switchTab('quiz')">Flashcards</div>
+            <div class="tab active" id="tab-write" onclick="switchTab('write')">
+                <span class="tab-icon">✍️</span> Write
+            </div>
+            <div class="tab" id="tab-read" onclick="switchTab('read')">
+                <span class="tab-icon">📖</span> Preview
+            </div>
+            <div class="tab" id="tab-quiz" onclick="switchTab('quiz')">
+                <span class="tab-icon">🎯</span> Flashcards
+            </div>
+            <div class="tab" id="tab-graph" onclick="switchTab('graph')">
+                <span class="tab-icon">🕸️</span> Graph
+            </div>
         </div>
         <div class="actions">
-            <span id="save-status" style="color:var(--text-muted); font-size:12px; padding-right:10px; align-self:center"></span>
-            <button class="primary" onclick="saveNote()">Save</button>
-            <button class="danger" onclick="deleteNote()">Del</button>
+            <div class="autosave-indicator" id="save-status" style="display: none;">
+                <div class="autosave-dot"></div>
+                <span>Autosaving...</span>
+            </div>
+            <button onclick="openPDFModal()">📄 Export PDF</button>
+            <button class="primary" onclick="saveNote()">💾 Save</button>
+            <button class="danger" onclick="deleteNote()">🗑️ Delete</button>
         </div>
     </div>
 
     <div class="content-area">
         <div id="pane-write" class="editor-pane active">
-            <input type="text" class="title-input" id="title-in" placeholder="Untitled Note">
-            <textarea class="body-input" id="body-in" placeholder="Supports Markdown (# title, **bold**, - list)..."></textarea>
+            <!-- AI Suggestions Section -->
+            <div class="ai-suggestions" id="ai-suggestions">
+                <h4>✨ AI Study Suggestions</h4>
+                <div id="ai-chips"></div>
+            </div>
+            
+            <!-- Link to Other Notes -->
+            <div class="link-input-container">
+                <input type="text" class="link-input" id="link-search" placeholder="🔗 Link to another note... (type to search)" onkeyup="searchForLinks()" onfocus="showLinkDropdown()" onblur="hideLinkDropdown()">
+                <div id="link-dropdown" style="position: absolute; background: var(--sidebar); border: 1px solid var(--border); border-radius: 6px; margin-top: 40px; max-height: 200px; overflow-y: auto; display: none; width: 300px; z-index: 10;"></div>
+            </div>
+            
+            <input type="text" class="title-input" id="title-in" placeholder="Untitled Note" oninput="generateAISuggestions()">
+            <textarea class="body-input" id="body-in" placeholder="Supports Markdown (# title, **bold**, - list)...
+
+✨ NEW FEATURES:
+• Link notes together using the search box above
+• Get AI-powered study suggestions
+• Export to PDF
+• View note connections in Graph view" oninput="handleAutoSave()"></textarea>
+            
+            <!-- Linked Notes Display -->
+            <div class="linked-notes-section" id="linked-section" style="display: none;">
+                <h4 style="color: var(--text-muted); font-size: 13px; margin-bottom: 8px;">🔗 Linked Notes</h4>
+                <div id="linked-display"></div>
+            </div>
         </div>
 
         <div id="pane-read" class="preview-pane">
             <h1 id="prev-title"></h1>
             <div id="prev-body"></div>
+            <div class="linked-notes-section" id="preview-linked-section" style="display: none;">
+                <h4 style="color: var(--text-muted); font-size: 14px;">🔗 Linked Notes</h4>
+                <div id="preview-linked-display"></div>
+            </div>
         </div>
 
         <div id="pane-quiz" class="flashcard-pane">
             <div class="flashcard-container">
-                <div style="margin-bottom:20px; color:var(--text-muted)">Space Repetition: <span id="sm-stats">New</span></div>
+                <div style="margin-bottom:24px; color:var(--text-muted); font-size: 13px;">
+                    📚 Spaced Repetition: <span id="sm-stats" style="color: var(--brand); font-weight: 600;">New Card</span>
+                </div>
                 <div class="card" id="flash-card" onclick="flipCard()">
-                    <div id="card-content">Tap to reveal Answer</div>
+                    <div id="card-content">Click to reveal answer</div>
                 </div>
                 <div class="rating-btns" id="rating-area">
-                    <button onclick="rateCard(1)" style="border-color:var(--danger)">Forgot</button>
-                    <button onclick="rateCard(3)">Hard</button>
-                    <button onclick="rateCard(4)">Good</button>
-                    <button onclick="rateCard(5)" style="border-color:var(--brand)">Easy</button>
+                    <button onclick="rateCard(1)" style="border-color:var(--danger); color: var(--danger);">❌ Forgot</button>
+                    <button onclick="rateCard(3)" style="border-color:var(--warning); color: var(--warning);">😐 Hard</button>
+                    <button onclick="rateCard(4)" style="border-color:var(--brand); color: var(--brand);">👍 Good</button>
+                    <button onclick="rateCard(5)" style="border-color:var(--success); color: var(--success);">⚡ Easy</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="pane-graph" class="graph-pane">
+            <canvas id="graph-canvas"></canvas>
+            <div class="graph-controls">
+                <button class="sm" onclick="resetGraphView()">🔄 Reset View</button>
+                <button class="sm" onclick="toggleGraphPhysics()">⚡ Physics</button>
+            </div>
+            <div class="graph-legend">
+                <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px; color: var(--brand);">Legend</div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: var(--brand);"></div>
+                    <span>Current Note</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: var(--success);"></div>
+                    <span>Linked Notes</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: var(--text-muted);"></div>
+                    <span>Other Notes</span>
                 </div>
             </div>
         </div>
@@ -175,6 +350,7 @@
     let activeId = null;
     let user = null;
     let isSignUp = false;
+    let autoSaveTimeout = null;
     
     // Timer State
     let timerInterval;
@@ -182,11 +358,19 @@
     
     // Flashcard State
     let isFlipped = false;
+    
+    // Graph State
+    let graphCanvas, graphCtx;
+    let graphNodes = [];
+    let graphLinks = [];
+    let graphPhysicsEnabled = true;
+    let isDragging = false;
+    let dragNode = null;
 
     // --- INITIALIZATION ---
     window.onload = () => {
-        // Check for Markdown lib
         if(!window.marked) alert("Markdown library failed to load. Check internet.");
+        initGraph();
     }
 
     // --- AUTHENTICATION ---
@@ -201,7 +385,7 @@
         const p = document.getElementById('password').value;
         if(isSignUp) {
             const { error } = await supabase.auth.signUp({ email: e, password: p });
-            if(error) alert(error.message); else alert("Check email for link!");
+            if(error) alert(error.message); else alert("Check email for confirmation link!");
         } else {
             const { error } = await supabase.auth.signInWithPassword({ email: e, password: p });
             if(error) alert(error.message); else location.reload();
@@ -220,23 +404,16 @@
 
     // --- DATA HANDLING ---
     async function fetchNotes() {
-        // We fetch notes and custom JSON data (sm_data) for spacing algorithm
         const { data } = await supabase.from('notes').select('*').order('updated_at', { ascending: false });
         if(data) {
             notes = data.map(n => ({
                 ...n,
-                // Parse the JSON field for SuperMemo data, or default
-                sm_data: typeof n.content === 'string' && n.content.includes('|||') 
-                         ? JSON.parse(n.content.split('|||')[1]) 
-                         : { interval: 0, repetition: 0, efactor: 2.5, due: Date.now() }
+                sm_data: n.sm_data || { interval: 0, repetition: 0, efactor: 2.5, due: Date.now() },
+                linked_notes: n.linked_notes || []
             }));
-            
-            // Clean content (remove hidden metadata if present in old format)
-            notes.forEach(n => {
-                if(n.content.includes('|||')) n.content = n.content.split('|||')[0];
-            });
 
             renderList();
+            updateStats();
             if(notes.length) loadNote(notes[0].id);
         }
     }
@@ -245,12 +422,15 @@
         const { data } = await supabase.from('notes').insert({ 
             user_id: user.id, 
             title: "", 
-            content: "" 
+            content: "",
+            sm_data: { interval: 0, repetition: 0, efactor: 2.5, due: Date.now() },
+            linked_notes: []
         }).select();
         if(data) {
-            notes.unshift({ ...data[0], sm_data: { interval: 0, repetition: 0, efactor: 2.5, due: Date.now() }});
+            notes.unshift({ ...data[0], sm_data: { interval: 0, repetition: 0, efactor: 2.5, due: Date.now() }, linked_notes: []});
             loadNote(data[0].id);
             renderList();
+            updateStats();
         }
     }
 
@@ -260,27 +440,53 @@
         const c = document.getElementById('body-in').value;
         const n = notes.find(x => x.id === activeId);
 
-        // We store SM metadata appended to content with a separator (Hack for simple table structure)
-        // Ideally we would alter table to add 'sm_data' jsonb column, but this works on your current DB
-        const storageContent = c; // We won't append SM data to text visible to user, we manage it in memory for now or hidden
+        await supabase.from('notes').update({ 
+            title: t, 
+            content: c, 
+            updated_at: new Date(),
+            sm_data: n.sm_data,
+            linked_notes: n.linked_notes 
+        }).eq('id', activeId);
         
-        document.getElementById('save-status').innerText = "Saving...";
-        await supabase.from('notes').update({ title: t, content: c, updated_at: new Date() }).eq('id', activeId);
+        n.title = t; 
+        n.content = c;
         
-        n.title = t; n.content = c;
-        document.getElementById('save-status').innerText = "Saved";
-        setTimeout(() => document.getElementById('save-status').innerText = "", 2000);
+        const saveStatus = document.getElementById('save-status');
+        saveStatus.style.display = 'flex';
+        saveStatus.innerHTML = '<div style="width: 6px; height: 6px; border-radius: 50%; background: var(--success);"></div><span style="color: var(--success);">Saved!</span>';
+        setTimeout(() => saveStatus.style.display = 'none', 2000);
+        
         renderList();
         updatePreview();
+        updateStats();
+    }
+
+    // NEW: Auto-save functionality
+    window.handleAutoSave = () => {
+        clearTimeout(autoSaveTimeout);
+        document.getElementById('save-status').style.display = 'flex';
+        autoSaveTimeout = setTimeout(() => {
+            saveNote();
+        }, 2000);
     }
 
     window.deleteNote = async () => {
-        if(!activeId || !confirm("Delete note?")) return;
+        if(!activeId || !confirm("Delete this note permanently?")) return;
+        
+        // Remove this note from other notes' linked_notes arrays
+        notes.forEach(async (n) => {
+            if(n.linked_notes && n.linked_notes.includes(activeId)) {
+                n.linked_notes = n.linked_notes.filter(id => id !== activeId);
+                await supabase.from('notes').update({ linked_notes: n.linked_notes }).eq('id', n.id);
+            }
+        });
+        
         await supabase.from('notes').delete().eq('id', activeId);
         notes = notes.filter(n => n.id !== activeId);
         if(notes.length) loadNote(notes[0].id);
         else activeId = null;
         renderList();
+        updateStats();
     }
 
     window.loadNote = (id) => {
@@ -293,12 +499,23 @@
         // Reset Tabs
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById('tab-write').classList.add('active');
-        document.querySelectorAll('.editor-pane, .preview-pane, .flashcard-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.editor-pane, .preview-pane, .flashcard-pane, .graph-pane').forEach(p => p.classList.remove('active'));
         document.getElementById('pane-write').classList.add('active');
         
-        // Update Quiz UI
         resetFlashcardUI(n);
+        generateAISuggestions();
+        displayLinkedNotes();
         renderList();
+    }
+
+    // --- SEARCH FUNCTIONALITY ---
+    window.searchNotes = () => {
+        const query = document.getElementById('search-box').value.toLowerCase();
+        const items = document.querySelectorAll('.nav-item');
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(query) ? 'flex' : 'none';
+        });
     }
 
     // --- TAB SWITCHING ---
@@ -306,11 +523,12 @@
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(`tab-${mode}`).classList.add('active');
         
-        document.querySelectorAll('.editor-pane, .preview-pane, .flashcard-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.editor-pane, .preview-pane, .flashcard-pane, .graph-pane').forEach(p => p.classList.remove('active'));
         document.getElementById(`pane-${mode}`).classList.add('active');
 
         if(mode === 'read') updatePreview();
         if(mode === 'quiz') startQuizMode();
+        if(mode === 'graph') drawGraph();
     }
 
     function updatePreview() {
@@ -318,21 +536,395 @@
         const body = document.getElementById('body-in').value;
         document.getElementById('prev-title').innerText = title;
         document.getElementById('prev-body').innerHTML = marked.parse(body);
+        
+        // Show linked notes in preview
+        const n = notes.find(x => x.id === activeId);
+        if(n && n.linked_notes && n.linked_notes.length > 0) {
+            document.getElementById('preview-linked-section').style.display = 'block';
+            document.getElementById('preview-linked-display').innerHTML = n.linked_notes.map(linkId => {
+                const linkedNote = notes.find(x => x.id === linkId);
+                return linkedNote ? `<span class="linked-note-tag" onclick="loadNote('${linkId}')">${linkedNote.title || 'Untitled'}</span>` : '';
+            }).join('');
+        } else {
+            document.getElementById('preview-linked-section').style.display = 'none';
+        }
     }
 
-    // --- FLASHCARD LOGIC (SuperMemo 2 Simplified) ---
+    // --- FEATURE 1: AI-POWERED STUDY SUGGESTIONS ---
+    window.generateAISuggestions = () => {
+        const title = document.getElementById('title-in').value.toLowerCase();
+        const body = document.getElementById('body-in').value.toLowerCase();
+        const combined = title + " " + body;
+        
+        const suggestions = [];
+        
+        // Simple keyword-based suggestions (in production, use actual AI API)
+        if(combined.includes('python') || combined.includes('javascript') || combined.includes('code')) {
+            suggestions.push('💻 Practice coding problems', '📚 Review syntax', '🔍 Debug common errors');
+        }
+        if(combined.includes('math') || combined.includes('calculus') || combined.includes('algebra')) {
+            suggestions.push('📐 Practice problems', '📝 Create formula sheet', '🎯 Review theorems');
+        }
+        if(combined.includes('history') || combined.includes('war') || combined.includes('treaty')) {
+            suggestions.push('📅 Create timeline', '🗺️ Make concept map', '📖 Summarize key events');
+        }
+        if(combined.includes('biology') || combined.includes('chemistry') || combined.includes('physics')) {
+            suggestions.push('🧪 Lab review', '📊 Create diagrams', '🔬 Review experiments');
+        }
+        
+        // Default suggestions
+        if(suggestions.length === 0) {
+            suggestions.push('✍️ Create flashcards', '🔗 Link related notes', '📝 Summarize key points');
+        }
+        
+        const chipsHTML = suggestions.map(s => `<span class="ai-chip">${s}</span>`).join('');
+        document.getElementById('ai-chips').innerHTML = chipsHTML;
+    }
+
+    // --- FEATURE 2: NOTE LINKING SYSTEM ---
+    window.showLinkDropdown = () => {
+        document.getElementById('link-dropdown').style.display = 'block';
+        searchForLinks();
+    }
+
+    window.hideLinkDropdown = () => {
+        setTimeout(() => {
+            document.getElementById('link-dropdown').style.display = 'none';
+        }, 200);
+    }
+
+    window.searchForLinks = () => {
+        const query = document.getElementById('link-search').value.toLowerCase();
+        const dropdown = document.getElementById('link-dropdown');
+        
+        const filteredNotes = notes.filter(n => 
+            n.id !== activeId && 
+            (n.title || '').toLowerCase().includes(query)
+        ).slice(0, 5);
+        
+        if(filteredNotes.length === 0) {
+            dropdown.innerHTML = '<div style="padding: 12px; color: var(--text-muted); font-size: 12px;">No notes found</div>';
+        } else {
+            dropdown.innerHTML = filteredNotes.map(n => `
+                <div style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 13px;" 
+                     onmousedown="linkNote('${n.id}')" 
+                     onmouseover="this.style.background='var(--surface-hover)'" 
+                     onmouseout="this.style.background='transparent'">
+                    ${n.title || 'Untitled'}
+                </div>
+            `).join('');
+        }
+    }
+
+    window.linkNote = (linkId) => {
+        const currentNote = notes.find(x => x.id === activeId);
+        if(!currentNote.linked_notes) currentNote.linked_notes = [];
+        
+        if(!currentNote.linked_notes.includes(linkId)) {
+            currentNote.linked_notes.push(linkId);
+            
+            // Bidirectional linking
+            const linkedNote = notes.find(x => x.id === linkId);
+            if(!linkedNote.linked_notes) linkedNote.linked_notes = [];
+            if(!linkedNote.linked_notes.includes(activeId)) {
+                linkedNote.linked_notes.push(activeId);
+            }
+            
+            displayLinkedNotes();
+            document.getElementById('link-search').value = '';
+            saveNote();
+        }
+    }
+
+    function displayLinkedNotes() {
+        const n = notes.find(x => x.id === activeId);
+        if(!n || !n.linked_notes || n.linked_notes.length === 0) {
+            document.getElementById('linked-section').style.display = 'none';
+            return;
+        }
+        
+        document.getElementById('linked-section').style.display = 'block';
+        document.getElementById('linked-display').innerHTML = n.linked_notes.map(linkId => {
+            const linkedNote = notes.find(x => x.id === linkId);
+            return linkedNote ? `<span class="linked-note-tag" onclick="loadNote('${linkId}')">${linkedNote.title || 'Untitled'}</span>` : '';
+        }).join('');
+    }
+
+    // --- FEATURE 3: PDF EXPORT ---
+    window.openPDFModal = () => {
+        document.getElementById('pdf-modal').style.display = 'flex';
+    }
+
+    window.closePDFModal = () => {
+        document.getElementById('pdf-modal').style.display = 'none';
+    }
+
+    window.confirmPDFExport = async () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const n = notes.find(x => x.id === activeId);
+        const includeLinks = document.getElementById('pdf-include-links').checked;
+        const includeDate = document.getElementById('pdf-include-date').checked;
+        
+        // Title
+        doc.setFontSize(20);
+        doc.setFont(undefined, 'bold');
+        doc.text(n.title || 'Untitled Note', 20, 20);
+        
+        // Date
+        if(includeDate) {
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(128, 128, 128);
+            doc.text(`Created: ${new Date(n.created_at).toLocaleDateString()}`, 20, 28);
+        }
+        
+        // Body content
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont(undefined, 'normal');
+        const splitText = doc.splitTextToSize(n.content || '', 170);
+        doc.text(splitText, 20, includeDate ? 40 : 35);
+        
+        // Linked notes
+        if(includeLinks && n.linked_notes && n.linked_notes.length > 0) {
+            const textHeight = splitText.length * 7 + (includeDate ? 50 : 45);
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('Linked Notes:', 20, textHeight);
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'normal');
+            n.linked_notes.forEach((linkId, idx) => {
+                const linkedNote = notes.find(x => x.id === linkId);
+                if(linkedNote) {
+                    doc.text(`• ${linkedNote.title || 'Untitled'}`, 25, textHeight + 10 + (idx * 7));
+                }
+            });
+        }
+        
+        doc.save(`${n.title || 'note'}.pdf`);
+        closePDFModal();
+    }
+
+    // --- GRAPH VIEW (Interactive Network) ---
+    function initGraph() {
+        graphCanvas = document.getElementById('graph-canvas');
+        graphCtx = graphCanvas.getContext('2d');
+        
+        // Mouse events for dragging
+        graphCanvas.addEventListener('mousedown', onGraphMouseDown);
+        graphCanvas.addEventListener('mousemove', onGraphMouseMove);
+        graphCanvas.addEventListener('mouseup', onGraphMouseUp);
+        
+        window.addEventListener('resize', resizeGraph);
+        resizeGraph();
+    }
+
+    function resizeGraph() {
+        graphCanvas.width = graphCanvas.offsetWidth;
+        graphCanvas.height = graphCanvas.offsetHeight;
+    }
+
+    window.drawGraph = () => {
+        resizeGraph();
+        buildGraphData();
+        renderGraph();
+        if(graphPhysicsEnabled) startGraphPhysics();
+    }
+
+    function buildGraphData() {
+        const width = graphCanvas.width;
+        const height = graphCanvas.height;
+        
+        graphNodes = notes.map(n => ({
+            id: n.id,
+            label: n.title || 'Untitled',
+            x: Math.random() * (width - 100) + 50,
+            y: Math.random() * (height - 100) + 50,
+            vx: 0,
+            vy: 0,
+            isActive: n.id === activeId
+        }));
+        
+        graphLinks = [];
+        notes.forEach(n => {
+            if(n.linked_notes) {
+                n.linked_notes.forEach(linkId => {
+                    if(!graphLinks.find(l => 
+                        (l.source === n.id && l.target === linkId) || 
+                        (l.source === linkId && l.target === n.id)
+                    )) {
+                        graphLinks.push({ source: n.id, target: linkId });
+                    }
+                });
+            }
+        });
+    }
+
+    function renderGraph() {
+        graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+        
+        // Draw links
+        graphCtx.strokeStyle = '#2e2e2e';
+        graphCtx.lineWidth = 2;
+        graphLinks.forEach(link => {
+            const source = graphNodes.find(n => n.id === link.source);
+            const target = graphNodes.find(n => n.id === link.target);
+            if(source && target) {
+                graphCtx.beginPath();
+                graphCtx.moveTo(source.x, source.y);
+                graphCtx.lineTo(target.x, target.y);
+                graphCtx.stroke();
+            }
+        });
+        
+        // Draw nodes
+        graphNodes.forEach(node => {
+            const isLinked = graphLinks.some(l => l.source === activeId && l.target === node.id || l.target === activeId && l.source === node.id);
+            
+            graphCtx.beginPath();
+            graphCtx.arc(node.x, node.y, 20, 0, Math.PI * 2);
+            graphCtx.fillStyle = node.isActive ? '#00d9ff' : (isLinked ? '#3ecf8e' : '#8a8a8a');
+            graphCtx.fill();
+            graphCtx.strokeStyle = '#fff';
+            graphCtx.lineWidth = 2;
+            graphCtx.stroke();
+            
+            // Label
+            graphCtx.fillStyle = '#fff';
+            graphCtx.font = '11px Inter';
+            graphCtx.textAlign = 'center';
+            const label = node.label.length > 15 ? node.label.substring(0, 15) + '...' : node.label;
+            graphCtx.fillText(label, node.x, node.y + 35);
+        });
+    }
+
+    function startGraphPhysics() {
+        const animate = () => {
+            if(!graphPhysicsEnabled) return;
+            
+            // Simple force-directed layout
+            graphNodes.forEach(node => {
+                let fx = 0, fy = 0;
+                
+                // Repulsion from other nodes
+                graphNodes.forEach(other => {
+                    if(node !== other) {
+                        const dx = node.x - other.x;
+                        const dy = node.y - other.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+                        const force = 100 / (dist * dist);
+                        fx += (dx / dist) * force;
+                        fy += (dy / dist) * force;
+                    }
+                });
+                
+                // Attraction to linked nodes
+                graphLinks.forEach(link => {
+                    if(link.source === node.id || link.target === node.id) {
+                        const other = graphNodes.find(n => 
+                            n.id === (link.source === node.id ? link.target : link.source)
+                        );
+                        if(other) {
+                            const dx = other.x - node.x;
+                            const dy = other.y - node.y;
+                            const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+                            fx += dx * 0.01;
+                            fy += dy * 0.01;
+                        }
+                    }
+                });
+                
+                // Center gravity
+                fx += (graphCanvas.width/2 - node.x) * 0.001;
+                fy += (graphCanvas.height/2 - node.y) * 0.001;
+                
+                // Update velocity and position
+                node.vx = (node.vx + fx) * 0.9;
+                node.vy = (node.vy + fy) * 0.9;
+                node.x += node.vx;
+                node.y += node.vy;
+                
+                // Boundary check
+                node.x = Math.max(30, Math.min(graphCanvas.width - 30, node.x));
+                node.y = Math.max(30, Math.min(graphCanvas.height - 30, node.y));
+            });
+            
+            renderGraph();
+            requestAnimationFrame(animate);
+        };
+        animate();
+    }
+
+    window.toggleGraphPhysics = () => {
+        graphPhysicsEnabled = !graphPhysicsEnabled;
+        if(graphPhysicsEnabled) startGraphPhysics();
+    }
+
+    window.resetGraphView = () => {
+        buildGraphData();
+        renderGraph();
+        if(graphPhysicsEnabled) startGraphPhysics();
+    }
+
+    function onGraphMouseDown(e) {
+        const rect = graphCanvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        dragNode = graphNodes.find(n => {
+            const dx = n.x - x;
+            const dy = n.y - y;
+            return Math.sqrt(dx*dx + dy*dy) < 20;
+        });
+        
+        if(dragNode) {
+            isDragging = true;
+            graphPhysicsEnabled = false;
+        }
+    }
+
+    function onGraphMouseMove(e) {
+        if(isDragging && dragNode) {
+            const rect = graphCanvas.getBoundingClientRect();
+            dragNode.x = e.clientX - rect.left;
+            dragNode.y = e.clientY - rect.top;
+            renderGraph();
+        }
+    }
+
+    function onGraphMouseUp(e) {
+        if(isDragging && dragNode) {
+            // Check if clicked on a node
+            const rect = graphCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const dx = dragNode.x - x;
+            const dy = dragNode.y - y;
+            
+            if(Math.sqrt(dx*dx + dy*dy) < 5) {
+                // It was a click, not a drag
+                loadNote(dragNode.id);
+                switchTab('write');
+            }
+        }
+        
+        isDragging = false;
+        dragNode = null;
+    }
+
+    // --- FLASHCARD LOGIC (SuperMemo 2) ---
     function resetFlashcardUI(note) {
         isFlipped = false;
         document.getElementById('rating-area').style.display = 'none';
         document.getElementById('flash-card').style.transform = 'none';
-        
-        // Determine "Question" (Title) and "Answer" (Body)
         document.getElementById('card-content').innerText = note.title || "Untitled Card";
         
-        // Show status
         const isDue = new Date(note.sm_data.due) <= new Date();
-        document.getElementById('sm-stats').innerText = isDue ? "Review Due Now" : "Review Later";
-        document.getElementById('sm-stats').style.color = isDue ? "var(--brand)" : "var(--text-muted)";
+        document.getElementById('sm-stats').innerText = isDue ? "⚡ Review Due Now" : "📅 Review Later";
+        document.getElementById('sm-stats').style.color = isDue ? "var(--success)" : "var(--text-muted)";
     }
 
     window.startQuizMode = () => {
@@ -343,7 +935,7 @@
     window.flipCard = () => {
         if(isFlipped) return;
         const n = notes.find(x => x.id === activeId);
-        document.getElementById('card-content').innerText = n.content.substring(0, 200) + (n.content.length > 200 ? "..." : "");
+        document.getElementById('card-content').innerText = n.content.substring(0, 300) + (n.content.length > 300 ? "..." : "");
         document.getElementById('rating-area').style.display = 'grid';
         isFlipped = true;
     }
@@ -352,7 +944,6 @@
         const n = notes.find(x => x.id === activeId);
         let { interval, repetition, efactor } = n.sm_data;
 
-        // SuperMemo 2 Algorithm
         if (quality >= 3) {
             if (repetition === 0) interval = 1;
             else if (repetition === 1) interval = 6;
@@ -367,11 +958,18 @@
         if (efactor < 1.3) efactor = 1.3;
 
         n.sm_data = { interval, repetition, efactor, due: Date.now() + (interval * 24 * 60 * 60 * 1000) };
+        saveNote();
         
-        // Ideally save this metadata to DB. For now we just alert success in this demo
-        // To persist: You'd stringify sm_data and append it to content or use a new column.
-        alert(`Rescheduled for ${interval} days!`);
-        window.switchTab('write'); // Go back
+        const ratingText = quality === 5 ? 'Easy!' : quality === 4 ? 'Good!' : quality === 3 ? 'Hard' : 'Forgot';
+        alert(`✅ Rated: ${ratingText}\n📅 Next review in ${interval} day${interval > 1 ? 's' : ''}`);
+        window.switchTab('write');
+    }
+
+    // --- STATS ---
+    function updateStats() {
+        document.getElementById('total-notes').innerText = notes.length;
+        const dueCount = notes.filter(n => new Date(n.sm_data.due) <= new Date()).length;
+        document.getElementById('total-reviews').innerText = dueCount;
     }
 
     // --- POMODORO TIMER ---
@@ -389,8 +987,10 @@
                 updateTimerDisplay();
             } else {
                 pauseTimer();
-                alert("Time is up!");
-                new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play();
+                alert("⏰ Time's up! Great work!");
+                try {
+                    new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play();
+                } catch(e) {}
             }
         }, 1000);
     }
@@ -416,9 +1016,10 @@
         const list = document.getElementById('list');
         list.innerHTML = notes.map(n => {
             const isDue = new Date(n.sm_data.due) <= new Date();
+            const hasLinks = n.linked_notes && n.linked_notes.length > 0;
             return `
             <div class="nav-item ${n.id === activeId ? 'active' : ''} ${isDue ? 'due' : ''}" onclick="loadNote('${n.id}')">
-                <span>${n.title || 'Untitled'}</span>
+                <span>${n.title || 'Untitled'}${hasLinks ? '<span class="linked-indicator">🔗</span>' : ''}</span>
                 <div class="flashcard-indicator" title="Review Due"></div>
             </div>`;
         }).join('');
