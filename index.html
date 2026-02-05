@@ -2,35 +2,46 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>StudyOS | Kenneth's Edition</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="module" src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
     :root {
-        --bg: #0d0d0d;
-        --sidebar: #161616;
-        --border: #2a2a2a;
-        --surface: #1e1e1e;
-        --surface-hover: #282828;
-        --text-main: #f8f8f8;
-        --text-muted: #999999;
+        --bg: #0a0a0f;
+        --sidebar: #13131a;
+        --border: #2d2d3a;
+        --surface: #1a1a24;
+        --surface-hover: #232330;
+        --text-main: #fafafa;
+        --text-muted: #a0a0b0;
         --brand: #6366f1;
-        --brand-hover: #4f46e5;
-        --brand-light: #818cf8;
-        --accent: #22d3ee;
+        --brand-hover: #5558dd;
+        --brand-light: #8b8ff8;
+        --accent: #06b6d4;
         --danger: #ef4444;
         --success: #10b981;
         --warning: #f59e0b;
+        --purple: #a855f7;
+        --pink: #ec4899;
         --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         --mono: 'JetBrains Mono', 'Courier New', monospace;
-        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+        --glow: 0 0 20px rgba(99, 102, 241, 0.3);
     }
 
-    * { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
+    * { 
+        box-sizing: border-box; 
+        outline: none; 
+        margin: 0; 
+        padding: 0; 
+        -webkit-tap-highlight-color: transparent;
+    }
+    
     body { 
         background: var(--bg); 
         color: var(--text-main); 
@@ -43,6 +54,43 @@
         -moz-osx-font-smoothing: grayscale;
     }
 
+    /* Responsive breakpoints */
+    @media (max-width: 1024px) {
+        aside { 
+            position: fixed;
+            left: -320px;
+            top: 0;
+            bottom: 0;
+            z-index: 1000;
+            transition: left 0.3s ease;
+        }
+        aside.mobile-open { left: 0; }
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+        }
+        .mobile-overlay.active { display: block; }
+        .mobile-menu-btn {
+            display: flex !important;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 998;
+            background: var(--brand);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+        }
+    }
+    
+    .mobile-menu-btn { display: none; }
+
     /* --- SIDEBAR --- */
     aside { 
         width: 320px; 
@@ -50,42 +98,42 @@
         border-right: 1px solid var(--border); 
         display: flex; 
         flex-direction: column;
-        box-shadow: 2px 0 12px rgba(0,0,0,0.3);
+        box-shadow: 4px 0 24px rgba(0,0,0,0.4);
     }
 
     .sidebar-header { 
-        padding: 24px 20px 20px 20px; 
+        padding: 28px 24px 24px 24px; 
         border-bottom: 1px solid var(--border);
-        background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(34,211,238,0.05));
+        background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(6,182,212,0.05));
     }
 
     .brand-area { 
         display: flex; 
         align-items: center; 
-        gap: 14px; 
-        margin-bottom: 20px;
+        gap: 16px; 
+        margin-bottom: 24px;
     }
 
     .logo { 
-        width: 44px; 
-        height: 44px; 
+        width: 48px; 
+        height: 48px; 
         background: linear-gradient(135deg, var(--brand), var(--accent)); 
-        border-radius: 12px; 
+        border-radius: 14px; 
         display: flex; 
         align-items: center; 
         justify-content: center; 
-        font-weight: 800; 
+        font-weight: 900; 
         color: #fff;
-        font-size: 22px;
-        box-shadow: var(--shadow);
+        font-size: 24px;
+        box-shadow: var(--glow);
         letter-spacing: -1px;
     }
 
     .brand-info { flex: 1; }
     .brand-text { 
-        font-weight: 800; 
-        font-size: 22px; 
-        letter-spacing: -0.5px;
+        font-weight: 900; 
+        font-size: 24px; 
+        letter-spacing: -0.8px;
         background: linear-gradient(135deg, var(--brand-light), var(--accent));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -93,25 +141,34 @@
     }
     
     .author-tag { 
-        font-size: 11px; 
+        font-size: 12px; 
         color: var(--text-muted); 
-        font-weight: 500;
-        margin-top: 2px;
-        letter-spacing: 0.3px;
+        font-weight: 600;
+        margin-top: 4px;
+        letter-spacing: 0.5px;
     }
     
     .school-badge {
         display: inline-block;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        padding: 4px 10px;
-        border-radius: 6px;
+        background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.1));
+        border: 1px solid var(--brand);
+        padding: 6px 12px;
+        border-radius: 8px;
         font-size: 10px;
-        font-weight: 600;
-        color: var(--brand);
+        font-weight: 700;
+        color: var(--brand-light);
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-top: 8px;
+        letter-spacing: 0.8px;
+        margin-top: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .school-badge:hover {
+        background: var(--brand);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--glow);
     }
 
     .search-box { 
@@ -119,105 +176,104 @@
         background: var(--surface); 
         border: 1px solid var(--border); 
         color: white; 
-        padding: 10px 14px; 
-        border-radius: 10px; 
-        margin-bottom: 12px; 
-        transition: all 0.2s;
-        font-size: 13px;
+        padding: 12px 16px; 
+        border-radius: 12px; 
+        margin-bottom: 14px; 
+        transition: all 0.3s;
+        font-size: 14px;
+        font-weight: 500;
     }
     .search-box:focus { 
         border-color: var(--brand); 
-        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
+        background: var(--sidebar);
     }
     .search-box::placeholder { color: var(--text-muted); }
 
     /* Grade Divisions */
-    .grade-section {
-        margin: 8px 0;
-    }
+    .grade-section { margin: 10px 0; }
     
     .grade-header {
-        padding: 10px 12px;
+        padding: 12px 14px;
         background: var(--surface);
-        border-radius: 8px;
+        border-radius: 10px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        transition: all 0.2s;
+        transition: all 0.3s;
         border: 1px solid var(--border);
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
     
     .grade-header:hover {
         background: var(--surface-hover);
         border-color: var(--brand);
+        transform: translateX(2px);
     }
     
     .grade-header.active {
-        background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(34,211,238,0.1));
+        background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(6,182,212,0.08));
         border-color: var(--brand);
     }
     
     .grade-title {
-        font-weight: 600;
+        font-weight: 700;
         font-size: 13px;
         color: var(--text-main);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
     }
     
     .grade-count {
-        background: var(--brand);
+        background: linear-gradient(135deg, var(--brand), var(--accent));
         color: white;
-        padding: 2px 8px;
-        border-radius: 12px;
+        padding: 3px 10px;
+        border-radius: 14px;
         font-size: 11px;
-        font-weight: 700;
+        font-weight: 800;
+        box-shadow: 0 2px 8px rgba(99,102,241,0.4);
     }
     
     .grade-arrow {
         color: var(--text-muted);
         transition: transform 0.3s;
-        font-size: 12px;
+        font-size: 14px;
+        font-weight: 700;
     }
     
-    .grade-header.active .grade-arrow {
-        transform: rotate(90deg);
-    }
+    .grade-header.active .grade-arrow { transform: rotate(90deg); }
     
     .grade-notes {
         max-height: 0;
         overflow: hidden;
-        transition: max-height 0.3s ease;
+        transition: max-height 0.4s ease;
     }
     
-    .grade-notes.expanded {
-        max-height: 500px;
-    }
+    .grade-notes.expanded { max-height: 600px; }
     
     .nav-list { 
         flex: 1; 
         overflow-y: auto; 
-        padding: 12px; 
+        padding: 14px; 
         display: flex; 
         flex-direction: column; 
-        gap: 2px;
+        gap: 3px;
     }
 
     .nav-item { 
-        padding: 11px 14px; 
-        border-radius: 10px; 
+        padding: 12px 16px; 
+        border-radius: 12px; 
         cursor: pointer; 
         color: var(--text-muted); 
         display: flex; 
         justify-content: space-between; 
         align-items: center; 
-        transition: all 0.2s; 
+        transition: all 0.3s; 
         position: relative;
-        font-size: 13px;
-        font-weight: 500;
+        font-size: 14px;
+        font-weight: 600;
         border: 1px solid transparent;
     }
     
@@ -229,38 +285,22 @@
     }
     
     .nav-item.active { 
-        background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(34,211,238,0.15));
+        background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(6,182,212,0.15));
         color: var(--text-main); 
-        font-weight: 600;
+        font-weight: 700;
         border-color: var(--brand);
         box-shadow: var(--shadow);
     }
-
-    .flashcard-indicator { 
-        width: 9px; 
-        height: 9px; 
-        border-radius: 50%; 
-        background: var(--success); 
-        display: none; 
-        animation: pulse 2s infinite;
-        box-shadow: 0 0 8px var(--success);
-    }
-    .nav-item.due .flashcard-indicator { display: block; }
-    
-    @keyframes pulse { 
-        0%, 100% { opacity: 1; transform: scale(1); } 
-        50% { opacity: 0.6; transform: scale(1.2); } 
-    }
     
     .linked-indicator { 
-        font-size: 11px; 
+        font-size: 12px; 
         color: var(--accent); 
         margin-left: 6px;
     }
 
     /* Stats Widget */
     .stats-widget { 
-        padding: 16px; 
+        padding: 18px; 
         border-top: 1px solid var(--border); 
         background: linear-gradient(180deg, var(--sidebar), var(--surface));
     }
@@ -268,26 +308,26 @@
     .stats-grid { 
         display: grid; 
         grid-template-columns: 1fr 1fr; 
-        gap: 10px; 
-        margin-bottom: 12px;
+        gap: 12px;
     }
     
     .stat-card { 
         background: var(--bg); 
-        padding: 12px; 
-        border-radius: 10px; 
+        padding: 14px; 
+        border-radius: 12px; 
         border: 1px solid var(--border);
-        transition: all 0.2s;
+        transition: all 0.3s;
     }
     
     .stat-card:hover {
         border-color: var(--brand);
-        transform: translateY(-2px);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
     }
     
     .stat-value { 
-        font-size: 24px; 
-        font-weight: 800; 
+        font-size: 28px; 
+        font-weight: 900; 
         background: linear-gradient(135deg, var(--brand-light), var(--accent));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -299,24 +339,24 @@
         font-size: 10px; 
         color: var(--text-muted); 
         text-transform: uppercase; 
-        letter-spacing: 0.8px; 
-        margin-top: 4px;
-        font-weight: 600;
+        letter-spacing: 1px; 
+        margin-top: 6px;
+        font-weight: 700;
     }
 
     /* Pomodoro Widget */
     .pomodoro-box { 
-        padding: 18px; 
+        padding: 20px; 
         border-top: 1px solid var(--border); 
         background: var(--surface);
     }
     
     .timer-display { 
         font-family: var(--mono); 
-        font-size: 34px; 
-        font-weight: 800; 
-        margin-bottom: 14px; 
-        letter-spacing: 3px; 
+        font-size: 40px; 
+        font-weight: 900; 
+        margin-bottom: 16px; 
+        letter-spacing: 4px; 
         background: linear-gradient(135deg, var(--brand-light), var(--accent));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -326,35 +366,36 @@
     
     .timer-controls { 
         display: flex; 
-        gap: 8px; 
+        gap: 10px; 
         justify-content: center;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
     
     .timer-mode { 
         display: flex; 
-        gap: 6px; 
+        gap: 8px; 
         justify-content: center;
         flex-wrap: wrap;
     }
     
     .timer-mode span { 
         cursor: pointer; 
-        padding: 6px 12px; 
-        border-radius: 8px; 
-        transition: all 0.2s;
-        font-size: 11px;
-        font-weight: 600;
+        padding: 8px 14px; 
+        border-radius: 10px; 
+        transition: all 0.3s;
+        font-size: 12px;
+        font-weight: 700;
         border: 1px solid var(--border);
         background: var(--bg);
         color: var(--text-muted);
     }
     
     .timer-mode span:hover { 
-        background: var(--brand); 
+        background: linear-gradient(135deg, var(--brand), var(--accent));
         color: white;
         border-color: var(--brand);
         transform: translateY(-2px);
+        box-shadow: var(--glow);
     }
     
     /* Main Area */
@@ -367,19 +408,23 @@
     }
     
     .top-bar { 
-        height: 64px; 
+        height: 72px; 
         border-bottom: 1px solid var(--border); 
         display: flex; 
         justify-content: space-between; 
         align-items: center; 
-        padding: 0 32px;
+        padding: 0 36px;
         background: linear-gradient(180deg, var(--sidebar), var(--bg));
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(20px);
+    }
+    
+    @media (max-width: 768px) {
+        .top-bar { padding: 0 60px 0 20px; height: 64px; }
     }
     
     .tabs { 
         display: flex; 
-        gap: 8px; 
+        gap: 10px; 
         height: 100%;
         align-items: center;
     }
@@ -387,14 +432,14 @@
     .tab { 
         display: flex; 
         align-items: center; 
-        gap: 8px; 
+        gap: 10px; 
         cursor: pointer; 
         color: var(--text-muted); 
-        padding: 10px 18px;
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 13px;
-        transition: all 0.2s;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        transition: all 0.3s;
         border: 1px solid transparent;
     }
     
@@ -406,29 +451,39 @@
     
     .tab.active { 
         color: white;
-        background: linear-gradient(135deg, var(--brand), var(--brand-hover));
+        background: linear-gradient(135deg, var(--brand), var(--accent));
         border-color: var(--brand);
-        box-shadow: var(--shadow);
+        box-shadow: var(--glow);
     }
     
-    .tab-icon { font-size: 16px; }
+    .tab-icon { font-size: 18px; }
+    
+    @media (max-width: 768px) {
+        .tab { padding: 10px 14px; font-size: 13px; }
+        .tab-text { display: none; }
+    }
     
     .actions { 
         display: flex; 
-        gap: 10px; 
+        gap: 12px; 
         align-items: center;
+    }
+    
+    @media (max-width: 768px) {
+        .actions { gap: 8px; }
+        .btn-text { display: none; }
     }
     
     button { 
         background: var(--surface); 
         border: 1px solid var(--border); 
         color: var(--text-main); 
-        padding: 9px 18px; 
-        border-radius: 10px; 
+        padding: 11px 20px; 
+        border-radius: 12px; 
         cursor: pointer; 
-        font-size: 13px; 
-        transition: all 0.2s; 
-        font-weight: 600;
+        font-size: 14px; 
+        transition: all 0.3s; 
+        font-weight: 700;
         font-family: var(--font);
     }
     
@@ -439,15 +494,13 @@
         box-shadow: var(--shadow);
     }
     
-    button:active { 
-        transform: translateY(0);
-    }
+    button:active { transform: translateY(0); }
     
     button.primary { 
-        background: linear-gradient(135deg, var(--brand), var(--brand-hover));
+        background: linear-gradient(135deg, var(--brand), var(--accent));
         border: none; 
         color: white;
-        box-shadow: var(--shadow);
+        box-shadow: var(--glow);
     }
     
     button.primary:hover { 
@@ -462,10 +515,7 @@
         border-color: var(--danger);
     }
     
-    button.sm { 
-        padding: 7px 14px; 
-        font-size: 12px;
-    }
+    button.sm { padding: 9px 16px; font-size: 13px; }
 
     /* Editor & Preview */
     .content-area { 
@@ -474,7 +524,7 @@
         overflow: hidden;
     }
     
-    .editor-pane, .preview-pane, .flashcard-pane, .graph-pane { 
+    .editor-pane, .preview-pane, .graph-pane { 
         position: absolute; 
         inset: 0; 
         padding: 48px 56px; 
@@ -483,94 +533,90 @@
         display: none;
     }
     
-    .editor-pane.active, .preview-pane.active, .flashcard-pane.active, .graph-pane.active { 
-        display: block;
+    @media (max-width: 768px) {
+        .editor-pane, .preview-pane, .graph-pane { padding: 24px; }
     }
+    
+    .editor-pane.active, .preview-pane.active, .graph-pane.active { display: block; }
     
     input.title-input { 
         background: transparent; 
         border: none; 
         color: var(--text-main); 
-        font-size: 36px; 
-        font-weight: 800; 
-        margin-bottom: 28px; 
+        font-size: 40px; 
+        font-weight: 900; 
+        margin-bottom: 32px; 
         width: 100%; 
         font-family: var(--font);
-        letter-spacing: -1px;
+        letter-spacing: -1.5px;
     }
     
-    input.title-input::placeholder {
-        color: var(--text-muted);
-        opacity: 0.5;
+    @media (max-width: 768px) {
+        input.title-input { font-size: 28px; margin-bottom: 24px; }
     }
     
-    .grade-selector {
-        margin-bottom: 24px;
-    }
+    input.title-input::placeholder { color: var(--text-muted); opacity: 0.4; }
+    
+    .grade-selector { margin-bottom: 28px; }
     
     .grade-selector label {
         display: block;
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 700;
         color: var(--text-muted);
-        margin-bottom: 8px;
+        margin-bottom: 10px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
     }
     
     select.grade-dropdown {
         background: var(--surface);
         border: 1px solid var(--border);
         color: var(--text-main);
-        padding: 10px 14px;
-        border-radius: 10px;
+        padding: 12px 16px;
+        border-radius: 12px;
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
-        transition: all 0.2s;
-        width: 200px;
+        transition: all 0.3s;
+        width: 220px;
         font-family: var(--font);
     }
     
-    select.grade-dropdown:hover {
-        border-color: var(--brand);
-    }
+    select.grade-dropdown:hover { border-color: var(--brand); }
     
     select.grade-dropdown:focus {
         border-color: var(--brand);
-        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
     }
     
     textarea.body-input { 
         width: 100%; 
-        height: calc(100% - 180px); 
+        height: calc(100% - 240px); 
         background: var(--surface); 
         border: 1px solid var(--border); 
-        color: #e8e8e8; 
-        font-size: 15px; 
+        color: #f0f0f0; 
+        font-size: 16px; 
         line-height: 1.8; 
         resize: none; 
         font-family: var(--mono); 
-        padding: 24px; 
-        border-radius: 12px;
-        transition: border-color 0.2s;
+        padding: 28px; 
+        border-radius: 16px;
+        transition: border-color 0.3s;
     }
     
     textarea.body-input:focus {
         border-color: var(--brand);
-        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
     }
     
-    textarea.body-input::placeholder {
-        color: var(--text-muted);
-        opacity: 0.6;
-    }
+    textarea.body-input::placeholder { color: var(--text-muted); opacity: 0.5; }
     
     /* Link Input */
     .link-input-container { 
-        margin-bottom: 20px; 
+        margin-bottom: 24px; 
         display: flex; 
-        gap: 10px;
+        gap: 12px;
         position: relative;
     }
     
@@ -579,26 +625,27 @@
         background: var(--surface); 
         border: 1px solid var(--border); 
         color: white; 
-        padding: 10px 14px; 
-        border-radius: 10px; 
-        font-size: 13px;
-        transition: all 0.2s;
+        padding: 12px 16px; 
+        border-radius: 12px; 
+        font-size: 14px;
+        transition: all 0.3s;
+        font-weight: 500;
     }
     
     .link-input:focus {
         border-color: var(--brand);
-        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
     }
     
     #link-dropdown {
         position: absolute;
-        top: 48px;
+        top: 52px;
         left: 0;
         right: 0;
         background: var(--sidebar);
         border: 1px solid var(--border);
-        border-radius: 10px;
-        max-height: 250px;
+        border-radius: 12px;
+        max-height: 280px;
         overflow-y: auto;
         display: none;
         z-index: 100;
@@ -607,50 +654,48 @@
     
     /* Markdown Styles */
     .preview-pane { 
-        line-height: 1.9; 
-        color: #e8e8e8; 
-        max-width: 850px;
-        font-size: 16px;
+        line-height: 2; 
+        color: #f0f0f0; 
+        max-width: 900px;
+        font-size: 17px;
     }
     
     .preview-pane h1 { 
         border-bottom: 3px solid var(--brand); 
-        padding-bottom: 16px; 
+        padding-bottom: 18px; 
         margin-top: 0;
-        margin-bottom: 32px;
+        margin-bottom: 36px;
         background: linear-gradient(135deg, var(--brand-light), var(--accent));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        font-size: 42px;
-        font-weight: 800;
-        letter-spacing: -1px;
+        font-size: 48px;
+        font-weight: 900;
+        letter-spacing: -1.5px;
     }
     
     .preview-pane h2 { 
         margin-top: 3em;
         margin-bottom: 1em;
         color: var(--brand-light);
-        font-size: 28px;
-        font-weight: 700;
+        font-size: 32px;
+        font-weight: 800;
     }
     
     .preview-pane h3 {
         margin-top: 2em;
         margin-bottom: 0.8em;
         color: var(--accent);
-        font-size: 22px;
-        font-weight: 600;
+        font-size: 24px;
+        font-weight: 700;
     }
     
-    .preview-pane p {
-        margin-bottom: 1.5em;
-    }
+    .preview-pane p { margin-bottom: 1.5em; }
     
     .preview-pane code { 
         background: var(--surface); 
-        padding: 3px 8px; 
-        border-radius: 6px; 
+        padding: 4px 10px; 
+        border-radius: 8px; 
         font-family: var(--mono); 
         font-size: 0.9em; 
         border: 1px solid var(--border);
@@ -659,27 +704,27 @@
     
     .preview-pane pre { 
         background: var(--surface); 
-        padding: 24px; 
-        border-radius: 12px; 
+        padding: 28px; 
+        border-radius: 16px; 
         overflow-x: auto; 
         border: 1px solid var(--border);
-        margin: 1.5em 0;
+        margin: 2em 0;
     }
     
     .preview-pane pre code {
         background: transparent;
         border: none;
         padding: 0;
-        color: #e8e8e8;
+        color: #f0f0f0;
     }
     
     .preview-pane blockquote { 
         border-left: 4px solid var(--brand); 
-        margin: 1.5em 0; 
-        padding: 16px 24px; 
+        margin: 2em 0; 
+        padding: 20px 28px; 
         color: var(--text-muted); 
         background: var(--surface); 
-        border-radius: 0 12px 12px 0;
+        border-radius: 0 16px 16px 0;
         font-style: italic;
     }
     
@@ -687,79 +732,21 @@
         color: var(--accent); 
         text-decoration: none; 
         border-bottom: 2px solid transparent; 
-        transition: border-color 0.2s;
-        font-weight: 600;
+        transition: border-color 0.3s;
+        font-weight: 700;
     }
     
-    .preview-pane a:hover { 
-        border-bottom-color: var(--accent);
-    }
+    .preview-pane a:hover { border-bottom-color: var(--accent); }
     
     .preview-pane ul, .preview-pane ol {
         margin: 1.5em 0;
-        padding-left: 2em;
+        padding-left: 2.5em;
     }
     
-    .preview-pane li {
-        margin: 0.5em 0;
-    }
-
-    /* Flashcard Mode */
-    .flashcard-container { 
-        max-width: 750px; 
-        margin: 80px auto; 
-        text-align: center;
-    }
-    
-    .card { 
-        background: linear-gradient(135deg, var(--surface), var(--sidebar)); 
-        border: 2px solid var(--border); 
-        padding: 90px 60px; 
-        border-radius: 20px; 
-        margin-bottom: 36px; 
-        min-height: 380px; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        font-size: 24px; 
-        cursor: pointer; 
-        transition: all 0.3s; 
-        box-shadow: var(--shadow-lg);
-        font-weight: 500;
-        line-height: 1.6;
-    }
-    
-    .card:hover { 
-        border-color: var(--brand); 
-        box-shadow: 0 24px 56px rgba(99,102,241,0.3);
-        transform: translateY(-6px);
-    }
-    
-    .rating-btns { 
-        display: grid; 
-        grid-template-columns: 1fr 1fr 1fr 1fr; 
-        gap: 14px; 
-        display: none;
-    }
-    
-    .rating-btns button { 
-        padding: 18px; 
-        border: 2px solid var(--border); 
-        font-weight: 700;
-        font-size: 14px;
-        border-radius: 12px;
-    }
-    
-    .rating-btns button:hover { 
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-lg);
-    }
+    .preview-pane li { margin: 0.7em 0; }
 
     /* Graph View */
-    .graph-pane { 
-        background: var(--bg); 
-        padding: 0;
-    }
+    .graph-pane { background: var(--bg); padding: 0; }
     
     #graph-canvas { 
         width: 100%; 
@@ -767,48 +754,46 @@
         cursor: grab;
     }
     
-    #graph-canvas:active {
-        cursor: grabbing;
-    }
+    #graph-canvas:active { cursor: grabbing; }
     
     .graph-controls { 
         position: absolute; 
-        top: 24px; 
-        right: 24px; 
+        top: 28px; 
+        right: 28px; 
         background: var(--sidebar); 
         border: 1px solid var(--border); 
-        border-radius: 12px; 
-        padding: 14px; 
+        border-radius: 14px; 
+        padding: 16px; 
         display: flex; 
-        gap: 10px;
+        gap: 12px;
         box-shadow: var(--shadow-lg);
     }
     
     .graph-legend { 
         position: absolute; 
-        bottom: 24px; 
-        left: 24px; 
+        bottom: 28px; 
+        left: 28px; 
         background: var(--sidebar); 
         border: 1px solid var(--border); 
-        border-radius: 12px; 
-        padding: 16px;
+        border-radius: 14px; 
+        padding: 18px;
         box-shadow: var(--shadow-lg);
     }
     
     .legend-item { 
         display: flex; 
         align-items: center; 
-        gap: 10px; 
-        margin: 8px 0; 
-        font-size: 13px;
-        font-weight: 500;
+        gap: 12px; 
+        margin: 10px 0; 
+        font-size: 14px;
+        font-weight: 600;
     }
     
     .legend-dot { 
-        width: 14px; 
-        height: 14px; 
+        width: 16px; 
+        height: 16px; 
         border-radius: 50%;
-        box-shadow: 0 0 8px currentColor;
+        box-shadow: 0 0 12px currentColor;
     }
 
     /* Auth */
@@ -823,13 +808,18 @@
     }
     
     .auth-card { 
-        width: 440px; 
+        width: 90%;
+        max-width: 460px; 
         background: var(--sidebar); 
         border: 1px solid var(--border); 
-        padding: 48px; 
-        border-radius: 20px; 
+        padding: 52px; 
+        border-radius: 24px; 
         text-align: center; 
         box-shadow: var(--shadow-lg);
+    }
+    
+    @media (max-width: 768px) {
+        .auth-card { padding: 36px 28px; }
     }
     
     .input-field { 
@@ -837,37 +827,38 @@
         background: var(--surface); 
         border: 1px solid var(--border); 
         color: white; 
-        padding: 14px; 
-        border-radius: 10px; 
-        margin-bottom: 16px; 
-        transition: all 0.2s;
-        font-size: 14px;
+        padding: 16px; 
+        border-radius: 12px; 
+        margin-bottom: 18px; 
+        transition: all 0.3s;
+        font-size: 15px;
         font-family: var(--font);
+        font-weight: 500;
     }
     
     .input-field:focus { 
         border-color: var(--brand);
-        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
     }
     
     /* PDF Export Modal */
     .modal-overlay { 
         position: fixed; 
         inset: 0; 
-        background: rgba(0,0,0,0.85); 
+        background: rgba(0,0,0,0.9); 
         display: none; 
         align-items: center; 
         justify-content: center; 
         z-index: 200;
-        backdrop-filter: blur(4px);
+        backdrop-filter: blur(8px);
     }
     
     .modal { 
         background: var(--sidebar); 
         border: 1px solid var(--border); 
-        border-radius: 20px; 
-        padding: 36px; 
-        max-width: 540px; 
+        border-radius: 24px; 
+        padding: 40px; 
+        max-width: 560px; 
         width: 90%;
         box-shadow: var(--shadow-lg);
     }
@@ -875,14 +866,76 @@
     .modal h3 { 
         margin-top: 0; 
         color: var(--brand-light);
-        font-size: 24px;
+        font-size: 28px;
+        font-weight: 800;
+    }
+    
+    /* Snake Game Modal */
+    #game-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.95);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 300;
+        backdrop-filter: blur(10px);
+    }
+    
+    .game-container {
+        background: var(--sidebar);
+        border: 2px solid var(--brand);
+        border-radius: 24px;
+        padding: 32px;
+        text-align: center;
+        box-shadow: var(--shadow-lg), var(--glow);
+        max-width: 90%;
+    }
+    
+    .game-title {
+        font-size: 32px;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--brand-light), var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 16px;
+    }
+    
+    .game-score {
+        font-size: 20px;
+        color: var(--text-main);
+        margin-bottom: 20px;
         font-weight: 700;
+    }
+    
+    #game-canvas {
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        background: var(--bg);
+        margin: 0 auto;
+        display: block;
+        box-shadow: 0 0 30px rgba(99,102,241,0.3);
+    }
+    
+    .game-controls {
+        margin-top: 24px;
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .game-instructions {
+        margin-top: 20px;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 600;
     }
     
     /* Linked Notes Display */
     .linked-notes-section { 
-        margin-top: 32px; 
-        padding-top: 32px; 
+        margin-top: 36px; 
+        padding-top: 36px; 
         border-top: 1px solid var(--border);
     }
     
@@ -891,83 +944,76 @@
         background: var(--surface); 
         border: 1px solid var(--accent); 
         color: var(--accent); 
-        padding: 6px 14px; 
-        border-radius: 20px; 
-        margin: 6px; 
-        font-size: 12px; 
+        padding: 8px 16px; 
+        border-radius: 24px; 
+        margin: 8px; 
+        font-size: 13px; 
         cursor: pointer; 
-        transition: all 0.2s;
-        font-weight: 600;
+        transition: all 0.3s;
+        font-weight: 700;
     }
     
     .linked-note-tag:hover { 
         background: var(--accent); 
         color: #000;
-        transform: translateY(-2px);
-        box-shadow: var(--shadow);
+        transform: translateY(-3px);
+        box-shadow: 0 0 20px rgba(6,182,212,0.4);
     }
     
     /* Autosave indicator */
     .autosave-indicator { 
-        font-size: 12px; 
+        font-size: 13px; 
         color: var(--success); 
         display: flex; 
         align-items: center; 
-        gap: 8px;
-        font-weight: 600;
+        gap: 10px;
+        font-weight: 700;
     }
     
     .autosave-dot { 
-        width: 7px; 
-        height: 7px; 
+        width: 8px; 
+        height: 8px; 
         border-radius: 50%; 
         background: var(--success); 
         animation: blink 1.5s infinite;
-        box-shadow: 0 0 8px var(--success);
+        box-shadow: 0 0 10px var(--success);
     }
     
     @keyframes blink { 
         0%, 100% { opacity: 1; } 
-        50% { opacity: 0.3; } 
+        50% { opacity: 0.2; } 
     }
 
     /* Scrollbar */
-    ::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: var(--sidebar);
-    }
-    
+    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar-track { background: var(--sidebar); }
     ::-webkit-scrollbar-thumb {
         background: var(--surface);
-        border-radius: 6px;
-        border: 2px solid var(--sidebar);
+        border-radius: 8px;
+        border: 3px solid var(--sidebar);
     }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background: var(--surface-hover);
-    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--surface-hover); }
 </style>
 </head>
 <body>
 
+<button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+<div class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
 <div id="auth-overlay">
     <div class="auth-card">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 32px;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 36px;">
             <div class="logo">K</div>
             <div>
-                <h2 style="margin: 0; font-size: 28px; font-weight: 800;">StudyOS</h2>
-                <p style="margin: 6px 0 0 0; font-size: 13px; color: var(--text-muted); font-weight: 500;">by Kenneth</p>
+                <h2 style="margin: 0; font-size: 32px; font-weight: 900;">StudyOS</h2>
+                <p style="margin: 8px 0 0 0; font-size: 14px; color: var(--text-muted); font-weight: 600;">by Kenneth</p>
             </div>
         </div>
         <input type="email" id="email" class="input-field" placeholder="Email">
         <input type="password" id="password" class="input-field" placeholder="Password">
-        <button class="primary" style="width:100%; padding: 14px; font-size: 15px;" onclick="handleAuth()">Enter System</button>
-        <p style="font-size:13px; color:var(--text-muted); cursor:pointer; margin-top: 20px; font-weight: 500;" onclick="toggleAuth()" id="auth-msg">Switch to Sign Up</p>
-        <div id="auth-err" style="color:var(--danger); font-size:13px; margin-top: 12px;"></div>
+        <button class="primary" style="width:100%; padding: 16px; font-size: 16px;" onclick="handleAuth()">Enter System</button>
+        <p style="font-size:14px; color:var(--text-muted); cursor:pointer; margin-top: 24px; font-weight: 600;" onclick="toggleAuth()" id="auth-msg">Switch to Sign Up</p>
+        <div id="auth-err" style="color:var(--danger); font-size:14px; margin-top: 14px; font-weight: 600;"></div>
     </div>
 </div>
 
@@ -975,34 +1021,50 @@
 <div class="modal-overlay" id="pdf-modal">
     <div class="modal">
         <h3>📄 Export to PDF</h3>
-        <p style="color: var(--text-muted); font-size: 14px; margin: 16px 0 24px 0;">Your note will be exported as a beautifully formatted PDF document.</p>
-        <div style="margin: 24px 0;">
-            <label style="display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600;">
-                <input type="checkbox" id="pdf-include-links" checked style="margin-right: 8px;"> Include linked notes references
+        <p style="color: var(--text-muted); font-size: 15px; margin: 18px 0 28px 0; font-weight: 500;">Your note will be exported as a beautifully formatted PDF document.</p>
+        <div style="margin: 28px 0;">
+            <label style="display: block; margin-bottom: 12px; font-size: 15px; font-weight: 700;">
+                <input type="checkbox" id="pdf-include-links" checked style="margin-right: 10px;"> Include linked notes references
             </label>
-            <label style="display: block; margin: 10px 0; font-size: 14px; font-weight: 600;">
-                <input type="checkbox" id="pdf-include-date" checked style="margin-right: 8px;"> Include creation date
+            <label style="display: block; margin: 12px 0; font-size: 15px; font-weight: 700;">
+                <input type="checkbox" id="pdf-include-date" checked style="margin-right: 10px;"> Include creation date
             </label>
         </div>
-        <div style="display: flex; gap: 12px; margin-top: 32px;">
+        <div style="display: flex; gap: 14px; margin-top: 36px;">
             <button style="flex: 1;" onclick="closePDFModal()">Cancel</button>
             <button class="primary" style="flex: 1;" onclick="confirmPDFExport()">Export PDF</button>
         </div>
     </div>
 </div>
 
-<aside>
+<!-- Snake Game Modal -->
+<div id="game-modal">
+    <div class="game-container">
+        <div class="game-title">🐍 Snake Break!</div>
+        <div class="game-score">Score: <span id="game-score">0</span> | High: <span id="high-score">0</span></div>
+        <canvas id="game-canvas" width="400" height="400"></canvas>
+        <div class="game-controls">
+            <button class="primary" onclick="startGame()">Start Game</button>
+            <button onclick="closeGame()">Back to Study</button>
+        </div>
+        <div class="game-instructions">
+            🎮 Use Arrow Keys or WASD to move | Eat the food to grow | Don't hit the walls or yourself!
+        </div>
+    </div>
+</div>
+
+<aside id="sidebar">
     <div class="sidebar-header">
         <div class="brand-area">
             <div class="logo">K</div>
             <div class="brand-info">
                 <div class="brand-text">StudyOS</div>
                 <div class="author-tag">by Kenneth</div>
-                <div class="school-badge" id="school-badge">Salesianum</div>
+                <div class="school-badge" id="school-badge" title="Click to toggle school">Salesianum</div>
             </div>
         </div>
         <input type="text" class="search-box" id="search-box" placeholder="🔍 Search notes..." onkeyup="searchNotes()">
-        <button class="primary" style="width:100%; margin-top: 12px; font-weight: 700;" onclick="createNote()">+ New Note</button>
+        <button class="primary" style="width:100%; margin-top: 14px; font-weight: 800;" onclick="createNote()">+ New Note</button>
     </div>
     
     <div class="nav-list" id="list"></div>
@@ -1015,8 +1077,8 @@
                 <div class="stat-label">Total Notes</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="total-reviews">0</div>
-                <div class="stat-label">Reviews Due</div>
+                <div class="stat-value" id="total-links">0</div>
+                <div class="stat-label">Links Made</div>
             </div>
         </div>
     </div>
@@ -1024,19 +1086,19 @@
     <div class="pomodoro-box">
         <div class="timer-display" id="timer">25:00</div>
         <div class="timer-controls">
-            <button class="sm" onclick="startTimer()" style="font-size: 14px;">▶</button>
-            <button class="sm" onclick="pauseTimer()" style="font-size: 14px;">⏸</button>
-            <button class="sm" onclick="resetTimer()" style="font-size: 14px;">↺</button>
+            <button class="sm" onclick="startTimer()" style="font-size: 16px;">▶</button>
+            <button class="sm" onclick="pauseTimer()" style="font-size: 16px;">⏸</button>
+            <button class="sm" onclick="resetTimer()" style="font-size: 16px;">↺</button>
         </div>
         <div class="timer-mode">
             <span onclick="setTimer(25)">Focus</span>
-            <span onclick="setTimer(5)">Break</span>
+            <span onclick="setTimer(5); openGame()">Break 🎮</span>
             <span onclick="setTimer(15)">Long</span>
         </div>
     </div>
     
-    <div style="padding:14px; border-top:1px solid var(--border)">
-        <button style="width:100%; border:none; color:var(--text-muted); font-weight: 600;" onclick="signOut()">Sign out</button>
+    <div style="padding:16px; border-top:1px solid var(--border)">
+        <button style="width:100%; border:none; color:var(--text-muted); font-weight: 700;" onclick="signOut()">Sign out</button>
     </div>
 </aside>
 
@@ -1044,16 +1106,13 @@
     <div class="top-bar">
         <div class="tabs">
             <div class="tab active" id="tab-write" onclick="switchTab('write')">
-                <span class="tab-icon">✍️</span> Write
+                <span class="tab-icon">✍️</span> <span class="tab-text">Write</span>
             </div>
             <div class="tab" id="tab-read" onclick="switchTab('read')">
-                <span class="tab-icon">📖</span> Preview
-            </div>
-            <div class="tab" id="tab-quiz" onclick="switchTab('quiz')">
-                <span class="tab-icon">🎯</span> Flashcards
+                <span class="tab-icon">📖</span> <span class="tab-text">Preview</span>
             </div>
             <div class="tab" id="tab-graph" onclick="switchTab('graph')">
-                <span class="tab-icon">🕸️</span> Graph
+                <span class="tab-icon">🕸️</span> <span class="tab-text">Graph</span>
             </div>
         </div>
         <div class="actions">
@@ -1061,9 +1120,9 @@
                 <div class="autosave-dot"></div>
                 <span>Autosaving...</span>
             </div>
-            <button onclick="openPDFModal()">📄 Export</button>
-            <button class="primary" onclick="saveNote()">💾 Save</button>
-            <button class="danger" onclick="deleteNote()">🗑️ Delete</button>
+            <button onclick="openPDFModal()">📄 <span class="btn-text">Export</span></button>
+            <button class="primary" onclick="saveNote()">💾 <span class="btn-text">Save</span></button>
+            <button class="danger" onclick="deleteNote()">🗑️ <span class="btn-text">Delete</span></button>
         </div>
     </div>
 
@@ -1099,15 +1158,15 @@ Supports Markdown:
 > quote
 
 ✨ Features:
-• Organize by grade level
+• Organize by grade level (8th-12th)
 • Link notes together
 • Export to PDF
-• Spaced repetition flashcards
-• Visual note connections" oninput="handleAutoSave()"></textarea>
+• Visual note connections graph
+• Pomodoro timer with break game!" oninput="handleAutoSave()"></textarea>
             
             <!-- Linked Notes Display -->
             <div class="linked-notes-section" id="linked-section" style="display: none;">
-                <h4 style="color: var(--text-muted); font-size: 14px; margin-bottom: 12px; font-weight: 600;">🔗 Linked Notes</h4>
+                <h4 style="color: var(--text-muted); font-size: 16px; margin-bottom: 14px; font-weight: 700;">🔗 Linked Notes</h4>
                 <div id="linked-display"></div>
             </div>
         </div>
@@ -1116,25 +1175,8 @@ Supports Markdown:
             <h1 id="prev-title"></h1>
             <div id="prev-body"></div>
             <div class="linked-notes-section" id="preview-linked-section" style="display: none;">
-                <h4 style="color: var(--text-muted); font-size: 16px; font-weight: 600;">🔗 Linked Notes</h4>
+                <h4 style="color: var(--text-muted); font-size: 18px; font-weight: 700;">🔗 Linked Notes</h4>
                 <div id="preview-linked-display"></div>
-            </div>
-        </div>
-
-        <div id="pane-quiz" class="flashcard-pane">
-            <div class="flashcard-container">
-                <div style="margin-bottom:28px; color:var(--text-muted); font-size: 14px; font-weight: 600;">
-                    📚 Spaced Repetition: <span id="sm-stats" style="color: var(--brand); font-weight: 700;">New Card</span>
-                </div>
-                <div class="card" id="flash-card" onclick="flipCard()">
-                    <div id="card-content">Click to reveal answer</div>
-                </div>
-                <div class="rating-btns" id="rating-area">
-                    <button onclick="rateCard(1)" style="border-color:var(--danger); color: var(--danger);">❌ Forgot</button>
-                    <button onclick="rateCard(3)" style="border-color:var(--warning); color: var(--warning);">😐 Hard</button>
-                    <button onclick="rateCard(4)" style="border-color:var(--brand); color: var(--brand);">👍 Good</button>
-                    <button onclick="rateCard(5)" style="border-color:var(--success); color: var(--success);">⚡ Easy</button>
-                </div>
             </div>
         </div>
 
@@ -1145,7 +1187,7 @@ Supports Markdown:
                 <button class="sm" onclick="toggleGraphPhysics()">⚡ Physics</button>
             </div>
             <div class="graph-legend">
-                <div style="font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--brand-light);">Legend</div>
+                <div style="font-size: 14px; font-weight: 800; margin-bottom: 14px; color: var(--brand-light);">Legend</div>
                 <div class="legend-item">
                     <div class="legend-dot" style="background: var(--brand);"></div>
                     <span>Current Note</span>
@@ -1176,14 +1218,14 @@ Supports Markdown:
     let user = null;
     let isSignUp = false;
     let autoSaveTimeout = null;
-    let currentSchool = 'Salesianum'; // or 'St Peter Cathedral'
+    let currentSchool = 'Salesianum';
+    
+    // Store metadata in localStorage
+    const META_KEY = 'studyos_metadata';
     
     // Timer State
     let timerInterval;
     let timeLeft = 25 * 60;
-    
-    // Flashcard State
-    let isFlipped = false;
     
     // Graph State
     let graphCanvas, graphCtx;
@@ -1192,6 +1234,12 @@ Supports Markdown:
     let graphPhysicsEnabled = true;
     let isDragging = false;
     let dragNode = null;
+    
+    // Snake Game State
+    let gameCanvas, gameCtx;
+    let snake, food, direction, score, gameInterval, gameRunning;
+    const gridSize = 20;
+    const tileCount = 20;
     
     // Grade levels
     const grades = ['8th', '9th', '10th', '11th', '12th'];
@@ -1202,6 +1250,234 @@ Supports Markdown:
         '11th': '11th Grade (Junior)',
         '12th': '12th Grade (Senior)'
     };
+
+    // --- MOBILE MENU ---
+    window.toggleMobileMenu = () => {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.mobile-overlay');
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('active');
+    }
+
+    // --- METADATA MANAGEMENT ---
+    function getMetadata() {
+        const stored = localStorage.getItem(META_KEY);
+        return stored ? JSON.parse(stored) : {};
+    }
+    
+    function saveMetadata(metadata) {
+        localStorage.setItem(META_KEY, JSON.stringify(metadata));
+    }
+    
+    function getNoteMetadata(noteId) {
+        const metadata = getMetadata();
+        return metadata[noteId] || { grade: '', linked_notes: [] };
+    }
+    
+    function setNoteMetadata(noteId, data) {
+        const metadata = getMetadata();
+        metadata[noteId] = data;
+        saveMetadata(metadata);
+    }
+
+    // --- SNAKE GAME ---
+    window.openGame = () => {
+        document.getElementById('game-modal').style.display = 'flex';
+        if(!gameCanvas) initGame();
+    }
+    
+    window.closeGame = () => {
+        document.getElementById('game-modal').style.display = 'none';
+        stopGame();
+    }
+    
+    function initGame() {
+        gameCanvas = document.getElementById('game-canvas');
+        gameCtx = gameCanvas.getContext('2d');
+        resetGame();
+        
+        // Load high score
+        const highScore = localStorage.getItem('snake_high_score') || 0;
+        document.getElementById('high-score').textContent = highScore;
+        
+        // Keyboard controls
+        document.addEventListener('keydown', changeDirection);
+    }
+    
+    function resetGame() {
+        snake = [{x: 10, y: 10}];
+        direction = {x: 0, y: 0};
+        score = 0;
+        spawnFood();
+        document.getElementById('game-score').textContent = score;
+    }
+    
+    function spawnFood() {
+        food = {
+            x: Math.floor(Math.random() * tileCount),
+            y: Math.floor(Math.random() * tileCount)
+        };
+        
+        // Make sure food doesn't spawn on snake
+        for(let segment of snake) {
+            if(segment.x === food.x && segment.y === food.y) {
+                spawnFood();
+                return;
+            }
+        }
+    }
+    
+    function changeDirection(e) {
+        if(!gameRunning) return;
+        
+        const key = e.key.toLowerCase();
+        
+        // Prevent reverse direction
+        if((key === 'arrowup' || key === 'w') && direction.y === 0) {
+            direction = {x: 0, y: -1};
+        } else if((key === 'arrowdown' || key === 's') && direction.y === 0) {
+            direction = {x: 0, y: 1};
+        } else if((key === 'arrowleft' || key === 'a') && direction.x === 0) {
+            direction = {x: -1, y: 0};
+        } else if((key === 'arrowright' || key === 'd') && direction.x === 0) {
+            direction = {x: 1, y: 0};
+        }
+    }
+    
+    window.startGame = () => {
+        if(gameRunning) return;
+        
+        resetGame();
+        gameRunning = true;
+        direction = {x: 1, y: 0}; // Start moving right
+        
+        gameInterval = setInterval(updateGame, 100);
+    }
+    
+    function stopGame() {
+        gameRunning = false;
+        clearInterval(gameInterval);
+    }
+    
+    function updateGame() {
+        // Move snake
+        const head = {
+            x: snake[0].x + direction.x,
+            y: snake[0].y + direction.y
+        };
+        
+        // Check wall collision
+        if(head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+            gameOver();
+            return;
+        }
+        
+        // Check self collision
+        for(let segment of snake) {
+            if(segment.x === head.x && segment.y === head.y) {
+                gameOver();
+                return;
+            }
+        }
+        
+        snake.unshift(head);
+        
+        // Check food collision
+        if(head.x === food.x && head.y === food.y) {
+            score++;
+            document.getElementById('game-score').textContent = score;
+            spawnFood();
+            
+            // Update high score
+            const highScore = parseInt(localStorage.getItem('snake_high_score') || 0);
+            if(score > highScore) {
+                localStorage.setItem('snake_high_score', score);
+                document.getElementById('high-score').textContent = score;
+            }
+        } else {
+            snake.pop();
+        }
+        
+        drawGame();
+    }
+    
+    function drawGame() {
+        // Clear canvas
+        gameCtx.fillStyle = '#0a0a0f';
+        gameCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+        
+        // Draw grid
+        gameCtx.strokeStyle = '#1a1a24';
+        gameCtx.lineWidth = 1;
+        for(let i = 0; i <= tileCount; i++) {
+            gameCtx.beginPath();
+            gameCtx.moveTo(i * gridSize, 0);
+            gameCtx.lineTo(i * gridSize, gameCanvas.height);
+            gameCtx.stroke();
+            
+            gameCtx.beginPath();
+            gameCtx.moveTo(0, i * gridSize);
+            gameCtx.lineTo(gameCanvas.width, i * gridSize);
+            gameCtx.stroke();
+        }
+        
+        // Draw snake
+        snake.forEach((segment, index) => {
+            const gradient = gameCtx.createLinearGradient(
+                segment.x * gridSize, segment.y * gridSize,
+                (segment.x + 1) * gridSize, (segment.y + 1) * gridSize
+            );
+            
+            if(index === 0) {
+                gradient.addColorStop(0, '#6366f1');
+                gradient.addColorStop(1, '#06b6d4');
+            } else {
+                gradient.addColorStop(0, '#4f46e5');
+                gradient.addColorStop(1, '#0891b2');
+            }
+            
+            gameCtx.fillStyle = gradient;
+            gameCtx.fillRect(
+                segment.x * gridSize + 1,
+                segment.y * gridSize + 1,
+                gridSize - 2,
+                gridSize - 2
+            );
+            
+            // Add glow to head
+            if(index === 0) {
+                gameCtx.shadowBlur = 15;
+                gameCtx.shadowColor = '#6366f1';
+                gameCtx.fillRect(
+                    segment.x * gridSize + 1,
+                    segment.y * gridSize + 1,
+                    gridSize - 2,
+                    gridSize - 2
+                );
+                gameCtx.shadowBlur = 0;
+            }
+        });
+        
+        // Draw food
+        gameCtx.fillStyle = '#10b981';
+        gameCtx.shadowBlur = 15;
+        gameCtx.shadowColor = '#10b981';
+        gameCtx.beginPath();
+        gameCtx.arc(
+            food.x * gridSize + gridSize / 2,
+            food.y * gridSize + gridSize / 2,
+            gridSize / 2 - 2,
+            0,
+            Math.PI * 2
+        );
+        gameCtx.fill();
+        gameCtx.shadowBlur = 0;
+    }
+    
+    function gameOver() {
+        stopGame();
+        alert(`Game Over! 🐍\n\nYour Score: ${score}\n\nTake a deep breath and get back to studying! 📚`);
+    }
 
     // --- INITIALIZATION ---
     window.onload = () => {
@@ -1248,12 +1524,14 @@ Supports Markdown:
     async function fetchNotes() {
         const { data } = await supabase.from('notes').select('*').order('updated_at', { ascending: false });
         if(data) {
-            notes = data.map(n => ({
-                ...n,
-                sm_data: n.sm_data || { interval: 0, repetition: 0, efactor: 2.5, due: Date.now() },
-                linked_notes: n.linked_notes || [],
-                grade: n.grade || ''
-            }));
+            notes = data.map(n => {
+                const meta = getNoteMetadata(n.id);
+                return {
+                    ...n,
+                    grade: meta.grade || '',
+                    linked_notes: meta.linked_notes || []
+                };
+            });
 
             renderList();
             updateStats();
@@ -1265,14 +1543,13 @@ Supports Markdown:
         const { data } = await supabase.from('notes').insert({ 
             user_id: user.id, 
             title: "", 
-            content: "",
-            sm_data: { interval: 0, repetition: 0, efactor: 2.5, due: Date.now() },
-            linked_notes: [],
-            grade: ''
+            content: ""
         }).select();
         if(data) {
-            notes.unshift({ ...data[0], sm_data: { interval: 0, repetition: 0, efactor: 2.5, due: Date.now() }, linked_notes: [], grade: ''});
-            loadNote(data[0].id);
+            const newNote = data[0];
+            setNoteMetadata(newNote.id, { grade: '', linked_notes: [] });
+            notes.unshift({ ...newNote, grade: '', linked_notes: [] });
+            loadNote(newNote.id);
             renderList();
             updateStats();
         }
@@ -1287,12 +1564,14 @@ Supports Markdown:
 
         await supabase.from('notes').update({ 
             title: t, 
-            content: c, 
-            grade: g,
-            updated_at: new Date(),
-            sm_data: n.sm_data,
-            linked_notes: n.linked_notes 
+            content: c,
+            updated_at: new Date()
         }).eq('id', activeId);
+        
+        setNoteMetadata(activeId, {
+            grade: g,
+            linked_notes: n.linked_notes || []
+        });
         
         n.title = t; 
         n.content = c;
@@ -1300,7 +1579,7 @@ Supports Markdown:
         
         const saveStatus = document.getElementById('save-status');
         saveStatus.style.display = 'flex';
-        saveStatus.innerHTML = '<div style="width: 7px; height: 7px; border-radius: 50%; background: var(--success);"></div><span style="color: var(--success);">Saved!</span>';
+        saveStatus.innerHTML = '<div style="width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success);"></div><span style="color: var(--success);">Saved!</span>';
         setTimeout(() => saveStatus.style.display = 'none', 2000);
         
         renderList();
@@ -1308,7 +1587,6 @@ Supports Markdown:
         updateStats();
     }
 
-    // Auto-save functionality
     window.handleAutoSave = () => {
         clearTimeout(autoSaveTimeout);
         document.getElementById('save-status').style.display = 'flex';
@@ -1324,15 +1602,19 @@ Supports Markdown:
     window.deleteNote = async () => {
         if(!activeId || !confirm("Delete this note permanently?")) return;
         
-        // Remove this note from other notes' linked_notes arrays
-        notes.forEach(async (n) => {
+        notes.forEach(n => {
             if(n.linked_notes && n.linked_notes.includes(activeId)) {
                 n.linked_notes = n.linked_notes.filter(id => id !== activeId);
-                await supabase.from('notes').update({ linked_notes: n.linked_notes }).eq('id', n.id);
+                setNoteMetadata(n.id, { grade: n.grade, linked_notes: n.linked_notes });
             }
         });
         
         await supabase.from('notes').delete().eq('id', activeId);
+        
+        const metadata = getMetadata();
+        delete metadata[activeId];
+        saveMetadata(metadata);
+        
         notes = notes.filter(n => n.id !== activeId);
         if(notes.length) loadNote(notes[0].id);
         else activeId = null;
@@ -1348,33 +1630,33 @@ Supports Markdown:
         document.getElementById('body-in').value = n.content || "";
         document.getElementById('note-grade').value = n.grade || "";
         
-        // Reset Tabs
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById('tab-write').classList.add('active');
-        document.querySelectorAll('.editor-pane, .preview-pane, .flashcard-pane, .graph-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.editor-pane, .preview-pane, .graph-pane').forEach(p => p.classList.remove('active'));
         document.getElementById('pane-write').classList.add('active');
         
-        resetFlashcardUI(n);
         displayLinkedNotes();
         renderList();
+        
+        // Close mobile menu after selecting
+        if(window.innerWidth <= 1024) {
+            toggleMobileMenu();
+        }
     }
 
-    // --- SEARCH FUNCTIONALITY ---
     window.searchNotes = () => {
         const query = document.getElementById('search-box').value.toLowerCase();
         renderList(query);
     }
 
-    // --- TAB SWITCHING ---
     window.switchTab = (mode) => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(`tab-${mode}`).classList.add('active');
         
-        document.querySelectorAll('.editor-pane, .preview-pane, .flashcard-pane, .graph-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.editor-pane, .preview-pane, .graph-pane').forEach(p => p.classList.remove('active'));
         document.getElementById(`pane-${mode}`).classList.add('active');
 
         if(mode === 'read') updatePreview();
-        if(mode === 'quiz') startQuizMode();
         if(mode === 'graph') drawGraph();
     }
 
@@ -1384,7 +1666,6 @@ Supports Markdown:
         document.getElementById('prev-title').innerText = title;
         document.getElementById('prev-body').innerHTML = marked.parse(body);
         
-        // Show linked notes in preview
         const n = notes.find(x => x.id === activeId);
         if(n && n.linked_notes && n.linked_notes.length > 0) {
             document.getElementById('preview-linked-section').style.display = 'block';
@@ -1397,7 +1678,6 @@ Supports Markdown:
         }
     }
 
-    // --- NOTE LINKING SYSTEM ---
     window.showLinkDropdown = () => {
         document.getElementById('link-dropdown').style.display = 'block';
         searchForLinks();
@@ -1419,14 +1699,14 @@ Supports Markdown:
         ).slice(0, 5);
         
         if(filteredNotes.length === 0) {
-            dropdown.innerHTML = '<div style="padding: 14px; color: var(--text-muted); font-size: 13px;">No notes found</div>';
+            dropdown.innerHTML = '<div style="padding: 16px; color: var(--text-muted); font-size: 14px; font-weight: 600;">No notes found</div>';
         } else {
             dropdown.innerHTML = filteredNotes.map(n => `
-                <div style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 500; transition: all 0.2s;" 
+                <div style="padding: 14px 18px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; transition: all 0.3s;" 
                      onmousedown="linkNote('${n.id}')" 
                      onmouseover="this.style.background='var(--surface-hover)'; this.style.color='var(--brand)'" 
                      onmouseout="this.style.background='transparent'; this.style.color='var(--text-main)'">
-                    ${n.title || 'Untitled'} ${n.grade ? `<span style="color: var(--text-muted); font-size: 11px;">(${gradeLabels[n.grade]})</span>` : ''}
+                    ${n.title || 'Untitled'} ${n.grade ? `<span style="color: var(--text-muted); font-size: 12px;">(${gradeLabels[n.grade]})</span>` : ''}
                 </div>
             `).join('');
         }
@@ -1439,11 +1719,11 @@ Supports Markdown:
         if(!currentNote.linked_notes.includes(linkId)) {
             currentNote.linked_notes.push(linkId);
             
-            // Bidirectional linking
             const linkedNote = notes.find(x => x.id === linkId);
             if(!linkedNote.linked_notes) linkedNote.linked_notes = [];
             if(!linkedNote.linked_notes.includes(activeId)) {
                 linkedNote.linked_notes.push(activeId);
+                setNoteMetadata(linkId, { grade: linkedNote.grade, linked_notes: linkedNote.linked_notes });
             }
             
             displayLinkedNotes();
@@ -1466,7 +1746,6 @@ Supports Markdown:
         }).join('');
     }
 
-    // --- PDF EXPORT ---
     window.openPDFModal = () => {
         document.getElementById('pdf-modal').style.display = 'flex';
     }
@@ -1483,14 +1762,12 @@ Supports Markdown:
         const includeLinks = document.getElementById('pdf-include-links').checked;
         const includeDate = document.getElementById('pdf-include-date').checked;
         
-        // Title
-        doc.setFontSize(22);
+        doc.setFontSize(24);
         doc.setFont(undefined, 'bold');
         doc.text(n.title || 'Untitled Note', 20, 20);
         
-        let yPos = 28;
+        let yPos = 30;
         
-        // Grade & School
         doc.setFontSize(11);
         doc.setFont(undefined, 'normal');
         doc.setTextColor(100, 100, 100);
@@ -1501,24 +1778,21 @@ Supports Markdown:
         doc.text(`School: ${currentSchool}`, 20, yPos);
         yPos += 6;
         
-        // Date
         if(includeDate) {
             doc.text(`Created: ${new Date(n.created_at).toLocaleDateString()}`, 20, yPos);
             yPos += 6;
         }
         
-        yPos += 8;
+        yPos += 10;
         
-        // Body content
         doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
         doc.setFont(undefined, 'normal');
         const splitText = doc.splitTextToSize(n.content || '', 170);
         doc.text(splitText, 20, yPos);
         
-        // Linked notes
         if(includeLinks && n.linked_notes && n.linked_notes.length > 0) {
-            const textHeight = splitText.length * 7 + yPos + 10;
+            const textHeight = splitText.length * 7 + yPos + 12;
             doc.setFontSize(14);
             doc.setFont(undefined, 'bold');
             doc.text('Linked Notes:', 20, textHeight);
@@ -1545,6 +1819,33 @@ Supports Markdown:
         graphCanvas.addEventListener('mousedown', onGraphMouseDown);
         graphCanvas.addEventListener('mousemove', onGraphMouseMove);
         graphCanvas.addEventListener('mouseup', onGraphMouseUp);
+        
+        // Touch events for mobile
+        graphCanvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            graphCanvas.dispatchEvent(mouseEvent);
+        });
+        
+        graphCanvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            graphCanvas.dispatchEvent(mouseEvent);
+        });
+        
+        graphCanvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const mouseEvent = new MouseEvent('mouseup', {});
+            graphCanvas.dispatchEvent(mouseEvent);
+        });
         
         window.addEventListener('resize', resizeGraph);
         resizeGraph();
@@ -1594,8 +1895,7 @@ Supports Markdown:
     function renderGraph() {
         graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
         
-        // Draw links
-        graphCtx.strokeStyle = '#2a2a2a';
+        graphCtx.strokeStyle = '#2d2d3a';
         graphCtx.lineWidth = 2;
         graphLinks.forEach(link => {
             const source = graphNodes.find(n => n.id === link.source);
@@ -1608,34 +1908,31 @@ Supports Markdown:
             }
         });
         
-        // Draw nodes
         graphNodes.forEach(node => {
             const isLinked = graphLinks.some(l => l.source === activeId && l.target === node.id || l.target === activeId && l.source === node.id);
             
             graphCtx.beginPath();
-            graphCtx.arc(node.x, node.y, 24, 0, Math.PI * 2);
-            graphCtx.fillStyle = node.isActive ? '#6366f1' : (isLinked ? '#10b981' : '#999999');
+            graphCtx.arc(node.x, node.y, 26, 0, Math.PI * 2);
+            graphCtx.fillStyle = node.isActive ? '#6366f1' : (isLinked ? '#10b981' : '#a0a0b0');
             graphCtx.fill();
-            graphCtx.strokeStyle = '#fff';
+            graphCtx.strokeStyle = '#fafafa';
             graphCtx.lineWidth = 3;
             graphCtx.stroke();
             
-            // Glow effect
             if(node.isActive || isLinked) {
-                graphCtx.shadowBlur = 15;
+                graphCtx.shadowBlur = 20;
                 graphCtx.shadowColor = node.isActive ? '#6366f1' : '#10b981';
                 graphCtx.beginPath();
-                graphCtx.arc(node.x, node.y, 24, 0, Math.PI * 2);
+                graphCtx.arc(node.x, node.y, 26, 0, Math.PI * 2);
                 graphCtx.stroke();
                 graphCtx.shadowBlur = 0;
             }
             
-            // Label
-            graphCtx.fillStyle = '#f8f8f8';
-            graphCtx.font = '600 12px Inter';
+            graphCtx.fillStyle = '#fafafa';
+            graphCtx.font = '700 13px Inter';
             graphCtx.textAlign = 'center';
             const label = node.label.length > 18 ? node.label.substring(0, 18) + '...' : node.label;
-            graphCtx.fillText(label, node.x, node.y + 42);
+            graphCtx.fillText(label, node.x, node.y + 46);
         });
     }
 
@@ -1646,19 +1943,17 @@ Supports Markdown:
             graphNodes.forEach(node => {
                 let fx = 0, fy = 0;
                 
-                // Repulsion
                 graphNodes.forEach(other => {
                     if(node !== other) {
                         const dx = node.x - other.x;
                         const dy = node.y - other.y;
                         const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-                        const force = 100 / (dist * dist);
+                        const force = 120 / (dist * dist);
                         fx += (dx / dist) * force;
                         fy += (dy / dist) * force;
                     }
                 });
                 
-                // Attraction to linked nodes
                 graphLinks.forEach(link => {
                     if(link.source === node.id || link.target === node.id) {
                         const other = graphNodes.find(n => 
@@ -1673,19 +1968,16 @@ Supports Markdown:
                     }
                 });
                 
-                // Center gravity
                 fx += (graphCanvas.width/2 - node.x) * 0.001;
                 fy += (graphCanvas.height/2 - node.y) * 0.001;
                 
-                // Update
                 node.vx = (node.vx + fx) * 0.9;
                 node.vy = (node.vy + fy) * 0.9;
                 node.x += node.vx;
                 node.y += node.vy;
                 
-                // Boundary
-                node.x = Math.max(40, Math.min(graphCanvas.width - 40, node.x));
-                node.y = Math.max(40, Math.min(graphCanvas.height - 40, node.y));
+                node.x = Math.max(50, Math.min(graphCanvas.width - 50, node.x));
+                node.y = Math.max(50, Math.min(graphCanvas.height - 50, node.y));
             });
             
             renderGraph();
@@ -1713,7 +2005,7 @@ Supports Markdown:
         dragNode = graphNodes.find(n => {
             const dx = n.x - x;
             const dy = n.y - y;
-            return Math.sqrt(dx*dx + dy*dy) < 24;
+            return Math.sqrt(dx*dx + dy*dy) < 26;
         });
         
         if(dragNode) {
@@ -1749,64 +2041,15 @@ Supports Markdown:
         dragNode = null;
     }
 
-    // --- FLASHCARD LOGIC ---
-    function resetFlashcardUI(note) {
-        isFlipped = false;
-        document.getElementById('rating-area').style.display = 'none';
-        document.getElementById('flash-card').style.transform = 'none';
-        document.getElementById('card-content').innerText = note.title || "Untitled Card";
-        
-        const isDue = new Date(note.sm_data.due) <= new Date();
-        document.getElementById('sm-stats').innerText = isDue ? "⚡ Review Due Now" : "📅 Review Later";
-        document.getElementById('sm-stats').style.color = isDue ? "var(--success)" : "var(--text-muted)";
-    }
-
-    window.startQuizMode = () => {
-        const n = notes.find(x => x.id === activeId);
-        resetFlashcardUI(n);
-    }
-
-    window.flipCard = () => {
-        if(isFlipped) return;
-        const n = notes.find(x => x.id === activeId);
-        document.getElementById('card-content').innerText = n.content.substring(0, 300) + (n.content.length > 300 ? "..." : "");
-        document.getElementById('rating-area').style.display = 'grid';
-        isFlipped = true;
-    }
-
-    window.rateCard = (quality) => {
-        const n = notes.find(x => x.id === activeId);
-        let { interval, repetition, efactor } = n.sm_data;
-
-        if (quality >= 3) {
-            if (repetition === 0) interval = 1;
-            else if (repetition === 1) interval = 6;
-            else interval = Math.round(interval * efactor);
-            repetition++;
-        } else {
-            repetition = 0;
-            interval = 1;
-        }
-
-        efactor = efactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-        if (efactor < 1.3) efactor = 1.3;
-
-        n.sm_data = { interval, repetition, efactor, due: Date.now() + (interval * 24 * 60 * 60 * 1000) };
-        saveNote();
-        
-        const ratingText = quality === 5 ? 'Easy!' : quality === 4 ? 'Good!' : quality === 3 ? 'Hard' : 'Forgot';
-        alert(`✅ Rated: ${ratingText}\n📅 Next review in ${interval} day${interval > 1 ? 's' : ''}`);
-        window.switchTab('write');
-    }
-
-    // --- STATS ---
     function updateStats() {
         document.getElementById('total-notes').innerText = notes.length;
-        const dueCount = notes.filter(n => new Date(n.sm_data.due) <= new Date()).length;
-        document.getElementById('total-reviews').innerText = dueCount;
+        let linkCount = 0;
+        notes.forEach(n => {
+            if(n.linked_notes) linkCount += n.linked_notes.length;
+        });
+        document.getElementById('total-links').innerText = Math.floor(linkCount / 2);
     }
 
-    // --- POMODORO TIMER ---
     window.setTimer = (min) => {
         pauseTimer();
         timeLeft = min * 60;
@@ -1846,11 +2089,9 @@ Supports Markdown:
         document.getElementById('timer').innerText = `${m}:${s}`;
     }
 
-    // --- RENDER LIST WITH GRADE DIVISIONS ---
     function renderList(searchQuery = '') {
         const list = document.getElementById('list');
         
-        // Group notes by grade
         const notesByGrade = {};
         grades.forEach(g => notesByGrade[g] = []);
         notesByGrade['ungraded'] = [];
@@ -1867,7 +2108,6 @@ Supports Markdown:
         
         let html = '';
         
-        // Render each grade section
         grades.forEach(grade => {
             if(notesByGrade[grade].length > 0) {
                 html += `
@@ -1881,12 +2121,10 @@ Supports Markdown:
                     </div>
                     <div class="grade-notes expanded" id="grade-${grade}">
                         ${notesByGrade[grade].map(n => {
-                            const isDue = new Date(n.sm_data.due) <= new Date();
                             const hasLinks = n.linked_notes && n.linked_notes.length > 0;
                             return `
-                            <div class="nav-item ${n.id === activeId ? 'active' : ''} ${isDue ? 'due' : ''}" onclick="loadNote('${n.id}')">
+                            <div class="nav-item ${n.id === activeId ? 'active' : ''}" onclick="loadNote('${n.id}')">
                                 <span>${n.title || 'Untitled'}${hasLinks ? '<span class="linked-indicator">🔗</span>' : ''}</span>
-                                <div class="flashcard-indicator" title="Review Due"></div>
                             </div>`;
                         }).join('')}
                     </div>
@@ -1894,7 +2132,6 @@ Supports Markdown:
             }
         });
         
-        // Ungraded notes
         if(notesByGrade['ungraded'].length > 0) {
             html += `
             <div class="grade-section">
@@ -1907,12 +2144,10 @@ Supports Markdown:
                 </div>
                 <div class="grade-notes expanded" id="grade-ungraded">
                     ${notesByGrade['ungraded'].map(n => {
-                        const isDue = new Date(n.sm_data.due) <= new Date();
                         const hasLinks = n.linked_notes && n.linked_notes.length > 0;
                         return `
-                        <div class="nav-item ${n.id === activeId ? 'active' : ''} ${isDue ? 'due' : ''}" onclick="loadNote('${n.id}')">
+                        <div class="nav-item ${n.id === activeId ? 'active' : ''}" onclick="loadNote('${n.id}')">
                             <span>${n.title || 'Untitled'}${hasLinks ? '<span class="linked-indicator">🔗</span>' : ''}</span>
-                            <div class="flashcard-indicator" title="Review Due"></div>
                         </div>`;
                     }).join('')}
                 </div>
