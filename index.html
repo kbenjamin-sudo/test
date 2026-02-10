@@ -6,993 +6,391 @@
 <title>StudyOS | Kenneth's Edition</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script type="module" src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
     :root {
-        --bg: #0a0a0f;
-        --sidebar: #13131a;
-        --border: #2d2d3a;
-        --surface: #1a1a24;
-        --surface-hover: #232330;
-        --text-main: #fafafa;
-        --text-muted: #a0a0b0;
-        --brand: #6366f1;
-        --brand-hover: #5558dd;
-        --brand-light: #8b8ff8;
-        --accent: #06b6d4;
-        --danger: #ef4444;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --purple: #a855f7;
-        --pink: #ec4899;
-        --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        --bg: #0a0a0a;
+        --sidebar: #111111;
+        --border: #2a2a2a;
+        --surface: #181818;
+        --surface-hover: #222222;
+        --text-main: #f5f5f5;
+        --text-muted: #888888;
+        --brand: #ff6500;
+        --brand-hover: #e05500;
+        --brand-light: #ff8533;
+        --accent: #ffaa00;
+        --danger: #ff3333;
+        --success: #22c55e;
+        --font: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
         --mono: 'JetBrains Mono', 'Courier New', monospace;
-        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
-        --glow: 0 0 20px rgba(99, 102, 241, 0.3);
+        --shadow: 0 4px 16px rgba(0,0,0,0.6);
+        --shadow-lg: 0 20px 40px rgba(0,0,0,0.8);
+        --glow: 0 0 24px rgba(255,101,0,0.4);
+        --sidebar-width: 300px;
+        --sidebar-mini: 64px;
     }
 
-    * { 
-        box-sizing: border-box; 
-        outline: none; 
-        margin: 0; 
-        padding: 0; 
-        -webkit-tap-highlight-color: transparent;
-    }
-    
-    body { 
-        background: var(--bg); 
-        color: var(--text-main); 
-        font-family: var(--font); 
-        height: 100vh; 
-        display: flex; 
-        overflow: hidden; 
-        font-size: 14px;
+    * { box-sizing: border-box; outline: none; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+        background: var(--bg);
+        color: var(--text-main);
+        font-family: var(--font);
+        height: 100vh;
+        display: flex;
+        overflow: hidden;
+        font-size: 13px;
         -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Responsive breakpoints */
-    @media (max-width: 1024px) {
-        aside { 
-            position: fixed;
-            left: -320px;
-            top: 0;
-            bottom: 0;
-            z-index: 1000;
-            transition: left 0.3s ease;
-        }
-        aside.mobile-open { left: 0; }
-        .mobile-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 999;
-        }
-        .mobile-overlay.active { display: block; }
-        .mobile-menu-btn {
-            display: flex !important;
-            position: fixed;
-            top: 16px;
-            left: 16px;
-            z-index: 998;
-            background: var(--brand);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: var(--shadow-lg);
-        }
-    }
-    
-    .mobile-menu-btn { display: none; }
-
-    /* --- SIDEBAR --- */
-    aside { 
-        width: 320px; 
-        background: var(--sidebar); 
-        border-right: 1px solid var(--border); 
-        display: flex; 
+    /* ===== SIDEBAR ===== */
+    aside {
+        width: var(--sidebar-width);
+        background: var(--sidebar);
+        border-right: 1px solid var(--border);
+        display: flex;
         flex-direction: column;
-        box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+        transition: width 0.32s cubic-bezier(0.4,0,0.2,1);
+        overflow: hidden;
+        position: relative;
+        z-index: 10;
+        flex-shrink: 0;
     }
 
-    .sidebar-header { 
-        padding: 28px 24px 24px 24px; 
-        border-bottom: 1px solid var(--border);
-        background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(6,182,212,0.05));
+    aside.collapsed { width: var(--sidebar-mini); }
+    aside.collapsed .sidebar-content { opacity: 0; pointer-events: none; }
+    aside.collapsed .sidebar-mini-icons { opacity: 1; pointer-events: auto; }
+
+    .sidebar-content {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+        transition: opacity 0.18s ease;
+        min-width: calc(var(--sidebar-width) - 2px);
     }
 
-    .brand-area { 
-        display: flex; 
-        align-items: center; 
-        gap: 16px; 
-        margin-bottom: 24px;
+    .sidebar-mini-icons {
+        position: absolute;
+        top: 0; left: 0;
+        width: var(--sidebar-mini);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 18px 0;
+        gap: 8px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.18s ease;
     }
 
-    .logo { 
-        width: 48px; 
-        height: 48px; 
-        background: linear-gradient(135deg, var(--brand), var(--accent)); 
-        border-radius: 14px; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        font-weight: 900; 
-        color: #fff;
-        font-size: 24px;
+    .mini-icon {
+        width: 40px; height: 40px;
+        border-radius: 9px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 17px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+    .mini-icon:hover { background: var(--surface-hover); border-color: var(--brand); }
+    .mini-icon.logo-mini {
+        background: linear-gradient(135deg, var(--brand), var(--accent));
+        color: white; font-weight: 900; font-size: 13px;
         box-shadow: var(--glow);
-        letter-spacing: -1px;
     }
 
-    .brand-info { flex: 1; }
-    .brand-text { 
-        font-weight: 900; 
-        font-size: 24px; 
-        letter-spacing: -0.8px;
+    .sidebar-toggle {
+        position: absolute;
+        top: 17px; right: -14px;
+        width: 28px; height: 28px;
+        background: var(--brand);
+        border: 2px solid var(--bg);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        z-index: 30;
+        font-size: 11px;
+        color: white;
+        box-shadow: var(--glow);
+        transition: all 0.3s;
+        flex-shrink: 0;
+        font-weight: 900;
+    }
+    .sidebar-toggle:hover { transform: scale(1.18); box-shadow: var(--shadow-lg), var(--glow); }
+
+    /* Header */
+    .sidebar-header {
+        padding: 22px 18px 18px;
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(160deg, rgba(255,101,0,0.07), rgba(255,170,0,0.03));
+        flex-shrink: 0;
+    }
+
+    .brand-area { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+
+    .logo {
+        width: 42px; height: 42px;
+        background: linear-gradient(135deg, var(--brand), var(--accent));
+        border-radius: 11px;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 900; color: #fff; font-size: 20px;
+        flex-shrink: 0; font-family: var(--font);
+        animation: logoPulse 3s ease infinite;
+    }
+
+    @keyframes logoPulse {
+        0%,100% { box-shadow: 0 0 14px rgba(255,101,0,0.5); }
+        50% { box-shadow: 0 0 28px rgba(255,170,0,0.7), 0 0 44px rgba(255,101,0,0.2); }
+    }
+
+    .brand-info { flex: 1; min-width: 0; }
+    .brand-text {
+        font-weight: 900; font-size: 21px; letter-spacing: -0.4px;
         background: linear-gradient(135deg, var(--brand-light), var(--accent));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        white-space: nowrap;
     }
-    
-    .author-tag { 
-        font-size: 12px; 
-        color: var(--text-muted); 
-        font-weight: 600;
-        margin-top: 4px;
-        letter-spacing: 0.5px;
-    }
-    
+    .author-tag { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
     .school-badge {
         display: inline-block;
-        background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.1));
-        border: 1px solid var(--brand);
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--brand-light);
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-top: 10px;
-        cursor: pointer;
-        transition: all 0.3s;
+        background: rgba(255,101,0,0.1);
+        border: 1px solid rgba(255,101,0,0.35);
+        padding: 4px 9px; border-radius: 6px;
+        font-size: 9px; font-weight: 800;
+        color: var(--brand-light); text-transform: uppercase; letter-spacing: 0.9px;
+        margin-top: 7px; cursor: pointer; transition: all 0.3s;
     }
-    
-    .school-badge:hover {
-        background: var(--brand);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: var(--glow);
-    }
+    .school-badge:hover { background: var(--brand); color: white; transform: translateY(-1px); box-shadow: var(--glow); }
 
-    .search-box { 
-        width: 100%; 
-        background: var(--surface); 
-        border: 1px solid var(--border); 
-        color: white; 
-        padding: 12px 16px; 
-        border-radius: 12px; 
-        margin-bottom: 14px; 
-        transition: all 0.3s;
-        font-size: 14px;
-        font-weight: 500;
+    .search-box {
+        width: 100%; background: var(--surface);
+        border: 1.5px solid var(--border); color: white;
+        padding: 10px 13px; border-radius: 9px;
+        margin-bottom: 10px; transition: all 0.3s;
+        font-size: 12px; font-weight: 600; font-family: var(--font);
     }
-    .search-box:focus { 
-        border-color: var(--brand); 
-        box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
-        background: var(--sidebar);
-    }
+    .search-box:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(255,101,0,0.12); background: #0f0f0f; }
     .search-box::placeholder { color: var(--text-muted); }
 
-    /* Grade Divisions */
-    .grade-section { margin: 10px 0; }
-    
+    .new-note-btn {
+        width: 100%; padding: 11px 14px;
+        background: linear-gradient(135deg, var(--brand), var(--accent));
+        border: none; color: white; border-radius: 9px;
+        font-weight: 800; font-size: 12px; cursor: pointer;
+        transition: all 0.3s; font-family: var(--font); letter-spacing: 0.3px;
+        box-shadow: var(--glow);
+    }
+    .new-note-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg), var(--glow); }
+
+    /* Grade sections */
+    .grade-section { margin: 6px 0; }
+
     .grade-header {
-        padding: 12px 14px;
-        background: var(--surface);
-        border-radius: 10px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        transition: all 0.3s;
-        border: 1px solid var(--border);
-        margin-bottom: 8px;
+        padding: 9px 11px; background: var(--surface);
+        border-radius: 7px; cursor: pointer;
+        display: flex; align-items: center; justify-content: space-between;
+        transition: all 0.25s; border: 1px solid var(--border); margin-bottom: 5px;
     }
-    
-    .grade-header:hover {
-        background: var(--surface-hover);
-        border-color: var(--brand);
-        transform: translateX(2px);
-    }
-    
-    .grade-header.active {
-        background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(6,182,212,0.08));
-        border-color: var(--brand);
-    }
-    
-    .grade-title {
-        font-weight: 700;
-        font-size: 13px;
-        color: var(--text-main);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .grade-count {
-        background: linear-gradient(135deg, var(--brand), var(--accent));
-        color: white;
-        padding: 3px 10px;
-        border-radius: 14px;
-        font-size: 11px;
-        font-weight: 800;
-        box-shadow: 0 2px 8px rgba(99,102,241,0.4);
-    }
-    
-    .grade-arrow {
-        color: var(--text-muted);
-        transition: transform 0.3s;
-        font-size: 14px;
-        font-weight: 700;
-    }
-    
+    .grade-header:hover { background: var(--surface-hover); border-color: rgba(255,101,0,0.35); }
+    .grade-header.active { background: linear-gradient(135deg, rgba(255,101,0,0.09),rgba(255,170,0,0.05)); border-color: rgba(255,101,0,0.35); }
+
+    .grade-title { font-weight: 700; font-size: 11px; color: var(--text-main); display: flex; align-items: center; gap: 7px; }
+    .grade-count { background: linear-gradient(135deg, var(--brand), var(--accent)); color: white; padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 800; }
+    .grade-arrow { color: var(--text-muted); transition: transform 0.3s; font-size: 10px; }
     .grade-header.active .grade-arrow { transform: rotate(90deg); }
-    
-    .grade-notes {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.4s ease;
-    }
-    
+    .grade-notes { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
     .grade-notes.expanded { max-height: 600px; }
-    
-    .nav-list { 
-        flex: 1; 
-        overflow-y: auto; 
-        padding: 14px; 
-        display: flex; 
-        flex-direction: column; 
-        gap: 3px;
-    }
 
-    .nav-item { 
-        padding: 12px 16px; 
-        border-radius: 12px; 
-        cursor: pointer; 
-        color: var(--text-muted); 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        transition: all 0.3s; 
-        position: relative;
-        font-size: 14px;
-        font-weight: 600;
-        border: 1px solid transparent;
-    }
-    
-    .nav-item:hover { 
-        background: var(--surface-hover); 
-        color: var(--text-main); 
-        transform: translateX(4px);
-        border-color: var(--border);
-    }
-    
-    .nav-item.active { 
-        background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(6,182,212,0.15));
-        color: var(--text-main); 
-        font-weight: 700;
-        border-color: var(--brand);
-        box-shadow: var(--shadow);
-    }
-    
-    .linked-indicator { 
-        font-size: 12px; 
-        color: var(--accent); 
-        margin-left: 6px;
-    }
+    .nav-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 2px; }
 
-    /* Stats Widget */
-    .stats-widget { 
-        padding: 18px; 
-        border-top: 1px solid var(--border); 
-        background: linear-gradient(180deg, var(--sidebar), var(--surface));
+    .nav-item {
+        padding: 9px 12px; border-radius: 7px; cursor: pointer;
+        color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;
+        transition: all 0.2s; font-size: 12px; font-weight: 600; border: 1px solid transparent;
     }
-    
-    .stats-grid { 
-        display: grid; 
-        grid-template-columns: 1fr 1fr; 
-        gap: 12px;
-    }
-    
-    .stat-card { 
-        background: var(--bg); 
-        padding: 14px; 
-        border-radius: 12px; 
-        border: 1px solid var(--border);
-        transition: all 0.3s;
-    }
-    
-    .stat-card:hover {
-        border-color: var(--brand);
-        transform: translateY(-3px);
-        box-shadow: var(--shadow);
-    }
-    
-    .stat-value { 
-        font-size: 28px; 
-        font-weight: 900; 
-        background: linear-gradient(135deg, var(--brand-light), var(--accent));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-family: var(--mono);
-    }
-    
-    .stat-label { 
-        font-size: 10px; 
-        color: var(--text-muted); 
-        text-transform: uppercase; 
-        letter-spacing: 1px; 
-        margin-top: 6px;
-        font-weight: 700;
-    }
+    .nav-item:hover { background: var(--surface-hover); color: var(--text-main); transform: translateX(3px); border-color: var(--border); }
+    .nav-item.active { background: linear-gradient(135deg, rgba(255,101,0,0.16),rgba(255,170,0,0.09)); color: var(--text-main); font-weight: 700; border-color: rgba(255,101,0,0.45); box-shadow: 0 2px 8px rgba(255,101,0,0.12); }
+    .linked-indicator { font-size: 10px; color: var(--accent); margin-left: 4px; }
 
-    /* Pomodoro Widget */
-    .pomodoro-box { 
-        padding: 20px; 
-        border-top: 1px solid var(--border); 
+    /* Stats */
+    .stats-widget { padding: 12px; border-top: 1px solid var(--border); background: linear-gradient(180deg, var(--sidebar), var(--surface)); flex-shrink: 0; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat-card { background: var(--bg); padding: 10px; border-radius: 9px; border: 1px solid var(--border); transition: all 0.3s; }
+    .stat-card:hover { border-color: rgba(255,101,0,0.35); transform: translateY(-2px); }
+    .stat-value { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, var(--brand-light), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-family: var(--mono); }
+    .stat-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; font-weight: 700; }
+
+    /* Timer */
+    .pomodoro-box { padding: 14px; border-top: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+    .timer-display { font-family: var(--mono); font-size: 34px; font-weight: 900; margin-bottom: 10px; letter-spacing: 3px; background: linear-gradient(135deg, var(--brand-light), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center; }
+    .timer-controls { display: flex; gap: 7px; justify-content: center; margin-bottom: 9px; }
+    .timer-mode { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
+    .timer-mode span { cursor: pointer; padding: 6px 11px; border-radius: 7px; transition: all 0.3s; font-size: 10px; font-weight: 800; border: 1.5px solid var(--border); background: var(--bg); color: var(--text-muted); font-family: var(--font); }
+    .timer-mode span:hover { background: linear-gradient(135deg, var(--brand), var(--accent)); color: white; border-color: var(--brand); transform: translateY(-2px); box-shadow: var(--glow); }
+
+    .signout-area { padding: 10px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .signout-btn { width: 100%; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-weight: 700; font-size: 11px; padding: 8px; border-radius: 7px; transition: all 0.3s; font-family: var(--font); cursor: pointer; }
+    .signout-btn:hover { border-color: var(--danger); color: var(--danger); background: rgba(255,51,51,0.07); transform: none; box-shadow: none; }
+
+    /* ===== MAIN ===== */
+    main { flex: 1; display: flex; flex-direction: column; background: var(--bg); position: relative; min-width: 0; }
+
+    .top-bar { height: 66px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 26px; background: linear-gradient(180deg, #111 0%, var(--bg) 100%); flex-shrink: 0; }
+
+    .tabs { display: flex; gap: 5px; height: 100%; align-items: center; }
+
+    .tab { display: flex; align-items: center; gap: 7px; cursor: pointer; color: var(--text-muted); padding: 9px 16px; border-radius: 9px; font-weight: 700; font-size: 12px; transition: all 0.25s; border: 1.5px solid transparent; font-family: var(--font); }
+    .tab:hover { color: var(--text-main); background: var(--surface); border-color: var(--border); }
+    .tab.active { color: white; background: linear-gradient(135deg, var(--brand), var(--accent)); border-color: var(--brand); box-shadow: var(--glow); }
+    .tab-icon { font-size: 15px; }
+
+    .actions { display: flex; gap: 7px; align-items: center; }
+
+    /* BUTTONS — extra visible on Chromebook */
+    button {
         background: var(--surface);
-    }
-    
-    .timer-display { 
-        font-family: var(--mono); 
-        font-size: 40px; 
-        font-weight: 900; 
-        margin-bottom: 16px; 
-        letter-spacing: 4px; 
-        background: linear-gradient(135deg, var(--brand-light), var(--accent));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        text-align: center;
-    }
-    
-    .timer-controls { 
-        display: flex; 
-        gap: 10px; 
-        justify-content: center;
-        margin-bottom: 12px;
-    }
-    
-    .timer-mode { 
-        display: flex; 
-        gap: 8px; 
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
-    .timer-mode span { 
-        cursor: pointer; 
-        padding: 8px 14px; 
-        border-radius: 10px; 
-        transition: all 0.3s;
-        font-size: 12px;
-        font-weight: 700;
-        border: 1px solid var(--border);
-        background: var(--bg);
-        color: var(--text-muted);
-    }
-    
-    .timer-mode span:hover { 
-        background: linear-gradient(135deg, var(--brand), var(--accent));
-        color: white;
-        border-color: var(--brand);
-        transform: translateY(-2px);
-        box-shadow: var(--glow);
-    }
-    
-    /* Main Area */
-    main { 
-        flex: 1; 
-        display: flex; 
-        flex-direction: column; 
-        background: var(--bg); 
-        position: relative;
-    }
-    
-    .top-bar { 
-        height: 72px; 
-        border-bottom: 1px solid var(--border); 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        padding: 0 36px;
-        background: linear-gradient(180deg, var(--sidebar), var(--bg));
-        backdrop-filter: blur(20px);
-    }
-    
-    @media (max-width: 768px) {
-        .top-bar { padding: 0 60px 0 20px; height: 64px; }
-    }
-    
-    .tabs { 
-        display: flex; 
-        gap: 10px; 
-        height: 100%;
-        align-items: center;
-    }
-    
-    .tab { 
-        display: flex; 
-        align-items: center; 
-        gap: 10px; 
-        cursor: pointer; 
-        color: var(--text-muted); 
-        padding: 12px 20px;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 14px;
-        transition: all 0.3s;
-        border: 1px solid transparent;
-    }
-    
-    .tab:hover { 
+        border: 1.5px solid rgba(255,255,255,0.13);
         color: var(--text-main);
-        background: var(--surface);
-        border-color: var(--border);
-    }
-    
-    .tab.active { 
-        color: white;
-        background: linear-gradient(135deg, var(--brand), var(--accent));
-        border-color: var(--brand);
-        box-shadow: var(--glow);
-    }
-    
-    .tab-icon { font-size: 18px; }
-    
-    @media (max-width: 768px) {
-        .tab { padding: 10px 14px; font-size: 13px; }
-        .tab-text { display: none; }
-    }
-    
-    .actions { 
-        display: flex; 
-        gap: 12px; 
-        align-items: center;
-    }
-    
-    @media (max-width: 768px) {
-        .actions { gap: 8px; }
-        .btn-text { display: none; }
-    }
-    
-    button { 
-        background: var(--surface); 
-        border: 1px solid var(--border); 
-        color: var(--text-main); 
-        padding: 11px 20px; 
-        border-radius: 12px; 
-        cursor: pointer; 
-        font-size: 14px; 
-        transition: all 0.3s; 
-        font-weight: 700;
-        font-family: var(--font);
-    }
-    
-    button:hover { 
-        background: var(--surface-hover); 
-        border-color: var(--brand); 
-        transform: translateY(-2px);
-        box-shadow: var(--shadow);
-    }
-    
-    button:active { transform: translateY(0); }
-    
-    button.primary { 
-        background: linear-gradient(135deg, var(--brand), var(--accent));
-        border: none; 
-        color: white;
-        box-shadow: var(--glow);
-    }
-    
-    button.primary:hover { 
-        background: linear-gradient(135deg, var(--brand-hover), var(--brand));
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-    }
-    
-    button.danger:hover { 
-        background: var(--danger);
-        color: white; 
-        border-color: var(--danger);
-    }
-    
-    button.sm { padding: 9px 16px; font-size: 13px; }
-
-    /* Editor & Preview */
-    .content-area { 
-        flex: 1; 
-        position: relative; 
-        overflow: hidden;
-    }
-    
-    .editor-pane, .preview-pane, .graph-pane { 
-        position: absolute; 
-        inset: 0; 
-        padding: 48px 56px; 
-        overflow-y: auto; 
-        background: var(--bg); 
-        display: none;
-    }
-    
-    @media (max-width: 768px) {
-        .editor-pane, .preview-pane, .graph-pane { padding: 24px; }
-    }
-    
-    .editor-pane.active, .preview-pane.active, .graph-pane.active { display: block; }
-    
-    input.title-input { 
-        background: transparent; 
-        border: none; 
-        color: var(--text-main); 
-        font-size: 40px; 
-        font-weight: 900; 
-        margin-bottom: 32px; 
-        width: 100%; 
-        font-family: var(--font);
-        letter-spacing: -1.5px;
-    }
-    
-    @media (max-width: 768px) {
-        input.title-input { font-size: 28px; margin-bottom: 24px; }
-    }
-    
-    input.title-input::placeholder { color: var(--text-muted); opacity: 0.4; }
-    
-    .grade-selector { margin-bottom: 28px; }
-    
-    .grade-selector label {
-        display: block;
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--text-muted);
-        margin-bottom: 10px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    select.grade-dropdown {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        color: var(--text-main);
-        padding: 12px 16px;
-        border-radius: 12px;
-        font-size: 14px;
-        font-weight: 700;
+        padding: 10px 16px;
+        border-radius: 9px;
         cursor: pointer;
-        transition: all 0.3s;
-        width: 220px;
+        font-size: 12px;
+        transition: all 0.22s;
+        font-weight: 700;
         font-family: var(--font);
     }
-    
-    select.grade-dropdown:hover { border-color: var(--brand); }
-    
-    select.grade-dropdown:focus {
-        border-color: var(--brand);
-        box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
-    }
-    
-    textarea.body-input { 
-        width: 100%; 
-        height: calc(100% - 240px); 
-        background: var(--surface); 
-        border: 1px solid var(--border); 
-        color: #f0f0f0; 
-        font-size: 16px; 
-        line-height: 1.8; 
-        resize: none; 
-        font-family: var(--mono); 
-        padding: 28px; 
-        border-radius: 16px;
-        transition: border-color 0.3s;
-    }
-    
-    textarea.body-input:focus {
-        border-color: var(--brand);
-        box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
-    }
-    
-    textarea.body-input::placeholder { color: var(--text-muted); opacity: 0.5; }
-    
-    /* Link Input */
-    .link-input-container { 
-        margin-bottom: 24px; 
-        display: flex; 
-        gap: 12px;
-        position: relative;
-    }
-    
-    .link-input { 
-        flex: 1; 
-        background: var(--surface); 
-        border: 1px solid var(--border); 
-        color: white; 
-        padding: 12px 16px; 
-        border-radius: 12px; 
-        font-size: 14px;
-        transition: all 0.3s;
-        font-weight: 500;
-    }
-    
-    .link-input:focus {
-        border-color: var(--brand);
-        box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
-    }
-    
-    #link-dropdown {
-        position: absolute;
-        top: 52px;
-        left: 0;
-        right: 0;
-        background: var(--sidebar);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        max-height: 280px;
-        overflow-y: auto;
-        display: none;
-        z-index: 100;
-        box-shadow: var(--shadow-lg);
-    }
-    
-    /* Markdown Styles */
-    .preview-pane { 
-        line-height: 2; 
-        color: #f0f0f0; 
-        max-width: 900px;
-        font-size: 17px;
-    }
-    
-    .preview-pane h1 { 
-        border-bottom: 3px solid var(--brand); 
-        padding-bottom: 18px; 
-        margin-top: 0;
-        margin-bottom: 36px;
-        background: linear-gradient(135deg, var(--brand-light), var(--accent));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-size: 48px;
-        font-weight: 900;
-        letter-spacing: -1.5px;
-    }
-    
-    .preview-pane h2 { 
-        margin-top: 3em;
-        margin-bottom: 1em;
-        color: var(--brand-light);
-        font-size: 32px;
-        font-weight: 800;
-    }
-    
-    .preview-pane h3 {
-        margin-top: 2em;
-        margin-bottom: 0.8em;
-        color: var(--accent);
-        font-size: 24px;
-        font-weight: 700;
-    }
-    
-    .preview-pane p { margin-bottom: 1.5em; }
-    
-    .preview-pane code { 
-        background: var(--surface); 
-        padding: 4px 10px; 
-        border-radius: 8px; 
-        font-family: var(--mono); 
-        font-size: 0.9em; 
-        border: 1px solid var(--border);
-        color: var(--accent);
-    }
-    
-    .preview-pane pre { 
-        background: var(--surface); 
-        padding: 28px; 
-        border-radius: 16px; 
-        overflow-x: auto; 
-        border: 1px solid var(--border);
-        margin: 2em 0;
-    }
-    
-    .preview-pane pre code {
-        background: transparent;
-        border: none;
-        padding: 0;
-        color: #f0f0f0;
-    }
-    
-    .preview-pane blockquote { 
-        border-left: 4px solid var(--brand); 
-        margin: 2em 0; 
-        padding: 20px 28px; 
-        color: var(--text-muted); 
-        background: var(--surface); 
-        border-radius: 0 16px 16px 0;
-        font-style: italic;
-    }
-    
-    .preview-pane a { 
-        color: var(--accent); 
-        text-decoration: none; 
-        border-bottom: 2px solid transparent; 
-        transition: border-color 0.3s;
-        font-weight: 700;
-    }
-    
-    .preview-pane a:hover { border-bottom-color: var(--accent); }
-    
-    .preview-pane ul, .preview-pane ol {
-        margin: 1.5em 0;
-        padding-left: 2.5em;
-    }
-    
-    .preview-pane li { margin: 0.7em 0; }
+    button:hover { background: var(--surface-hover); border-color: var(--brand); transform: translateY(-2px); box-shadow: var(--shadow), 0 0 12px rgba(255,101,0,0.18); color: white; }
+    button:active { transform: translateY(0); box-shadow: none; }
 
-    /* Graph View */
+    button.primary { background: linear-gradient(135deg, var(--brand), var(--accent)); border: 1.5px solid transparent; color: white; box-shadow: var(--glow); }
+    button.primary:hover { background: linear-gradient(135deg, var(--brand-hover), var(--brand)); transform: translateY(-2px); box-shadow: var(--shadow-lg), var(--glow); }
+
+    button.danger { border-color: rgba(255,51,51,0.28); color: #ff8888; }
+    button.danger:hover { background: var(--danger); color: white; border-color: var(--danger); box-shadow: 0 0 14px rgba(255,51,51,0.4); }
+
+    button.sm { padding: 7px 12px; font-size: 11px; }
+
+    /* Content */
+    .content-area { flex: 1; position: relative; overflow: hidden; }
+
+    .editor-pane, .preview-pane, .graph-pane { position: absolute; inset: 0; padding: 38px 50px; overflow-y: auto; background: var(--bg); display: none; }
+    .editor-pane.active, .preview-pane.active, .graph-pane.active { display: block; }
+
+    input.title-input { background: transparent; border: none; color: var(--text-main); font-size: 36px; font-weight: 900; margin-bottom: 26px; width: 100%; font-family: var(--font); letter-spacing: -1px; }
+    input.title-input::placeholder { color: var(--text-muted); opacity: 0.3; }
+
+    .grade-selector { margin-bottom: 22px; }
+    .grade-selector label { display: block; font-size: 9px; font-weight: 800; color: var(--text-muted); margin-bottom: 7px; text-transform: uppercase; letter-spacing: 1.5px; }
+
+    select.grade-dropdown { background: var(--surface); border: 1.5px solid var(--border); color: var(--text-main); padding: 9px 13px; border-radius: 9px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; width: 200px; font-family: var(--font); }
+    select.grade-dropdown:hover { border-color: rgba(255,101,0,0.45); }
+    select.grade-dropdown:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(255,101,0,0.12); }
+
+    textarea.body-input { width: 100%; height: calc(100% - 210px); background: var(--surface); border: 1.5px solid var(--border); color: #f0f0f0; font-size: 14px; line-height: 1.85; resize: none; font-family: var(--mono); padding: 22px; border-radius: 13px; transition: border-color 0.3s; }
+    textarea.body-input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(255,101,0,0.1); }
+    textarea.body-input::placeholder { color: var(--text-muted); opacity: 0.45; }
+
+    .link-input-container { margin-bottom: 18px; display: flex; gap: 8px; position: relative; }
+    .link-input { flex: 1; background: var(--surface); border: 1.5px solid var(--border); color: white; padding: 9px 13px; border-radius: 9px; font-size: 12px; transition: all 0.3s; font-weight: 600; font-family: var(--font); }
+    .link-input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(255,101,0,0.1); }
+
+    #link-dropdown { position: absolute; top: 48px; left: 0; right: 0; background: #141414; border: 1.5px solid var(--border); border-radius: 9px; max-height: 240px; overflow-y: auto; display: none; z-index: 100; box-shadow: var(--shadow-lg); }
+
+    /* Preview */
+    .preview-pane { line-height: 2; color: #f0f0f0; max-width: 840px; font-size: 15px; }
+    .preview-pane h1 { border-bottom: 3px solid var(--brand); padding-bottom: 14px; margin-top: 0; margin-bottom: 30px; background: linear-gradient(135deg, var(--brand-light), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 42px; font-weight: 900; letter-spacing: -1.5px; }
+    .preview-pane h2 { margin-top: 2.4em; margin-bottom: 0.7em; color: var(--brand-light); font-size: 26px; font-weight: 800; }
+    .preview-pane h3 { margin-top: 1.8em; margin-bottom: 0.6em; color: var(--accent); font-size: 20px; font-weight: 700; }
+    .preview-pane p { margin-bottom: 1.3em; }
+    .preview-pane code { background: var(--surface); padding: 3px 7px; border-radius: 5px; font-family: var(--mono); font-size: 0.86em; border: 1px solid var(--border); color: var(--accent); }
+    .preview-pane pre { background: var(--surface); padding: 22px; border-radius: 13px; overflow-x: auto; border: 1px solid var(--border); margin: 1.8em 0; }
+    .preview-pane pre code { background: transparent; border: none; padding: 0; color: #f0f0f0; }
+    .preview-pane blockquote { border-left: 4px solid var(--brand); margin: 1.8em 0; padding: 16px 22px; color: var(--text-muted); background: var(--surface); border-radius: 0 11px 11px 0; font-style: italic; }
+    .preview-pane a { color: var(--brand-light); text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.3s; font-weight: 700; }
+    .preview-pane a:hover { border-bottom-color: var(--brand-light); }
+    .preview-pane ul, .preview-pane ol { margin: 1.3em 0; padding-left: 2.2em; }
+    .preview-pane li { margin: 0.5em 0; }
+
+    /* Graph */
     .graph-pane { background: var(--bg); padding: 0; }
-    
-    #graph-canvas { 
-        width: 100%; 
-        height: 100%;
-        cursor: grab;
-    }
-    
+    #graph-canvas { width: 100%; height: 100%; cursor: grab; }
     #graph-canvas:active { cursor: grabbing; }
-    
-    .graph-controls { 
-        position: absolute; 
-        top: 28px; 
-        right: 28px; 
-        background: var(--sidebar); 
-        border: 1px solid var(--border); 
-        border-radius: 14px; 
-        padding: 16px; 
-        display: flex; 
-        gap: 12px;
-        box-shadow: var(--shadow-lg);
-    }
-    
-    .graph-legend { 
-        position: absolute; 
-        bottom: 28px; 
-        left: 28px; 
-        background: var(--sidebar); 
-        border: 1px solid var(--border); 
-        border-radius: 14px; 
-        padding: 18px;
-        box-shadow: var(--shadow-lg);
-    }
-    
-    .legend-item { 
-        display: flex; 
-        align-items: center; 
-        gap: 12px; 
-        margin: 10px 0; 
-        font-size: 14px;
-        font-weight: 600;
-    }
-    
-    .legend-dot { 
-        width: 16px; 
-        height: 16px; 
-        border-radius: 50%;
-        box-shadow: 0 0 12px currentColor;
-    }
+    .graph-controls { position: absolute; top: 22px; right: 22px; background: #111; border: 1px solid var(--border); border-radius: 11px; padding: 12px; display: flex; gap: 9px; box-shadow: var(--shadow-lg); }
+    .graph-legend { position: absolute; bottom: 22px; left: 22px; background: #111; border: 1px solid var(--border); border-radius: 11px; padding: 14px; box-shadow: var(--shadow-lg); }
+    .legend-item { display: flex; align-items: center; gap: 9px; margin: 7px 0; font-size: 12px; font-weight: 600; }
+    .legend-dot { width: 13px; height: 13px; border-radius: 50%; box-shadow: 0 0 9px currentColor; }
 
     /* Auth */
-    #auth-overlay { 
-        position: fixed; 
-        inset: 0; 
-        background: var(--bg); 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        z-index: 100;
-    }
-    
-    .auth-card { 
-        width: 90%;
-        max-width: 460px; 
-        background: var(--sidebar); 
-        border: 1px solid var(--border); 
-        padding: 52px; 
-        border-radius: 24px; 
-        text-align: center; 
-        box-shadow: var(--shadow-lg);
-    }
-    
-    @media (max-width: 768px) {
-        .auth-card { padding: 36px 28px; }
-    }
-    
-    .input-field { 
-        width: 100%; 
-        background: var(--surface); 
-        border: 1px solid var(--border); 
-        color: white; 
-        padding: 16px; 
-        border-radius: 12px; 
-        margin-bottom: 18px; 
-        transition: all 0.3s;
-        font-size: 15px;
-        font-family: var(--font);
-        font-weight: 500;
-    }
-    
-    .input-field:focus { 
-        border-color: var(--brand);
-        box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
-    }
-    
-    /* PDF Export Modal */
-    .modal-overlay { 
-        position: fixed; 
-        inset: 0; 
-        background: rgba(0,0,0,0.9); 
-        display: none; 
-        align-items: center; 
-        justify-content: center; 
-        z-index: 200;
-        backdrop-filter: blur(8px);
-    }
-    
-    .modal { 
-        background: var(--sidebar); 
-        border: 1px solid var(--border); 
-        border-radius: 24px; 
-        padding: 40px; 
-        max-width: 560px; 
-        width: 90%;
-        box-shadow: var(--shadow-lg);
-    }
-    
-    .modal h3 { 
-        margin-top: 0; 
-        color: var(--brand-light);
-        font-size: 28px;
-        font-weight: 800;
-    }
-    
-    /* Snake Game Modal */
-    #game-modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.95);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 300;
-        backdrop-filter: blur(10px);
-    }
-    
-    .game-container {
-        background: var(--sidebar);
-        border: 2px solid var(--brand);
-        border-radius: 24px;
-        padding: 32px;
-        text-align: center;
-        box-shadow: var(--shadow-lg), var(--glow);
-        max-width: 90%;
-    }
-    
-    .game-title {
-        font-size: 32px;
-        font-weight: 900;
-        background: linear-gradient(135deg, var(--brand-light), var(--accent));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 16px;
-    }
-    
-    .game-score {
-        font-size: 20px;
-        color: var(--text-main);
-        margin-bottom: 20px;
-        font-weight: 700;
-    }
-    
-    #game-canvas {
-        border: 2px solid var(--border);
-        border-radius: 12px;
-        background: var(--bg);
-        margin: 0 auto;
-        display: block;
-        box-shadow: 0 0 30px rgba(99,102,241,0.3);
-    }
-    
-    .game-controls {
-        margin-top: 24px;
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
-    .game-instructions {
-        margin-top: 20px;
-        color: var(--text-muted);
-        font-size: 13px;
-        font-weight: 600;
-    }
-    
-    /* Linked Notes Display */
-    .linked-notes-section { 
-        margin-top: 36px; 
-        padding-top: 36px; 
-        border-top: 1px solid var(--border);
-    }
-    
-    .linked-note-tag { 
-        display: inline-block; 
-        background: var(--surface); 
-        border: 1px solid var(--accent); 
-        color: var(--accent); 
-        padding: 8px 16px; 
-        border-radius: 24px; 
-        margin: 8px; 
-        font-size: 13px; 
-        cursor: pointer; 
-        transition: all 0.3s;
-        font-weight: 700;
-    }
-    
-    .linked-note-tag:hover { 
-        background: var(--accent); 
-        color: #000;
-        transform: translateY(-3px);
-        box-shadow: 0 0 20px rgba(6,182,212,0.4);
-    }
-    
-    /* Autosave indicator */
-    .autosave-indicator { 
-        font-size: 13px; 
-        color: var(--success); 
-        display: flex; 
-        align-items: center; 
-        gap: 10px;
-        font-weight: 700;
-    }
-    
-    .autosave-dot { 
-        width: 8px; 
-        height: 8px; 
-        border-radius: 50%; 
-        background: var(--success); 
-        animation: blink 1.5s infinite;
-        box-shadow: 0 0 10px var(--success);
-    }
-    
-    @keyframes blink { 
-        0%, 100% { opacity: 1; } 
-        50% { opacity: 0.2; } 
-    }
+    #auth-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .auth-card { width: 90%; max-width: 420px; background: #111; border: 1px solid var(--border); padding: 44px; border-radius: 20px; text-align: center; box-shadow: var(--shadow-lg), var(--glow); }
+    .input-field { width: 100%; background: var(--surface); border: 1.5px solid var(--border); color: white; padding: 13px 15px; border-radius: 9px; margin-bottom: 14px; transition: all 0.3s; font-size: 13px; font-family: var(--font); font-weight: 600; }
+    .input-field:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(255,101,0,0.12); }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.93); display: none; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(8px); }
+    .modal { background: #111; border: 1px solid var(--border); border-radius: 20px; padding: 34px; max-width: 520px; width: 90%; box-shadow: var(--shadow-lg); }
+    .modal h3 { margin-top: 0; color: var(--brand-light); font-size: 24px; font-weight: 900; }
+
+    /* ===== GAME MODAL ===== */
+    #game-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.97); display: none; align-items: center; justify-content: center; z-index: 300; backdrop-filter: blur(12px); }
+
+    .game-wrapper { background: #111; border: 1.5px solid rgba(255,101,0,0.35); border-radius: 20px; padding: 24px 28px; text-align: center; box-shadow: var(--shadow-lg), var(--glow); max-width: 95vw; max-height: 95vh; overflow-y: auto; }
+
+    .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 14px; flex-wrap: wrap; }
+    .game-selector { display: flex; gap: 7px; }
+    .game-tab { padding: 7px 16px; border-radius: 7px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; font-weight: 700; font-size: 12px; transition: all 0.22s; font-family: var(--font); }
+    .game-tab.active { background: linear-gradient(135deg, var(--brand), var(--accent)); border-color: var(--brand); color: white; box-shadow: var(--glow); }
+
+    .game-title { font-size: 26px; font-weight: 900; background: linear-gradient(135deg, var(--brand-light), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: var(--font); }
+    .game-score-bar { font-size: 14px; color: var(--text-main); margin-bottom: 14px; font-weight: 700; display: flex; gap: 20px; justify-content: center; }
+    .game-score-bar span { color: var(--accent); }
+
+    #game-canvas { border: 1.5px solid rgba(255,101,0,0.25); border-radius: 9px; background: #050505; margin: 0 auto; display: block; box-shadow: 0 0 28px rgba(255,101,0,0.15); }
+    #tetris-canvas { border: 1.5px solid rgba(255,101,0,0.25); border-radius: 9px; background: #050505; margin: 0 auto; display: none; box-shadow: 0 0 28px rgba(255,101,0,0.15); }
+
+    .game-controls-bar { margin-top: 18px; display: flex; gap: 9px; justify-content: center; flex-wrap: wrap; }
+    .game-instructions { margin-top: 13px; color: var(--text-muted); font-size: 11px; font-weight: 600; }
+
+    /* Linked notes */
+    .linked-notes-section { margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border); }
+    .linked-note-tag { display: inline-block; background: var(--surface); border: 1.5px solid rgba(255,170,0,0.35); color: var(--accent); padding: 6px 13px; border-radius: 18px; margin: 5px; font-size: 11px; cursor: pointer; transition: all 0.3s; font-weight: 700; }
+    .linked-note-tag:hover { background: var(--accent); color: #000; transform: translateY(-2px); box-shadow: 0 0 18px rgba(255,170,0,0.4); }
+
+    /* Autosave */
+    .autosave-indicator { font-size: 11px; color: var(--success); display: flex; align-items: center; gap: 7px; font-weight: 700; }
+    .autosave-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); animation: blink 1.5s infinite; box-shadow: 0 0 8px var(--success); }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
 
     /* Scrollbar */
-    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar { width: 9px; height: 9px; }
     ::-webkit-scrollbar-track { background: var(--sidebar); }
-    ::-webkit-scrollbar-thumb {
-        background: var(--surface);
-        border-radius: 8px;
-        border: 3px solid var(--sidebar);
+    ::-webkit-scrollbar-thumb { background: #282828; border-radius: 5px; border: 2px solid var(--sidebar); }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,101,0,0.38); }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        aside { position: fixed; left: -320px; top: 0; bottom: 0; z-index: 1000; transition: left 0.3s ease, width 0.3s ease; }
+        aside.mobile-open { left: 0; }
+        .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999; }
+        .mobile-overlay.active { display: block; }
+        .mobile-menu-btn { display: flex !important; position: fixed; top: 13px; left: 13px; z-index: 998; background: var(--brand); color: white; border: none; padding: 10px 12px; border-radius: 8px; cursor: pointer; box-shadow: var(--glow); font-size: 17px; }
+        .sidebar-toggle { display: none; }
     }
-    ::-webkit-scrollbar-thumb:hover { background: var(--surface-hover); }
+    .mobile-menu-btn { display: none; }
+
+    @media (max-width: 768px) {
+        .top-bar { padding: 0 56px 0 18px; height: 60px; }
+        .tab { padding: 8px 12px; font-size: 12px; }
+        .tab-text { display: none; }
+        .editor-pane, .preview-pane, .graph-pane { padding: 22px; }
+        input.title-input { font-size: 26px; }
+        .btn-text { display: none; }
+    }
 </style>
 </head>
 <body>
@@ -1000,126 +398,145 @@
 <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
 <div class="mobile-overlay" onclick="toggleMobileMenu()"></div>
 
+<!-- AUTH -->
 <div id="auth-overlay">
     <div class="auth-card">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 36px;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:13px;margin-bottom:30px;">
             <div class="logo">K</div>
             <div>
-                <h2 style="margin: 0; font-size: 32px; font-weight: 900;">StudyOS</h2>
-                <p style="margin: 8px 0 0 0; font-size: 14px; color: var(--text-muted); font-weight: 600;">by Kenneth</p>
+                <h2 style="margin:0;font-size:28px;font-weight:900;font-family:var(--font);letter-spacing:-0.5px;">StudyOS</h2>
+                <p style="margin:5px 0 0 0;font-size:11px;color:var(--text-muted);font-weight:700;">by Kenneth</p>
             </div>
         </div>
         <input type="email" id="email" class="input-field" placeholder="Email">
         <input type="password" id="password" class="input-field" placeholder="Password">
-        <button class="primary" style="width:100%; padding: 16px; font-size: 16px;" onclick="handleAuth()">Enter System</button>
-        <p style="font-size:14px; color:var(--text-muted); cursor:pointer; margin-top: 24px; font-weight: 600;" onclick="toggleAuth()" id="auth-msg">Switch to Sign Up</p>
-        <div id="auth-err" style="color:var(--danger); font-size:14px; margin-top: 14px; font-weight: 600;"></div>
+        <button class="primary" style="width:100%;padding:13px;font-size:14px;border-radius:11px;" onclick="handleAuth()">Enter System</button>
+        <p style="font-size:12px;color:var(--text-muted);cursor:pointer;margin-top:18px;font-weight:700;" onclick="toggleAuth()" id="auth-msg">Switch to Sign Up</p>
+        <div id="auth-err" style="color:var(--danger);font-size:12px;margin-top:10px;font-weight:600;"></div>
     </div>
 </div>
 
-<!-- PDF Export Modal -->
+<!-- PDF MODAL -->
 <div class="modal-overlay" id="pdf-modal">
     <div class="modal">
         <h3>📄 Export to PDF</h3>
-        <p style="color: var(--text-muted); font-size: 15px; margin: 18px 0 28px 0; font-weight: 500;">Your note will be exported as a beautifully formatted PDF document.</p>
-        <div style="margin: 28px 0;">
-            <label style="display: block; margin-bottom: 12px; font-size: 15px; font-weight: 700;">
-                <input type="checkbox" id="pdf-include-links" checked style="margin-right: 10px;"> Include linked notes references
+        <p style="color:var(--text-muted);font-size:13px;margin:14px 0 22px;font-weight:500;">Export your note as a beautifully formatted PDF.</p>
+        <div style="margin:20px 0;">
+            <label style="display:block;margin-bottom:9px;font-size:13px;font-weight:700;color:var(--text-main);">
+                <input type="checkbox" id="pdf-include-links" checked style="margin-right:8px;accent-color:var(--brand);"> Include linked notes
             </label>
-            <label style="display: block; margin: 12px 0; font-size: 15px; font-weight: 700;">
-                <input type="checkbox" id="pdf-include-date" checked style="margin-right: 10px;"> Include creation date
+            <label style="display:block;font-size:13px;font-weight:700;color:var(--text-main);">
+                <input type="checkbox" id="pdf-include-date" checked style="margin-right:8px;accent-color:var(--brand);"> Include creation date
             </label>
         </div>
-        <div style="display: flex; gap: 14px; margin-top: 36px;">
-            <button style="flex: 1;" onclick="closePDFModal()">Cancel</button>
-            <button class="primary" style="flex: 1;" onclick="confirmPDFExport()">Export PDF</button>
+        <div style="display:flex;gap:10px;margin-top:24px;">
+            <button style="flex:1;" onclick="closePDFModal()">Cancel</button>
+            <button class="primary" style="flex:1;" onclick="confirmPDFExport()">Export PDF</button>
         </div>
     </div>
 </div>
 
-<!-- Snake Game Modal -->
+<!-- GAME MODAL -->
 <div id="game-modal">
-    <div class="game-container">
-        <div class="game-title">🐍 Snake Break!</div>
-        <div class="game-score">Score: <span id="game-score">0</span> | High: <span id="high-score">0</span></div>
-        <canvas id="game-canvas" width="400" height="400"></canvas>
-        <div class="game-controls">
-            <button class="primary" onclick="startGame()">Start Game</button>
-            <button onclick="closeGame()">Back to Study</button>
+    <div class="game-wrapper">
+        <div class="game-header">
+            <div class="game-title" id="game-title-text">🐍 Snake Break!</div>
+            <div class="game-selector">
+                <div class="game-tab active" id="gtab-snake" onclick="switchGame('snake')">🐍 Snake</div>
+                <div class="game-tab" id="gtab-tetris" onclick="switchGame('tetris')">🟦 Tetris</div>
+            </div>
         </div>
-        <div class="game-instructions">
-            🎮 Use Arrow Keys or WASD to move | Eat the food to grow | Don't hit the walls or yourself!
+
+        <!-- SNAKE -->
+        <div id="snake-section">
+            <div class="game-score-bar">Score: <span id="game-score">0</span> &nbsp;|&nbsp; Best: <span id="high-score">0</span></div>
+            <canvas id="game-canvas" width="400" height="400"></canvas>
+            <div class="game-controls-bar">
+                <button class="primary" onclick="startGame()">▶ Start</button>
+                <button onclick="closeGame()">← Back to Study</button>
+            </div>
+            <div class="game-instructions">Arrow Keys or WASD · Hit walls to wrap around · Don't eat yourself! · Gets faster as you score 🔥</div>
+        </div>
+
+        <!-- TETRIS -->
+        <div id="tetris-section" style="display:none;">
+            <div class="game-score-bar">Score: <span id="tetris-score">0</span> &nbsp;|&nbsp; Level: <span id="tetris-level">1</span> &nbsp;|&nbsp; Lines: <span id="tetris-lines">0</span></div>
+            <canvas id="tetris-canvas" width="240" height="480"></canvas>
+            <div class="game-controls-bar">
+                <button class="primary" onclick="startTetris()">▶ Start</button>
+                <button onclick="closeGame()">← Back to Study</button>
+            </div>
+            <div class="game-instructions">← → Move &nbsp;·&nbsp; ↑ Rotate &nbsp;·&nbsp; ↓ Soft Drop &nbsp;·&nbsp; Space Hard Drop</div>
         </div>
     </div>
 </div>
 
+<!-- SIDEBAR -->
 <aside id="sidebar">
-    <div class="sidebar-header">
-        <div class="brand-area">
-            <div class="logo">K</div>
-            <div class="brand-info">
-                <div class="brand-text">StudyOS</div>
-                <div class="author-tag">by Kenneth</div>
-                <div class="school-badge" id="school-badge" title="Click to toggle school">Salesianum</div>
+    <div class="sidebar-toggle" onclick="toggleSidebar()" id="sidebar-toggle" title="Toggle sidebar">◀</div>
+
+    <div class="sidebar-content">
+        <div class="sidebar-header">
+            <div class="brand-area">
+                <div class="logo">K</div>
+                <div class="brand-info">
+                    <div class="brand-text">StudyOS</div>
+                    <div class="author-tag">by Kenneth</div>
+                    <div class="school-badge" id="school-badge">Salesianum</div>
+                </div>
+            </div>
+            <input type="text" class="search-box" id="search-box" placeholder="🔍 Search notes..." onkeyup="searchNotes()">
+            <button class="new-note-btn" onclick="createNote()">✏️ New Note</button>
+        </div>
+
+        <div class="nav-list" id="list"></div>
+
+        <div class="stats-widget">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value" id="total-notes">0</div><div class="stat-label">Notes</div></div>
+                <div class="stat-card"><div class="stat-value" id="total-links">0</div><div class="stat-label">Links</div></div>
             </div>
         </div>
-        <input type="text" class="search-box" id="search-box" placeholder="🔍 Search notes..." onkeyup="searchNotes()">
-        <button class="primary" style="width:100%; margin-top: 14px; font-weight: 800;" onclick="createNote()">+ New Note</button>
-    </div>
-    
-    <div class="nav-list" id="list"></div>
-    
-    <!-- Stats Widget -->
-    <div class="stats-widget">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value" id="total-notes">0</div>
-                <div class="stat-label">Total Notes</div>
+
+        <div class="pomodoro-box">
+            <div class="timer-display" id="timer">25:00</div>
+            <div class="timer-controls">
+                <button class="sm" onclick="startTimer()" title="Start">▶</button>
+                <button class="sm" onclick="pauseTimer()" title="Pause">⏸</button>
+                <button class="sm" onclick="resetTimer()" title="Reset">↺</button>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="total-links">0</div>
-                <div class="stat-label">Links Made</div>
+            <div class="timer-mode">
+                <span onclick="setTimer(25)">Focus</span>
+                <span onclick="setTimer(5); openGame()">Break 🎮</span>
+                <span onclick="setTimer(15)">Long</span>
             </div>
         </div>
-    </div>
-    
-    <div class="pomodoro-box">
-        <div class="timer-display" id="timer">25:00</div>
-        <div class="timer-controls">
-            <button class="sm" onclick="startTimer()" style="font-size: 16px;">▶</button>
-            <button class="sm" onclick="pauseTimer()" style="font-size: 16px;">⏸</button>
-            <button class="sm" onclick="resetTimer()" style="font-size: 16px;">↺</button>
-        </div>
-        <div class="timer-mode">
-            <span onclick="setTimer(25)">Focus</span>
-            <span onclick="setTimer(5); openGame()">Break 🎮</span>
-            <span onclick="setTimer(15)">Long</span>
+
+        <div class="signout-area">
+            <button class="signout-btn" onclick="signOut()">Sign out</button>
         </div>
     </div>
-    
-    <div style="padding:16px; border-top:1px solid var(--border)">
-        <button style="width:100%; border:none; color:var(--text-muted); font-weight: 700;" onclick="signOut()">Sign out</button>
+
+    <!-- Mini icons (collapsed state) -->
+    <div class="sidebar-mini-icons">
+        <div class="mini-icon logo-mini">K</div>
+        <div class="mini-icon" title="New Note" onclick="createNote()">✏️</div>
+        <div class="mini-icon" title="Games" onclick="openGame()">🎮</div>
+        <div class="mini-icon" title="Start Timer" onclick="startTimer()">⏱️</div>
+        <div class="mini-icon" title="Sign Out" onclick="signOut()" style="margin-top:auto;margin-bottom:10px;">🚪</div>
     </div>
 </aside>
 
+<!-- MAIN -->
 <main>
     <div class="top-bar">
         <div class="tabs">
-            <div class="tab active" id="tab-write" onclick="switchTab('write')">
-                <span class="tab-icon">✍️</span> <span class="tab-text">Write</span>
-            </div>
-            <div class="tab" id="tab-read" onclick="switchTab('read')">
-                <span class="tab-icon">📖</span> <span class="tab-text">Preview</span>
-            </div>
-            <div class="tab" id="tab-graph" onclick="switchTab('graph')">
-                <span class="tab-icon">🕸️</span> <span class="tab-text">Graph</span>
-            </div>
+            <div class="tab active" id="tab-write" onclick="switchTab('write')"><span class="tab-icon">✍️</span><span class="tab-text">Write</span></div>
+            <div class="tab" id="tab-read" onclick="switchTab('read')"><span class="tab-icon">📖</span><span class="tab-text">Preview</span></div>
+            <div class="tab" id="tab-graph" onclick="switchTab('graph')"><span class="tab-icon">🕸️</span><span class="tab-text">Graph</span></div>
         </div>
         <div class="actions">
-            <div class="autosave-indicator" id="save-status" style="display: none;">
-                <div class="autosave-dot"></div>
-                <span>Autosaving...</span>
-            </div>
+            <div class="autosave-indicator" id="save-status" style="display:none;"><div class="autosave-dot"></div><span>Autosaving...</span></div>
             <button onclick="openPDFModal()">📄 <span class="btn-text">Export</span></button>
             <button class="primary" onclick="saveNote()">💾 <span class="btn-text">Save</span></button>
             <button class="danger" onclick="deleteNote()">🗑️ <span class="btn-text">Delete</span></button>
@@ -1128,7 +545,6 @@
 
     <div class="content-area">
         <div id="pane-write" class="editor-pane active">
-            <!-- Grade Selector -->
             <div class="grade-selector">
                 <label>Grade Level</label>
                 <select class="grade-dropdown" id="note-grade" onchange="handleGradeChange()">
@@ -1140,33 +556,29 @@
                     <option value="12th">12th Grade (Senior)</option>
                 </select>
             </div>
-            
-            <!-- Link to Other Notes -->
             <div class="link-input-container">
-                <input type="text" class="link-input" id="link-search" placeholder="🔗 Link to another note... (type to search)" onkeyup="searchForLinks()" onfocus="showLinkDropdown()" onblur="hideLinkDropdown()">
+                <input type="text" class="link-input" id="link-search" placeholder="🔗 Link to another note..." onkeyup="searchForLinks()" onfocus="showLinkDropdown()" onblur="hideLinkDropdown()">
                 <div id="link-dropdown"></div>
             </div>
-            
             <input type="text" class="title-input" id="title-in" placeholder="Untitled Note" oninput="handleAutoSave()">
             <textarea class="body-input" id="body-in" placeholder="Start writing your notes here...
 
 Supports Markdown:
-# Heading
-**bold** *italic*
+# Heading 1
+## Heading 2
+**bold** *italic* ~~strikethrough~~
 - bullet list
 1. numbered list
-> quote
+> blockquote
+&#96;code&#96;
 
-✨ Features:
-• Organize by grade level (8th-12th)
+✨ Tips:
+• Organize by grade level (8th–12th)
 • Link notes together
 • Export to PDF
-• Visual note connections graph
-• Pomodoro timer with break game!" oninput="handleAutoSave()"></textarea>
-            
-            <!-- Linked Notes Display -->
-            <div class="linked-notes-section" id="linked-section" style="display: none;">
-                <h4 style="color: var(--text-muted); font-size: 16px; margin-bottom: 14px; font-weight: 700;">🔗 Linked Notes</h4>
+• Pomodoro timer with Snake &amp; Tetris!" oninput="handleAutoSave()"></textarea>
+            <div class="linked-notes-section" id="linked-section" style="display:none;">
+                <h4 style="color:var(--text-muted);font-size:11px;margin-bottom:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;">🔗 Linked Notes</h4>
                 <div id="linked-display"></div>
             </div>
         </div>
@@ -1174,8 +586,8 @@ Supports Markdown:
         <div id="pane-read" class="preview-pane">
             <h1 id="prev-title"></h1>
             <div id="prev-body"></div>
-            <div class="linked-notes-section" id="preview-linked-section" style="display: none;">
-                <h4 style="color: var(--text-muted); font-size: 18px; font-weight: 700;">🔗 Linked Notes</h4>
+            <div class="linked-notes-section" id="preview-linked-section" style="display:none;">
+                <h4 style="color:var(--text-muted);font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">🔗 Linked Notes</h4>
                 <div id="preview-linked-display"></div>
             </div>
         </div>
@@ -1187,19 +599,10 @@ Supports Markdown:
                 <button class="sm" onclick="toggleGraphPhysics()">⚡ Physics</button>
             </div>
             <div class="graph-legend">
-                <div style="font-size: 14px; font-weight: 800; margin-bottom: 14px; color: var(--brand-light);">Legend</div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: var(--brand);"></div>
-                    <span>Current Note</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: var(--success);"></div>
-                    <span>Linked Notes</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background: var(--text-muted);"></div>
-                    <span>Other Notes</span>
-                </div>
+                <div style="font-size:10px;font-weight:800;margin-bottom:10px;color:var(--brand-light);letter-spacing:1.2px;text-transform:uppercase;">Legend</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--brand);"></div><span>Current</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--success);"></div><span>Linked</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#555;"></div><span>Other</span></div>
             </div>
         </div>
     </div>
@@ -1211,959 +614,547 @@ Supports Markdown:
     const SUPABASE_URL = 'https://cgmazcvmpcgistoimqlw.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc';
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-    
-    // --- STATE ---
-    let notes = [];
-    let activeId = null;
-    let user = null;
-    let isSignUp = false;
-    let autoSaveTimeout = null;
-    let currentSchool = 'Salesianum';
-    
-    // Store metadata in localStorage
-    const META_KEY = 'studyos_metadata';
-    
-    // Timer State
-    let timerInterval;
-    let timeLeft = 25 * 60;
-    
-    // Graph State
-    let graphCanvas, graphCtx;
-    let graphNodes = [];
-    let graphLinks = [];
-    let graphPhysicsEnabled = true;
-    let isDragging = false;
-    let dragNode = null;
-    
-    // Snake Game State
-    let gameCanvas, gameCtx;
-    let snake, food, direction, score, gameInterval, gameRunning;
-    const gridSize = 20;
-    const tileCount = 20;
-    
-    // Grade levels
-    const grades = ['8th', '9th', '10th', '11th', '12th'];
-    const gradeLabels = {
-        '8th': '8th Grade',
-        '9th': '9th Grade (Freshman)',
-        '10th': '10th Grade (Sophomore)',
-        '11th': '11th Grade (Junior)',
-        '12th': '12th Grade (Senior)'
-    };
 
-    // --- MOBILE MENU ---
-    window.toggleMobileMenu = () => {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.querySelector('.mobile-overlay');
-        sidebar.classList.toggle('mobile-open');
-        overlay.classList.toggle('active');
+    let notes=[], activeId=null, user=null, isSignUp=false, autoSaveTimeout=null, currentSchool='Salesianum', sidebarCollapsed=false;
+    const META_KEY='studyos_metadata';
+    let timerInterval, timeLeft=25*60;
+    let graphCanvas, graphCtx, graphNodes=[], graphLinks=[], graphPhysicsEnabled=true, isDragging=false, dragNode=null;
+    let gameCanvas, gameCtx, snake, food, direction, score, gameInterval, gameRunning;
+    const gridSize=20, tileCount=20;
+    let tetrisCanvas, tetrisCtx, tetrisBoard, tetrisPiece, tetrisScore=0, tetrisLevel=1, tetrisLines=0, tetrisRunning=false, tetrisDropCounter=0, tetrisLastTime=0;
+
+    const grades=['8th','9th','10th','11th','12th'];
+    const gradeLabels={'8th':'8th Grade','9th':'9th Grade (Freshman)','10th':'10th Grade (Sophomore)','11th':'11th Grade (Junior)','12th':'12th Grade (Senior)'};
+
+    // ---- SIDEBAR TOGGLE ----
+    window.toggleSidebar=()=>{
+        sidebarCollapsed=!sidebarCollapsed;
+        const sb=document.getElementById('sidebar'), tg=document.getElementById('sidebar-toggle');
+        sb.classList.toggle('collapsed',sidebarCollapsed);
+        tg.textContent=sidebarCollapsed?'▶':'◀';
+        tg.title=sidebarCollapsed?'Expand Sidebar':'Collapse Sidebar';
     }
 
-    // --- METADATA MANAGEMENT ---
-    function getMetadata() {
-        const stored = localStorage.getItem(META_KEY);
-        return stored ? JSON.parse(stored) : {};
-    }
-    
-    function saveMetadata(metadata) {
-        localStorage.setItem(META_KEY, JSON.stringify(metadata));
-    }
-    
-    function getNoteMetadata(noteId) {
-        const metadata = getMetadata();
-        return metadata[noteId] || { grade: '', linked_notes: [] };
-    }
-    
-    function setNoteMetadata(noteId, data) {
-        const metadata = getMetadata();
-        metadata[noteId] = data;
-        saveMetadata(metadata);
+    window.toggleMobileMenu=()=>{
+        document.getElementById('sidebar').classList.toggle('mobile-open');
+        document.querySelector('.mobile-overlay').classList.toggle('active');
     }
 
-    // --- SNAKE GAME ---
-    window.openGame = () => {
-        document.getElementById('game-modal').style.display = 'flex';
-        if(!gameCanvas) initGame();
+    // ---- METADATA ----
+    function getMetadata(){const s=localStorage.getItem(META_KEY);return s?JSON.parse(s):{};}
+    function saveMetadata(m){localStorage.setItem(META_KEY,JSON.stringify(m));}
+    function getNoteMetadata(id){const m=getMetadata();return m[id]||{grade:'',linked_notes:[]};}
+    function setNoteMetadata(id,d){const m=getMetadata();m[id]=d;saveMetadata(m);}
+
+    // ---- GAME SWITCH ----
+    window.switchGame=(game)=>{
+        document.getElementById('gtab-snake').classList.toggle('active',game==='snake');
+        document.getElementById('gtab-tetris').classList.toggle('active',game==='tetris');
+        document.getElementById('snake-section').style.display=game==='snake'?'block':'none';
+        document.getElementById('tetris-section').style.display=game==='tetris'?'block':'none';
+        document.getElementById('game-canvas').style.display=game==='snake'?'block':'none';
+        document.getElementById('tetris-canvas').style.display=game==='tetris'?'block':'none';
+        document.getElementById('game-title-text').textContent=game==='snake'?'🐍 Snake Break!':'🟦 Tetris Break!';
+        if(game==='snake'){stopTetris();if(!gameCanvas)initGame();}
+        if(game==='tetris'){stopGame();if(!tetrisCanvas)initTetris();}
     }
-    
-    window.closeGame = () => {
-        document.getElementById('game-modal').style.display = 'none';
-        stopGame();
-    }
-    
-    function initGame() {
-        gameCanvas = document.getElementById('game-canvas');
-        gameCtx = gameCanvas.getContext('2d');
+
+    window.openGame=()=>{document.getElementById('game-modal').style.display='flex';if(!gameCanvas)initGame();document.getElementById('game-canvas').style.display='block';}
+    window.closeGame=()=>{document.getElementById('game-modal').style.display='none';stopGame();stopTetris();}
+
+    // ---- SNAKE (wall-wrap) ----
+    function initGame(){
+        gameCanvas=document.getElementById('game-canvas');
+        gameCtx=gameCanvas.getContext('2d');
         resetGame();
-        
-        // Load high score
-        const highScore = localStorage.getItem('snake_high_score') || 0;
-        document.getElementById('high-score').textContent = highScore;
-        
-        // Keyboard controls
-        document.addEventListener('keydown', changeDirection);
+        document.getElementById('high-score').textContent=localStorage.getItem('snake_hs')||0;
+        document.addEventListener('keydown',changeDir);
     }
-    
-    function resetGame() {
-        snake = [{x: 10, y: 10}];
-        direction = {x: 0, y: 0};
-        score = 0;
-        spawnFood();
-        document.getElementById('game-score').textContent = score;
+
+    function resetGame(){snake=[{x:10,y:10}];direction={x:0,y:0};score=0;spawnFood();document.getElementById('game-score').textContent=0;drawSnake();}
+
+    function spawnFood(){
+        food={x:Math.floor(Math.random()*tileCount),y:Math.floor(Math.random()*tileCount)};
+        if(snake.some(s=>s.x===food.x&&s.y===food.y))spawnFood();
     }
-    
-    function spawnFood() {
-        food = {
-            x: Math.floor(Math.random() * tileCount),
-            y: Math.floor(Math.random() * tileCount)
-        };
-        
-        // Make sure food doesn't spawn on snake
-        for(let segment of snake) {
-            if(segment.x === food.x && segment.y === food.y) {
-                spawnFood();
-                return;
-            }
-        }
+
+    function changeDir(e){
+        if(!gameRunning)return;
+        const k=e.key.toLowerCase();
+        if((k==='arrowup'||k==='w')&&direction.y===0)direction={x:0,y:-1};
+        else if((k==='arrowdown'||k==='s')&&direction.y===0)direction={x:0,y:1};
+        else if((k==='arrowleft'||k==='a')&&direction.x===0)direction={x:-1,y:0};
+        else if((k==='arrowright'||k==='d')&&direction.x===0)direction={x:1,y:0};
     }
-    
-    function changeDirection(e) {
-        if(!gameRunning) return;
-        
-        const key = e.key.toLowerCase();
-        
-        // Prevent reverse direction
-        if((key === 'arrowup' || key === 'w') && direction.y === 0) {
-            direction = {x: 0, y: -1};
-        } else if((key === 'arrowdown' || key === 's') && direction.y === 0) {
-            direction = {x: 0, y: 1};
-        } else if((key === 'arrowleft' || key === 'a') && direction.x === 0) {
-            direction = {x: -1, y: 0};
-        } else if((key === 'arrowright' || key === 'd') && direction.x === 0) {
-            direction = {x: 1, y: 0};
-        }
+
+    window.startGame=()=>{
+        if(gameRunning)return;
+        resetGame();gameRunning=true;direction={x:1,y:0};
+        gameInterval=setInterval(updateSnake,110);
     }
-    
-    window.startGame = () => {
-        if(gameRunning) return;
-        
-        resetGame();
-        gameRunning = true;
-        direction = {x: 1, y: 0}; // Start moving right
-        
-        gameInterval = setInterval(updateGame, 100);
-    }
-    
-    function stopGame() {
-        gameRunning = false;
-        clearInterval(gameInterval);
-    }
-    
-    function updateGame() {
-        // Move snake
-        const head = {
-            x: snake[0].x + direction.x,
-            y: snake[0].y + direction.y
-        };
-        
-        // Check wall collision
-        if(head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
-            gameOver();
-            return;
-        }
-        
-        // Check self collision
-        for(let segment of snake) {
-            if(segment.x === head.x && segment.y === head.y) {
-                gameOver();
-                return;
-            }
-        }
-        
+
+    function stopGame(){gameRunning=false;clearInterval(gameInterval);gameInterval=null;}
+
+    function updateSnake(){
+        // WALL WRAP — passing through walls
+        const head={x:((snake[0].x+direction.x)+tileCount)%tileCount,y:((snake[0].y+direction.y)+tileCount)%tileCount};
+        if(snake.some(s=>s.x===head.x&&s.y===head.y)){snakeGameOver();return;}
         snake.unshift(head);
-        
-        // Check food collision
-        if(head.x === food.x && head.y === food.y) {
+        if(head.x===food.x&&head.y===food.y){
             score++;
-            document.getElementById('game-score').textContent = score;
+            document.getElementById('game-score').textContent=score;
             spawnFood();
-            
-            // Update high score
-            const highScore = parseInt(localStorage.getItem('snake_high_score') || 0);
-            if(score > highScore) {
-                localStorage.setItem('snake_high_score', score);
-                document.getElementById('high-score').textContent = score;
-            }
-        } else {
-            snake.pop();
-        }
-        
-        drawGame();
+            const hs=parseInt(localStorage.getItem('snake_hs')||0);
+            if(score>hs){localStorage.setItem('snake_hs',score);document.getElementById('high-score').textContent=score;}
+            if(score%5===0&&score>0){clearInterval(gameInterval);gameInterval=setInterval(updateSnake,Math.max(55,110-score*3));}
+        }else{snake.pop();}
+        drawSnake();
     }
-    
-    function drawGame() {
-        // Clear canvas
-        gameCtx.fillStyle = '#0a0a0f';
-        gameCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
-        
-        // Draw grid
-        gameCtx.strokeStyle = '#1a1a24';
-        gameCtx.lineWidth = 1;
-        for(let i = 0; i <= tileCount; i++) {
+
+    function drawSnake(){
+        if(!gameCtx)return;
+        const W=gameCanvas.width,H=gameCanvas.height;
+        gameCtx.fillStyle='#050505';gameCtx.fillRect(0,0,W,H);
+        // Grid
+        gameCtx.strokeStyle='rgba(255,101,0,0.05)';gameCtx.lineWidth=0.5;
+        for(let i=0;i<=tileCount;i++){
+            gameCtx.beginPath();gameCtx.moveTo(i*gridSize,0);gameCtx.lineTo(i*gridSize,H);gameCtx.stroke();
+            gameCtx.beginPath();gameCtx.moveTo(0,i*gridSize);gameCtx.lineTo(W,i*gridSize);gameCtx.stroke();
+        }
+        // Snake body
+        snake.forEach((seg,idx)=>{
+            const x=seg.x*gridSize,y=seg.y*gridSize;
+            if(idx===0){
+                gameCtx.shadowBlur=16;gameCtx.shadowColor='#ff6500';
+                gameCtx.fillStyle='#ff6500';
+            }else{
+                const t=idx/snake.length;
+                gameCtx.fillStyle=`rgb(${Math.round(255-t*60)},${Math.round(101-t*40)},0)`;
+                gameCtx.shadowBlur=0;
+            }
             gameCtx.beginPath();
-            gameCtx.moveTo(i * gridSize, 0);
-            gameCtx.lineTo(i * gridSize, gameCanvas.height);
-            gameCtx.stroke();
-            
-            gameCtx.beginPath();
-            gameCtx.moveTo(0, i * gridSize);
-            gameCtx.lineTo(gameCanvas.width, i * gridSize);
-            gameCtx.stroke();
-        }
-        
-        // Draw snake
-        snake.forEach((segment, index) => {
-            const gradient = gameCtx.createLinearGradient(
-                segment.x * gridSize, segment.y * gridSize,
-                (segment.x + 1) * gridSize, (segment.y + 1) * gridSize
-            );
-            
-            if(index === 0) {
-                gradient.addColorStop(0, '#6366f1');
-                gradient.addColorStop(1, '#06b6d4');
-            } else {
-                gradient.addColorStop(0, '#4f46e5');
-                gradient.addColorStop(1, '#0891b2');
-            }
-            
-            gameCtx.fillStyle = gradient;
-            gameCtx.fillRect(
-                segment.x * gridSize + 1,
-                segment.y * gridSize + 1,
-                gridSize - 2,
-                gridSize - 2
-            );
-            
-            // Add glow to head
-            if(index === 0) {
-                gameCtx.shadowBlur = 15;
-                gameCtx.shadowColor = '#6366f1';
-                gameCtx.fillRect(
-                    segment.x * gridSize + 1,
-                    segment.y * gridSize + 1,
-                    gridSize - 2,
-                    gridSize - 2
-                );
-                gameCtx.shadowBlur = 0;
-            }
+            gameCtx.roundRect(x+1,y+1,gridSize-2,gridSize-2,idx===0?5:3);
+            gameCtx.fill();
         });
-        
-        // Draw food
-        gameCtx.fillStyle = '#10b981';
-        gameCtx.shadowBlur = 15;
-        gameCtx.shadowColor = '#10b981';
-        gameCtx.beginPath();
-        gameCtx.arc(
-            food.x * gridSize + gridSize / 2,
-            food.y * gridSize + gridSize / 2,
-            gridSize / 2 - 2,
-            0,
-            Math.PI * 2
-        );
-        gameCtx.fill();
-        gameCtx.shadowBlur = 0;
-    }
-    
-    function gameOver() {
-        stopGame();
-        alert(`Game Over! 🐍\n\nYour Score: ${score}\n\nTake a deep breath and get back to studying! 📚`);
+        gameCtx.shadowBlur=0;
+        // Eyes on head
+        if(snake.length>0){
+            const h=snake[0];
+            const hx=h.x*gridSize,hy=h.y*gridSize;
+            gameCtx.fillStyle='white';
+            if(direction.x===1){gameCtx.beginPath();gameCtx.arc(hx+14,hy+5,2.2,0,Math.PI*2);gameCtx.fill();gameCtx.beginPath();gameCtx.arc(hx+14,hy+14,2.2,0,Math.PI*2);gameCtx.fill();}
+            else if(direction.x===-1){gameCtx.beginPath();gameCtx.arc(hx+5,hy+5,2.2,0,Math.PI*2);gameCtx.fill();gameCtx.beginPath();gameCtx.arc(hx+5,hy+14,2.2,0,Math.PI*2);gameCtx.fill();}
+            else if(direction.y===-1){gameCtx.beginPath();gameCtx.arc(hx+5,hy+5,2.2,0,Math.PI*2);gameCtx.fill();gameCtx.beginPath();gameCtx.arc(hx+14,hy+5,2.2,0,Math.PI*2);gameCtx.fill();}
+            else{gameCtx.beginPath();gameCtx.arc(hx+5,hy+14,2.2,0,Math.PI*2);gameCtx.fill();gameCtx.beginPath();gameCtx.arc(hx+14,hy+14,2.2,0,Math.PI*2);gameCtx.fill();}
+        }
+        // Food
+        gameCtx.shadowBlur=18;gameCtx.shadowColor='#ffaa00';gameCtx.fillStyle='#ffaa00';
+        gameCtx.beginPath();gameCtx.arc(food.x*gridSize+gridSize/2,food.y*gridSize+gridSize/2,gridSize/2-3,0,Math.PI*2);gameCtx.fill();
+        gameCtx.shadowBlur=0;
     }
 
-    // --- INITIALIZATION ---
-    window.onload = () => {
-        if(!window.marked) alert("Markdown library failed to load. Check internet.");
-        initGraph();
-        
-        // Toggle school on badge click
-        document.getElementById('school-badge').addEventListener('click', () => {
-            currentSchool = currentSchool === 'Salesianum' ? 'St Peter Cathedral' : 'Salesianum';
-            document.getElementById('school-badge').textContent = currentSchool;
+    function snakeGameOver(){
+        stopGame();drawSnake();
+        const W=gameCanvas.width,H=gameCanvas.height;
+        gameCtx.fillStyle='rgba(0,0,0,0.72)';gameCtx.fillRect(0,0,W,H);
+        gameCtx.fillStyle='#ff6500';gameCtx.font='bold 30px Montserrat,sans-serif';gameCtx.textAlign='center';gameCtx.fillText('GAME OVER',W/2,H/2-18);
+        gameCtx.fillStyle='#ffaa00';gameCtx.font='bold 18px Montserrat,sans-serif';gameCtx.fillText('Score: '+score,W/2,H/2+16);
+        gameCtx.fillStyle='#666';gameCtx.font='12px Montserrat,sans-serif';gameCtx.fillText('Press Start to play again',W/2,H/2+50);
+    }
+
+    // ---- TETRIS ----
+    const TC=12,TR=24,TS=20;
+    const T_COLORS=[null,'#ff6500','#ffaa00','#ff8533','#cc2200','#ff3300','#ff9900','#ffcc00'];
+    const T_SHAPES=[null,[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]]];
+
+    function initTetris(){
+        tetrisCanvas=document.getElementById('tetris-canvas');
+        tetrisCtx=tetrisCanvas.getContext('2d');
+        tetrisCanvas.width=TC*TS;tetrisCanvas.height=TR*TS;
+        resetTetris();
+        document.addEventListener('keydown',handleTKey);
+    }
+
+    function resetTetris(){
+        tetrisBoard=Array.from({length:TR},()=>Array(TC).fill(0));
+        tetrisScore=0;tetrisLevel=1;tetrisLines=0;
+        document.getElementById('tetris-score').textContent=0;
+        document.getElementById('tetris-level').textContent=1;
+        document.getElementById('tetris-lines').textContent=0;
+        tetrisPiece=makePiece();
+        drawTetris();
+    }
+
+    function makePiece(){const t=Math.floor(Math.random()*7)+1;const s=T_SHAPES[t];return{type:t,shape:s.map(r=>[...r]),x:Math.floor(TC/2)-Math.floor(s[0].length/2),y:0};}
+
+    function handleTKey(e){
+        if(!tetrisRunning)return;
+        if(e.key==='ArrowLeft')tMove(-1,0);
+        else if(e.key==='ArrowRight')tMove(1,0);
+        else if(e.key==='ArrowDown')tMove(0,1);
+        else if(e.key==='ArrowUp')tRotate();
+        else if(e.key===' '){tHardDrop();e.preventDefault();}
+    }
+
+    function tMove(dx,dy){
+        tetrisPiece.x+=dx;tetrisPiece.y+=dy;
+        if(tCollide()){tetrisPiece.x-=dx;tetrisPiece.y-=dy;if(dy>0)tLock();}
+        drawTetris();
+    }
+
+    function tRotate(){
+        const orig=tetrisPiece.shape;
+        tetrisPiece.shape=tetrisPiece.shape[0].map((_,ci)=>tetrisPiece.shape.map(row=>row[ci]).reverse());
+        if(tCollide())tetrisPiece.shape=orig;
+        drawTetris();
+    }
+
+    function tHardDrop(){while(!tCollide())tetrisPiece.y++;tetrisPiece.y--;tLock();}
+
+    function tCollide(){
+        for(let r=0;r<tetrisPiece.shape.length;r++)for(let c=0;c<tetrisPiece.shape[r].length;c++){
+            if(!tetrisPiece.shape[r][c])continue;
+            const nx=tetrisPiece.x+c,ny=tetrisPiece.y+r;
+            if(nx<0||nx>=TC||ny>=TR)return true;
+            if(ny>=0&&tetrisBoard[ny][nx])return true;
+        }
+        return false;
+    }
+
+    function tLock(){
+        for(let r=0;r<tetrisPiece.shape.length;r++)for(let c=0;c<tetrisPiece.shape[r].length;c++){
+            if(!tetrisPiece.shape[r][c])continue;
+            const ny=tetrisPiece.y+r;
+            if(ny<0){tGameOver();return;}
+            tetrisBoard[ny][tetrisPiece.x+c]=tetrisPiece.type;
+        }
+        tClearLines();
+        tetrisPiece=makePiece();
+        if(tCollide())tGameOver();
+    }
+
+    function tClearLines(){
+        let cleared=0;
+        for(let r=TR-1;r>=0;r--){
+            if(tetrisBoard[r].every(c=>c!==0)){
+                tetrisBoard.splice(r,1);tetrisBoard.unshift(Array(TC).fill(0));cleared++;r++;
+            }
+        }
+        if(cleared>0){
+            tetrisScore+=[0,100,300,500,800][cleared]*tetrisLevel;
+            tetrisLines+=cleared;tetrisLevel=Math.floor(tetrisLines/10)+1;
+            document.getElementById('tetris-score').textContent=tetrisScore;
+            document.getElementById('tetris-level').textContent=tetrisLevel;
+            document.getElementById('tetris-lines').textContent=tetrisLines;
+        }
+    }
+
+    function drawTetris(){
+        if(!tetrisCtx)return;
+        const W=tetrisCanvas.width,H=tetrisCanvas.height;
+        tetrisCtx.fillStyle='#050505';tetrisCtx.fillRect(0,0,W,H);
+        tetrisCtx.strokeStyle='rgba(255,101,0,0.05)';tetrisCtx.lineWidth=0.5;
+        for(let r=0;r<=TR;r++){tetrisCtx.beginPath();tetrisCtx.moveTo(0,r*TS);tetrisCtx.lineTo(W,r*TS);tetrisCtx.stroke();}
+        for(let c=0;c<=TC;c++){tetrisCtx.beginPath();tetrisCtx.moveTo(c*TS,0);tetrisCtx.lineTo(c*TS,H);tetrisCtx.stroke();}
+        for(let r=0;r<TR;r++)for(let c=0;c<TC;c++)if(tetrisBoard[r][c])drawTCell(c,r,T_COLORS[tetrisBoard[r][c]]);
+        if(tetrisPiece){
+            // Ghost
+            let gy=tetrisPiece.y;
+            while(true){tetrisPiece.y++;if(tCollide()){tetrisPiece.y--;break;}}
+            const savedY=tetrisPiece.y;tetrisPiece.y=gy;
+            for(let r=0;r<tetrisPiece.shape.length;r++)for(let c=0;c<tetrisPiece.shape[r].length;c++){
+                if(!tetrisPiece.shape[r][c])continue;
+                tetrisCtx.strokeStyle=T_COLORS[tetrisPiece.type]+'44';tetrisCtx.lineWidth=1;
+                tetrisCtx.strokeRect((tetrisPiece.x+c)*TS+1,(savedY+r)*TS+1,TS-2,TS-2);
+            }
+            for(let r=0;r<tetrisPiece.shape.length;r++)for(let c=0;c<tetrisPiece.shape[r].length;c++){
+                if(tetrisPiece.shape[r][c])drawTCell(tetrisPiece.x+c,tetrisPiece.y+r,T_COLORS[tetrisPiece.type]);
+            }
+        }
+    }
+
+    function drawTCell(col,row,color){
+        const x=col*TS,y=row*TS;
+        tetrisCtx.shadowBlur=7;tetrisCtx.shadowColor=color;
+        tetrisCtx.fillStyle=color;tetrisCtx.fillRect(x+1,y+1,TS-2,TS-2);
+        tetrisCtx.shadowBlur=0;
+        tetrisCtx.fillStyle='rgba(255,255,255,0.14)';tetrisCtx.fillRect(x+2,y+2,TS-8,3);
+    }
+
+    window.startTetris=()=>{
+        if(tetrisRunning)return;
+        if(!tetrisCanvas)initTetris();
+        resetTetris();tetrisRunning=true;tetrisLastTime=0;
+        requestAnimationFrame(tLoop);
+    }
+
+    function tLoop(time=0){
+        if(!tetrisRunning)return;
+        const delta=time-tetrisLastTime;tetrisLastTime=time;
+        tetrisDropCounter+=delta;
+        if(tetrisDropCounter>=Math.max(80,700-(tetrisLevel-1)*60)){tMove(0,1);tetrisDropCounter=0;}
+        drawTetris();requestAnimationFrame(tLoop);
+    }
+
+    function stopTetris(){tetrisRunning=false;}
+
+    function tGameOver(){
+        tetrisRunning=false;
+        setTimeout(()=>{
+            drawTetris();
+            const W=tetrisCanvas.width,H=tetrisCanvas.height;
+            tetrisCtx.fillStyle='rgba(0,0,0,0.74)';tetrisCtx.fillRect(0,0,W,H);
+            tetrisCtx.fillStyle='#ff6500';tetrisCtx.font='bold 22px Montserrat,sans-serif';tetrisCtx.textAlign='center';tetrisCtx.fillText('GAME OVER',W/2,H/2-18);
+            tetrisCtx.fillStyle='#ffaa00';tetrisCtx.font='bold 15px Montserrat,sans-serif';tetrisCtx.fillText('Score: '+tetrisScore,W/2,H/2+14);
+            tetrisCtx.fillStyle='#666';tetrisCtx.font='11px Montserrat,sans-serif';tetrisCtx.fillText('Press Start again',W/2,H/2+42);
+        },50);
+    }
+
+    // ---- INIT ----
+    window.onload=()=>{
+        initGraph();updateTimerDisplay();
+        document.getElementById('school-badge').addEventListener('click',()=>{
+            currentSchool=currentSchool==='Salesianum'?'St Peter Cathedral':'Salesianum';
+            document.getElementById('school-badge').textContent=currentSchool;
         });
     }
 
-    // --- AUTHENTICATION ---
-    window.toggleAuth = () => {
-        isSignUp = !isSignUp;
-        document.getElementById('auth-msg').innerText = isSignUp ? "Have account? Sign In" : "Switch to Sign Up";
-        document.querySelector('#auth-overlay button').innerText = isSignUp ? "Create Account" : "Enter System";
+    // ---- AUTH ----
+    window.toggleAuth=()=>{
+        isSignUp=!isSignUp;
+        document.getElementById('auth-msg').innerText=isSignUp?'Have account? Sign In':'Switch to Sign Up';
+        document.querySelector('#auth-overlay button').innerText=isSignUp?'Create Account':'Enter System';
     }
 
-    window.handleAuth = async () => {
-        const e = document.getElementById('email').value;
-        const p = document.getElementById('password').value;
-        if(isSignUp) {
-            const { error } = await supabase.auth.signUp({ email: e, password: p });
-            if(error) alert(error.message); else alert("Check email for confirmation link!");
-        } else {
-            const { error } = await supabase.auth.signInWithPassword({ email: e, password: p });
-            if(error) alert(error.message); else location.reload();
-        }
+    window.handleAuth=async()=>{
+        const e=document.getElementById('email').value,p=document.getElementById('password').value;
+        if(isSignUp){const{error}=await supabase.auth.signUp({email:e,password:p});if(error)alert(error.message);else alert('Check email for confirmation!');}
+        else{const{error}=await supabase.auth.signInWithPassword({email:e,password:p});if(error)document.getElementById('auth-err').textContent=error.message;else location.reload();}
     }
 
-    window.signOut = async () => { await supabase.auth.signOut(); location.reload(); }
+    window.signOut=async()=>{await supabase.auth.signOut();location.reload();}
 
-    supabase.auth.onAuthStateChange((e, session) => {
-        if(session) {
-            user = session.user;
-            document.getElementById('auth-overlay').style.display = 'none';
-            fetchNotes();
-        }
+    supabase.auth.onAuthStateChange((ev,session)=>{
+        if(session){user=session.user;document.getElementById('auth-overlay').style.display='none';fetchNotes();}
     });
 
-    // --- DATA HANDLING ---
-    async function fetchNotes() {
-        const { data } = await supabase.from('notes').select('*').order('updated_at', { ascending: false });
-        if(data) {
-            notes = data.map(n => {
-                const meta = getNoteMetadata(n.id);
-                return {
-                    ...n,
-                    grade: meta.grade || '',
-                    linked_notes: meta.linked_notes || []
-                };
-            });
-
-            renderList();
-            updateStats();
-            if(notes.length) loadNote(notes[0].id);
+    // ---- DATA ----
+    async function fetchNotes(){
+        const{data}=await supabase.from('notes').select('*').order('updated_at',{ascending:false});
+        if(data){
+            notes=data.map(n=>{const m=getNoteMetadata(n.id);return{...n,grade:m.grade||'',linked_notes:m.linked_notes||[]};});
+            renderList();updateStats();if(notes.length)loadNote(notes[0].id);
         }
     }
 
-    window.createNote = async () => {
-        const { data } = await supabase.from('notes').insert({ 
-            user_id: user.id, 
-            title: "", 
-            content: ""
-        }).select();
-        if(data) {
-            const newNote = data[0];
-            setNoteMetadata(newNote.id, { grade: '', linked_notes: [] });
-            notes.unshift({ ...newNote, grade: '', linked_notes: [] });
-            loadNote(newNote.id);
-            renderList();
-            updateStats();
-        }
+    window.createNote=async()=>{
+        const{data}=await supabase.from('notes').insert({user_id:user.id,title:'',content:''}).select();
+        if(data){const n=data[0];setNoteMetadata(n.id,{grade:'',linked_notes:[]});notes.unshift({...n,grade:'',linked_notes:[]});loadNote(n.id);renderList();updateStats();}
     }
 
-    window.saveNote = async () => {
-        if(!activeId) return;
-        const t = document.getElementById('title-in').value;
-        const c = document.getElementById('body-in').value;
-        const g = document.getElementById('note-grade').value;
-        const n = notes.find(x => x.id === activeId);
-
-        await supabase.from('notes').update({ 
-            title: t, 
-            content: c,
-            updated_at: new Date()
-        }).eq('id', activeId);
-        
-        setNoteMetadata(activeId, {
-            grade: g,
-            linked_notes: n.linked_notes || []
-        });
-        
-        n.title = t; 
-        n.content = c;
-        n.grade = g;
-        
-        const saveStatus = document.getElementById('save-status');
-        saveStatus.style.display = 'flex';
-        saveStatus.innerHTML = '<div style="width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success);"></div><span style="color: var(--success);">Saved!</span>';
-        setTimeout(() => saveStatus.style.display = 'none', 2000);
-        
-        renderList();
-        updatePreview();
-        updateStats();
+    window.saveNote=async()=>{
+        if(!activeId)return;
+        const t=document.getElementById('title-in').value,c=document.getElementById('body-in').value,g=document.getElementById('note-grade').value,n=notes.find(x=>x.id===activeId);
+        await supabase.from('notes').update({title:t,content:c,updated_at:new Date()}).eq('id',activeId);
+        setNoteMetadata(activeId,{grade:g,linked_notes:n.linked_notes||[]});
+        n.title=t;n.content=c;n.grade=g;
+        const ss=document.getElementById('save-status');
+        ss.style.display='flex';ss.innerHTML='<div style="width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);"></div><span style="color:var(--success);">Saved!</span>';
+        setTimeout(()=>ss.style.display='none',2000);
+        renderList();updatePreview();updateStats();
     }
 
-    window.handleAutoSave = () => {
-        clearTimeout(autoSaveTimeout);
-        document.getElementById('save-status').style.display = 'flex';
-        autoSaveTimeout = setTimeout(() => {
-            saveNote();
-        }, 2000);
-    }
-    
-    window.handleGradeChange = () => {
-        handleAutoSave();
+    window.handleAutoSave=()=>{clearTimeout(autoSaveTimeout);document.getElementById('save-status').style.display='flex';autoSaveTimeout=setTimeout(()=>saveNote(),2000);}
+    window.handleGradeChange=()=>{handleAutoSave();}
+
+    window.deleteNote=async()=>{
+        if(!activeId||!confirm('Delete this note permanently?'))return;
+        notes.forEach(n=>{if(n.linked_notes&&n.linked_notes.includes(activeId)){n.linked_notes=n.linked_notes.filter(id=>id!==activeId);setNoteMetadata(n.id,{grade:n.grade,linked_notes:n.linked_notes});}});
+        await supabase.from('notes').delete().eq('id',activeId);
+        const m=getMetadata();delete m[activeId];saveMetadata(m);
+        notes=notes.filter(n=>n.id!==activeId);
+        if(notes.length)loadNote(notes[0].id);else activeId=null;
+        renderList();updateStats();
     }
 
-    window.deleteNote = async () => {
-        if(!activeId || !confirm("Delete this note permanently?")) return;
-        
-        notes.forEach(n => {
-            if(n.linked_notes && n.linked_notes.includes(activeId)) {
-                n.linked_notes = n.linked_notes.filter(id => id !== activeId);
-                setNoteMetadata(n.id, { grade: n.grade, linked_notes: n.linked_notes });
-            }
-        });
-        
-        await supabase.from('notes').delete().eq('id', activeId);
-        
-        const metadata = getMetadata();
-        delete metadata[activeId];
-        saveMetadata(metadata);
-        
-        notes = notes.filter(n => n.id !== activeId);
-        if(notes.length) loadNote(notes[0].id);
-        else activeId = null;
-        renderList();
-        updateStats();
-    }
-
-    window.loadNote = (id) => {
-        activeId = id;
-        const n = notes.find(x => x.id === id);
-        
-        document.getElementById('title-in').value = n.title || "";
-        document.getElementById('body-in').value = n.content || "";
-        document.getElementById('note-grade').value = n.grade || "";
-        
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    window.loadNote=(id)=>{
+        activeId=id;const n=notes.find(x=>x.id===id);
+        document.getElementById('title-in').value=n.title||'';
+        document.getElementById('body-in').value=n.content||'';
+        document.getElementById('note-grade').value=n.grade||'';
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
         document.getElementById('tab-write').classList.add('active');
-        document.querySelectorAll('.editor-pane, .preview-pane, .graph-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.editor-pane,.preview-pane,.graph-pane').forEach(p=>p.classList.remove('active'));
         document.getElementById('pane-write').classList.add('active');
-        
-        displayLinkedNotes();
-        renderList();
-        
-        // Close mobile menu after selecting
-        if(window.innerWidth <= 1024) {
-            toggleMobileMenu();
+        displayLinkedNotes();renderList();
+        if(window.innerWidth<=1024)toggleMobileMenu();
+    }
+
+    window.searchNotes=()=>{renderList(document.getElementById('search-box').value.toLowerCase());}
+
+    window.switchTab=(mode)=>{
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        document.getElementById('tab-'+mode).classList.add('active');
+        document.querySelectorAll('.editor-pane,.preview-pane,.graph-pane').forEach(p=>p.classList.remove('active'));
+        document.getElementById('pane-'+mode).classList.add('active');
+        if(mode==='read')updatePreview();
+        if(mode==='graph')drawGraph();
+    }
+
+    function updatePreview(){
+        document.getElementById('prev-title').innerText=document.getElementById('title-in').value;
+        document.getElementById('prev-body').innerHTML=marked.parse(document.getElementById('body-in').value);
+        const n=notes.find(x=>x.id===activeId);
+        if(n&&n.linked_notes&&n.linked_notes.length>0){
+            document.getElementById('preview-linked-section').style.display='block';
+            document.getElementById('preview-linked-display').innerHTML=n.linked_notes.map(lid=>{const ln=notes.find(x=>x.id===lid);return ln?`<span class="linked-note-tag" onclick="loadNote('${lid}')">${ln.title||'Untitled'}</span>`:'';}).join('');
+        }else{document.getElementById('preview-linked-section').style.display='none';}
+    }
+
+    window.showLinkDropdown=()=>{document.getElementById('link-dropdown').style.display='block';searchForLinks();}
+    window.hideLinkDropdown=()=>{setTimeout(()=>document.getElementById('link-dropdown').style.display='none',200);}
+
+    window.searchForLinks=()=>{
+        const q=document.getElementById('link-search').value.toLowerCase(),dd=document.getElementById('link-dropdown');
+        const f=notes.filter(n=>n.id!==activeId&&(n.title||'').toLowerCase().includes(q)).slice(0,5);
+        dd.innerHTML=f.length===0?'<div style="padding:12px;color:var(--text-muted);font-size:12px;font-weight:600;">No notes found</div>':
+            f.map(n=>`<div style="padding:11px 15px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;transition:all 0.2s;" onmousedown="linkNote('${n.id}')" onmouseover="this.style.background='var(--surface-hover)';this.style.color='var(--brand)'" onmouseout="this.style.background='transparent';this.style.color='var(--text-main)'">${n.title||'Untitled'} ${n.grade?`<span style="color:var(--text-muted);font-size:10px;">(${gradeLabels[n.grade]})</span>`:''}</div>`).join('');
+    }
+
+    window.linkNote=(lid)=>{
+        const cur=notes.find(x=>x.id===activeId);if(!cur.linked_notes)cur.linked_notes=[];
+        if(!cur.linked_notes.includes(lid)){
+            cur.linked_notes.push(lid);
+            const ln=notes.find(x=>x.id===lid);if(!ln.linked_notes)ln.linked_notes=[];
+            if(!ln.linked_notes.includes(activeId)){ln.linked_notes.push(activeId);setNoteMetadata(lid,{grade:ln.grade,linked_notes:ln.linked_notes});}
+            displayLinkedNotes();document.getElementById('link-search').value='';saveNote();
         }
     }
 
-    window.searchNotes = () => {
-        const query = document.getElementById('search-box').value.toLowerCase();
-        renderList(query);
+    function displayLinkedNotes(){
+        const n=notes.find(x=>x.id===activeId);
+        if(!n||!n.linked_notes||n.linked_notes.length===0){document.getElementById('linked-section').style.display='none';return;}
+        document.getElementById('linked-section').style.display='block';
+        document.getElementById('linked-display').innerHTML=n.linked_notes.map(lid=>{const ln=notes.find(x=>x.id===lid);return ln?`<span class="linked-note-tag" onclick="loadNote('${lid}')">${ln.title||'Untitled'}</span>`:'';}).join('');
     }
 
-    window.switchTab = (mode) => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(`tab-${mode}`).classList.add('active');
-        
-        document.querySelectorAll('.editor-pane, .preview-pane, .graph-pane').forEach(p => p.classList.remove('active'));
-        document.getElementById(`pane-${mode}`).classList.add('active');
+    window.openPDFModal=()=>document.getElementById('pdf-modal').style.display='flex';
+    window.closePDFModal=()=>document.getElementById('pdf-modal').style.display='none';
 
-        if(mode === 'read') updatePreview();
-        if(mode === 'graph') drawGraph();
-    }
-
-    function updatePreview() {
-        const title = document.getElementById('title-in').value;
-        const body = document.getElementById('body-in').value;
-        document.getElementById('prev-title').innerText = title;
-        document.getElementById('prev-body').innerHTML = marked.parse(body);
-        
-        const n = notes.find(x => x.id === activeId);
-        if(n && n.linked_notes && n.linked_notes.length > 0) {
-            document.getElementById('preview-linked-section').style.display = 'block';
-            document.getElementById('preview-linked-display').innerHTML = n.linked_notes.map(linkId => {
-                const linkedNote = notes.find(x => x.id === linkId);
-                return linkedNote ? `<span class="linked-note-tag" onclick="loadNote('${linkId}')">${linkedNote.title || 'Untitled'}</span>` : '';
-            }).join('');
-        } else {
-            document.getElementById('preview-linked-section').style.display = 'none';
+    window.confirmPDFExport=async()=>{
+        const{jsPDF}=window.jspdf,doc=new jsPDF(),n=notes.find(x=>x.id===activeId);
+        const inclLinks=document.getElementById('pdf-include-links').checked,inclDate=document.getElementById('pdf-include-date').checked;
+        doc.setFontSize(24);doc.setFont(undefined,'bold');doc.text(n.title||'Untitled Note',20,20);
+        let y=30;doc.setFontSize(11);doc.setFont(undefined,'normal');doc.setTextColor(100,100,100);
+        if(n.grade){doc.text('Grade: '+gradeLabels[n.grade],20,y);y+=6;}
+        doc.text('School: '+currentSchool,20,y);y+=6;
+        if(inclDate){doc.text('Created: '+new Date(n.created_at).toLocaleDateString(),20,y);y+=6;}
+        y+=10;doc.setFontSize(12);doc.setTextColor(0,0,0);doc.setFont(undefined,'normal');
+        const st=doc.splitTextToSize(n.content||'',170);doc.text(st,20,y);
+        if(inclLinks&&n.linked_notes&&n.linked_notes.length>0){
+            const th=st.length*7+y+12;doc.setFontSize(14);doc.setFont(undefined,'bold');doc.text('Linked Notes:',20,th);
+            doc.setFontSize(11);doc.setFont(undefined,'normal');
+            n.linked_notes.forEach((lid,i)=>{const ln=notes.find(x=>x.id===lid);if(ln)doc.text('• '+(ln.title||'Untitled'),25,th+10+(i*7));});
         }
+        doc.save((n.title||'note')+'.pdf');closePDFModal();
     }
 
-    window.showLinkDropdown = () => {
-        document.getElementById('link-dropdown').style.display = 'block';
-        searchForLinks();
+    // ---- TIMER ----
+    window.setTimer=(min)=>{pauseTimer();timeLeft=min*60;updateTimerDisplay();}
+    window.startTimer=()=>{
+        if(timerInterval)return;
+        timerInterval=setInterval(()=>{
+            if(timeLeft>0){timeLeft--;updateTimerDisplay();}
+            else{pauseTimer();alert("⏰ Time's up! Great work!");try{new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play();}catch(e){}}
+        },1000);
+    }
+    window.pauseTimer=()=>{clearInterval(timerInterval);timerInterval=null;}
+    window.resetTimer=()=>{pauseTimer();timeLeft=25*60;updateTimerDisplay();}
+    function updateTimerDisplay(){const m=Math.floor(timeLeft/60).toString().padStart(2,'0'),s=(timeLeft%60).toString().padStart(2,'0');document.getElementById('timer').innerText=m+':'+s;}
+
+    // ---- GRAPH ----
+    function initGraph(){
+        graphCanvas=document.getElementById('graph-canvas');graphCtx=graphCanvas.getContext('2d');
+        graphCanvas.addEventListener('mousedown',gMouseDown);graphCanvas.addEventListener('mousemove',gMouseMove);graphCanvas.addEventListener('mouseup',gMouseUp);
+        graphCanvas.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];graphCanvas.dispatchEvent(new MouseEvent('mousedown',{clientX:t.clientX,clientY:t.clientY}));});
+        graphCanvas.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];graphCanvas.dispatchEvent(new MouseEvent('mousemove',{clientX:t.clientX,clientY:t.clientY}));});
+        graphCanvas.addEventListener('touchend',e=>{e.preventDefault();graphCanvas.dispatchEvent(new MouseEvent('mouseup',{}));});
+        window.addEventListener('resize',resizeGraph);resizeGraph();
+    }
+    function resizeGraph(){graphCanvas.width=graphCanvas.offsetWidth;graphCanvas.height=graphCanvas.offsetHeight;}
+    window.drawGraph=()=>{resizeGraph();buildGraph();renderGraph();if(graphPhysicsEnabled)startPhysics();}
+
+    function buildGraph(){
+        const W=graphCanvas.width,H=graphCanvas.height;
+        graphNodes=notes.map(n=>({id:n.id,label:n.title||'Untitled',x:Math.random()*(W-100)+50,y:Math.random()*(H-100)+50,vx:0,vy:0,isActive:n.id===activeId}));
+        graphLinks=[];
+        notes.forEach(n=>{if(n.linked_notes)n.linked_notes.forEach(lid=>{if(!graphLinks.find(l=>(l.source===n.id&&l.target===lid)||(l.source===lid&&l.target===n.id)))graphLinks.push({source:n.id,target:lid});});});
     }
 
-    window.hideLinkDropdown = () => {
-        setTimeout(() => {
-            document.getElementById('link-dropdown').style.display = 'none';
-        }, 200);
+    function renderGraph(){
+        graphCtx.clearRect(0,0,graphCanvas.width,graphCanvas.height);
+        graphCtx.strokeStyle='rgba(255,101,0,0.28)';graphCtx.lineWidth=2;
+        graphLinks.forEach(l=>{const s=graphNodes.find(n=>n.id===l.source),t=graphNodes.find(n=>n.id===l.target);if(s&&t){graphCtx.beginPath();graphCtx.moveTo(s.x,s.y);graphCtx.lineTo(t.x,t.y);graphCtx.stroke();}});
+        graphNodes.forEach(node=>{
+            const isLinked=graphLinks.some(l=>l.source===activeId&&l.target===node.id||l.target===activeId&&l.source===node.id);
+            graphCtx.beginPath();graphCtx.arc(node.x,node.y,22,0,Math.PI*2);
+            graphCtx.fillStyle=node.isActive?'#ff6500':isLinked?'#22c55e':'#3a3a3a';graphCtx.fill();
+            graphCtx.strokeStyle='#1a1a1a';graphCtx.lineWidth=2;graphCtx.stroke();
+            if(node.isActive||isLinked){graphCtx.shadowBlur=18;graphCtx.shadowColor=node.isActive?'#ff6500':'#22c55e';graphCtx.beginPath();graphCtx.arc(node.x,node.y,22,0,Math.PI*2);graphCtx.stroke();graphCtx.shadowBlur=0;}
+            graphCtx.fillStyle='#f5f5f5';graphCtx.font='700 11px Montserrat,sans-serif';graphCtx.textAlign='center';
+            graphCtx.fillText(node.label.length>16?node.label.substring(0,16)+'...':node.label,node.x,node.y+40);
+        });
     }
 
-    window.searchForLinks = () => {
-        const query = document.getElementById('link-search').value.toLowerCase();
-        const dropdown = document.getElementById('link-dropdown');
-        
-        const filteredNotes = notes.filter(n => 
-            n.id !== activeId && 
-            (n.title || '').toLowerCase().includes(query)
-        ).slice(0, 5);
-        
-        if(filteredNotes.length === 0) {
-            dropdown.innerHTML = '<div style="padding: 16px; color: var(--text-muted); font-size: 14px; font-weight: 600;">No notes found</div>';
-        } else {
-            dropdown.innerHTML = filteredNotes.map(n => `
-                <div style="padding: 14px 18px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; transition: all 0.3s;" 
-                     onmousedown="linkNote('${n.id}')" 
-                     onmouseover="this.style.background='var(--surface-hover)'; this.style.color='var(--brand)'" 
-                     onmouseout="this.style.background='transparent'; this.style.color='var(--text-main)'">
-                    ${n.title || 'Untitled'} ${n.grade ? `<span style="color: var(--text-muted); font-size: 12px;">(${gradeLabels[n.grade]})</span>` : ''}
-                </div>
-            `).join('');
-        }
-    }
-
-    window.linkNote = (linkId) => {
-        const currentNote = notes.find(x => x.id === activeId);
-        if(!currentNote.linked_notes) currentNote.linked_notes = [];
-        
-        if(!currentNote.linked_notes.includes(linkId)) {
-            currentNote.linked_notes.push(linkId);
-            
-            const linkedNote = notes.find(x => x.id === linkId);
-            if(!linkedNote.linked_notes) linkedNote.linked_notes = [];
-            if(!linkedNote.linked_notes.includes(activeId)) {
-                linkedNote.linked_notes.push(activeId);
-                setNoteMetadata(linkId, { grade: linkedNote.grade, linked_notes: linkedNote.linked_notes });
-            }
-            
-            displayLinkedNotes();
-            document.getElementById('link-search').value = '';
-            saveNote();
-        }
-    }
-
-    function displayLinkedNotes() {
-        const n = notes.find(x => x.id === activeId);
-        if(!n || !n.linked_notes || n.linked_notes.length === 0) {
-            document.getElementById('linked-section').style.display = 'none';
-            return;
-        }
-        
-        document.getElementById('linked-section').style.display = 'block';
-        document.getElementById('linked-display').innerHTML = n.linked_notes.map(linkId => {
-            const linkedNote = notes.find(x => x.id === linkId);
-            return linkedNote ? `<span class="linked-note-tag" onclick="loadNote('${linkId}')">${linkedNote.title || 'Untitled'}</span>` : '';
-        }).join('');
-    }
-
-    window.openPDFModal = () => {
-        document.getElementById('pdf-modal').style.display = 'flex';
-    }
-
-    window.closePDFModal = () => {
-        document.getElementById('pdf-modal').style.display = 'none';
-    }
-
-    window.confirmPDFExport = async () => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        const n = notes.find(x => x.id === activeId);
-        const includeLinks = document.getElementById('pdf-include-links').checked;
-        const includeDate = document.getElementById('pdf-include-date').checked;
-        
-        doc.setFontSize(24);
-        doc.setFont(undefined, 'bold');
-        doc.text(n.title || 'Untitled Note', 20, 20);
-        
-        let yPos = 30;
-        
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'normal');
-        doc.setTextColor(100, 100, 100);
-        if(n.grade) {
-            doc.text(`Grade: ${gradeLabels[n.grade]}`, 20, yPos);
-            yPos += 6;
-        }
-        doc.text(`School: ${currentSchool}`, 20, yPos);
-        yPos += 6;
-        
-        if(includeDate) {
-            doc.text(`Created: ${new Date(n.created_at).toLocaleDateString()}`, 20, yPos);
-            yPos += 6;
-        }
-        
-        yPos += 10;
-        
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        doc.setFont(undefined, 'normal');
-        const splitText = doc.splitTextToSize(n.content || '', 170);
-        doc.text(splitText, 20, yPos);
-        
-        if(includeLinks && n.linked_notes && n.linked_notes.length > 0) {
-            const textHeight = splitText.length * 7 + yPos + 12;
-            doc.setFontSize(14);
-            doc.setFont(undefined, 'bold');
-            doc.text('Linked Notes:', 20, textHeight);
-            
-            doc.setFontSize(11);
-            doc.setFont(undefined, 'normal');
-            n.linked_notes.forEach((linkId, idx) => {
-                const linkedNote = notes.find(x => x.id === linkId);
-                if(linkedNote) {
-                    doc.text(`• ${linkedNote.title || 'Untitled'}`, 25, textHeight + 10 + (idx * 7));
-                }
+    function startPhysics(){
+        const anim=()=>{
+            if(!graphPhysicsEnabled)return;
+            graphNodes.forEach(node=>{
+                let fx=0,fy=0;
+                graphNodes.forEach(other=>{if(node!==other){const dx=node.x-other.x,dy=node.y-other.y,d=Math.sqrt(dx*dx+dy*dy)||1,f=120/(d*d);fx+=(dx/d)*f;fy+=(dy/d)*f;}});
+                graphLinks.forEach(l=>{if(l.source===node.id||l.target===node.id){const o=graphNodes.find(n=>n.id===(l.source===node.id?l.target:l.source));if(o){fx+=(o.x-node.x)*0.01;fy+=(o.y-node.y)*0.01;}}});
+                fx+=(graphCanvas.width/2-node.x)*0.001;fy+=(graphCanvas.height/2-node.y)*0.001;
+                node.vx=(node.vx+fx)*0.9;node.vy=(node.vy+fy)*0.9;node.x+=node.vx;node.y+=node.vy;
+                node.x=Math.max(50,Math.min(graphCanvas.width-50,node.x));node.y=Math.max(50,Math.min(graphCanvas.height-50,node.y));
             });
+            renderGraph();requestAnimationFrame(anim);
+        };anim();
+    }
+
+    window.toggleGraphPhysics=()=>{graphPhysicsEnabled=!graphPhysicsEnabled;if(graphPhysicsEnabled)startPhysics();}
+    window.resetGraphView=()=>{buildGraph();renderGraph();if(graphPhysicsEnabled)startPhysics();}
+
+    function gMouseDown(e){const r=graphCanvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;dragNode=graphNodes.find(n=>{const dx=n.x-x,dy=n.y-y;return Math.sqrt(dx*dx+dy*dy)<22;});if(dragNode){isDragging=true;graphPhysicsEnabled=false;}}
+    function gMouseMove(e){if(isDragging&&dragNode){const r=graphCanvas.getBoundingClientRect();dragNode.x=e.clientX-r.left;dragNode.y=e.clientY-r.top;renderGraph();}}
+    function gMouseUp(e){if(isDragging&&dragNode){const r=graphCanvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,dx=dragNode.x-x,dy=dragNode.y-y;if(Math.sqrt(dx*dx+dy*dy)<5){loadNote(dragNode.id);switchTab('write');}}isDragging=false;dragNode=null;}
+
+    function updateStats(){
+        document.getElementById('total-notes').innerText=notes.length;
+        let lc=0;notes.forEach(n=>{if(n.linked_notes)lc+=n.linked_notes.length;});
+        document.getElementById('total-links').innerText=Math.floor(lc/2);
+    }
+
+    // ---- RENDER LIST ----
+    function renderList(q=''){
+        const list=document.getElementById('list');
+        const byGrade={};grades.forEach(g=>byGrade[g]=[]);byGrade.ungraded=[];
+        notes.forEach(n=>{
+            if(q&&!(n.title||'').toLowerCase().includes(q))return;
+            if(n.grade&&grades.includes(n.grade))byGrade[n.grade].push(n);else byGrade.ungraded.push(n);
+        });
+        let html='';
+        grades.forEach(g=>{
+            if(byGrade[g].length>0){
+                html+=`<div class="grade-section"><div class="grade-header active" onclick="toggleGrade('${g}',event)"><div class="grade-title"><span>${gradeLabels[g]}</span><span class="grade-count">${byGrade[g].length}</span></div><div class="grade-arrow">▶</div></div><div class="grade-notes expanded" id="grade-${g}">${byGrade[g].map(n=>`<div class="nav-item ${n.id===activeId?'active':''}" onclick="loadNote('${n.id}')"><span>${n.title||'Untitled'}${n.linked_notes&&n.linked_notes.length?'<span class="linked-indicator">🔗</span>':''}</span></div>`).join('')}</div></div>`;
+            }
+        });
+        if(byGrade.ungraded.length>0){
+            html+=`<div class="grade-section"><div class="grade-header active" onclick="toggleGrade('ungraded',event)"><div class="grade-title"><span>Ungraded</span><span class="grade-count">${byGrade.ungraded.length}</span></div><div class="grade-arrow">▶</div></div><div class="grade-notes expanded" id="grade-ungraded">${byGrade.ungraded.map(n=>`<div class="nav-item ${n.id===activeId?'active':''}" onclick="loadNote('${n.id}')"><span>${n.title||'Untitled'}${n.linked_notes&&n.linked_notes.length?'<span class="linked-indicator">🔗</span>':''}</span></div>`).join('')}</div></div>`;
         }
-        
-        doc.save(`${n.title || 'note'}.pdf`);
-        closePDFModal();
+        list.innerHTML=html;
     }
 
-    // --- GRAPH VIEW ---
-    function initGraph() {
-        graphCanvas = document.getElementById('graph-canvas');
-        graphCtx = graphCanvas.getContext('2d');
-        
-        graphCanvas.addEventListener('mousedown', onGraphMouseDown);
-        graphCanvas.addEventListener('mousemove', onGraphMouseMove);
-        graphCanvas.addEventListener('mouseup', onGraphMouseUp);
-        
-        // Touch events for mobile
-        graphCanvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousedown', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            graphCanvas.dispatchEvent(mouseEvent);
-        });
-        
-        graphCanvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousemove', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            graphCanvas.dispatchEvent(mouseEvent);
-        });
-        
-        graphCanvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            const mouseEvent = new MouseEvent('mouseup', {});
-            graphCanvas.dispatchEvent(mouseEvent);
-        });
-        
-        window.addEventListener('resize', resizeGraph);
-        resizeGraph();
-    }
-
-    function resizeGraph() {
-        graphCanvas.width = graphCanvas.offsetWidth;
-        graphCanvas.height = graphCanvas.offsetHeight;
-    }
-
-    window.drawGraph = () => {
-        resizeGraph();
-        buildGraphData();
-        renderGraph();
-        if(graphPhysicsEnabled) startGraphPhysics();
-    }
-
-    function buildGraphData() {
-        const width = graphCanvas.width;
-        const height = graphCanvas.height;
-        
-        graphNodes = notes.map(n => ({
-            id: n.id,
-            label: n.title || 'Untitled',
-            x: Math.random() * (width - 100) + 50,
-            y: Math.random() * (height - 100) + 50,
-            vx: 0,
-            vy: 0,
-            isActive: n.id === activeId
-        }));
-        
-        graphLinks = [];
-        notes.forEach(n => {
-            if(n.linked_notes) {
-                n.linked_notes.forEach(linkId => {
-                    if(!graphLinks.find(l => 
-                        (l.source === n.id && l.target === linkId) || 
-                        (l.source === linkId && l.target === n.id)
-                    )) {
-                        graphLinks.push({ source: n.id, target: linkId });
-                    }
-                });
-            }
-        });
-    }
-
-    function renderGraph() {
-        graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
-        
-        graphCtx.strokeStyle = '#2d2d3a';
-        graphCtx.lineWidth = 2;
-        graphLinks.forEach(link => {
-            const source = graphNodes.find(n => n.id === link.source);
-            const target = graphNodes.find(n => n.id === link.target);
-            if(source && target) {
-                graphCtx.beginPath();
-                graphCtx.moveTo(source.x, source.y);
-                graphCtx.lineTo(target.x, target.y);
-                graphCtx.stroke();
-            }
-        });
-        
-        graphNodes.forEach(node => {
-            const isLinked = graphLinks.some(l => l.source === activeId && l.target === node.id || l.target === activeId && l.source === node.id);
-            
-            graphCtx.beginPath();
-            graphCtx.arc(node.x, node.y, 26, 0, Math.PI * 2);
-            graphCtx.fillStyle = node.isActive ? '#6366f1' : (isLinked ? '#10b981' : '#a0a0b0');
-            graphCtx.fill();
-            graphCtx.strokeStyle = '#fafafa';
-            graphCtx.lineWidth = 3;
-            graphCtx.stroke();
-            
-            if(node.isActive || isLinked) {
-                graphCtx.shadowBlur = 20;
-                graphCtx.shadowColor = node.isActive ? '#6366f1' : '#10b981';
-                graphCtx.beginPath();
-                graphCtx.arc(node.x, node.y, 26, 0, Math.PI * 2);
-                graphCtx.stroke();
-                graphCtx.shadowBlur = 0;
-            }
-            
-            graphCtx.fillStyle = '#fafafa';
-            graphCtx.font = '700 13px Inter';
-            graphCtx.textAlign = 'center';
-            const label = node.label.length > 18 ? node.label.substring(0, 18) + '...' : node.label;
-            graphCtx.fillText(label, node.x, node.y + 46);
-        });
-    }
-
-    function startGraphPhysics() {
-        const animate = () => {
-            if(!graphPhysicsEnabled) return;
-            
-            graphNodes.forEach(node => {
-                let fx = 0, fy = 0;
-                
-                graphNodes.forEach(other => {
-                    if(node !== other) {
-                        const dx = node.x - other.x;
-                        const dy = node.y - other.y;
-                        const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-                        const force = 120 / (dist * dist);
-                        fx += (dx / dist) * force;
-                        fy += (dy / dist) * force;
-                    }
-                });
-                
-                graphLinks.forEach(link => {
-                    if(link.source === node.id || link.target === node.id) {
-                        const other = graphNodes.find(n => 
-                            n.id === (link.source === node.id ? link.target : link.source)
-                        );
-                        if(other) {
-                            const dx = other.x - node.x;
-                            const dy = other.y - node.y;
-                            fx += dx * 0.01;
-                            fy += dy * 0.01;
-                        }
-                    }
-                });
-                
-                fx += (graphCanvas.width/2 - node.x) * 0.001;
-                fy += (graphCanvas.height/2 - node.y) * 0.001;
-                
-                node.vx = (node.vx + fx) * 0.9;
-                node.vy = (node.vy + fy) * 0.9;
-                node.x += node.vx;
-                node.y += node.vy;
-                
-                node.x = Math.max(50, Math.min(graphCanvas.width - 50, node.x));
-                node.y = Math.max(50, Math.min(graphCanvas.height - 50, node.y));
-            });
-            
-            renderGraph();
-            requestAnimationFrame(animate);
-        };
-        animate();
-    }
-
-    window.toggleGraphPhysics = () => {
-        graphPhysicsEnabled = !graphPhysicsEnabled;
-        if(graphPhysicsEnabled) startGraphPhysics();
-    }
-
-    window.resetGraphView = () => {
-        buildGraphData();
-        renderGraph();
-        if(graphPhysicsEnabled) startGraphPhysics();
-    }
-
-    function onGraphMouseDown(e) {
-        const rect = graphCanvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        dragNode = graphNodes.find(n => {
-            const dx = n.x - x;
-            const dy = n.y - y;
-            return Math.sqrt(dx*dx + dy*dy) < 26;
-        });
-        
-        if(dragNode) {
-            isDragging = true;
-            graphPhysicsEnabled = false;
-        }
-    }
-
-    function onGraphMouseMove(e) {
-        if(isDragging && dragNode) {
-            const rect = graphCanvas.getBoundingClientRect();
-            dragNode.x = e.clientX - rect.left;
-            dragNode.y = e.clientY - rect.top;
-            renderGraph();
-        }
-    }
-
-    function onGraphMouseUp(e) {
-        if(isDragging && dragNode) {
-            const rect = graphCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const dx = dragNode.x - x;
-            const dy = dragNode.y - y;
-            
-            if(Math.sqrt(dx*dx + dy*dy) < 5) {
-                loadNote(dragNode.id);
-                switchTab('write');
-            }
-        }
-        
-        isDragging = false;
-        dragNode = null;
-    }
-
-    function updateStats() {
-        document.getElementById('total-notes').innerText = notes.length;
-        let linkCount = 0;
-        notes.forEach(n => {
-            if(n.linked_notes) linkCount += n.linked_notes.length;
-        });
-        document.getElementById('total-links').innerText = Math.floor(linkCount / 2);
-    }
-
-    window.setTimer = (min) => {
-        pauseTimer();
-        timeLeft = min * 60;
-        updateTimerDisplay();
-    }
-
-    window.startTimer = () => {
-        if(timerInterval) return;
-        timerInterval = setInterval(() => {
-            if(timeLeft > 0) {
-                timeLeft--;
-                updateTimerDisplay();
-            } else {
-                pauseTimer();
-                alert("⏰ Time's up! Great work!");
-                try {
-                    new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play();
-                } catch(e) {}
-            }
-        }, 1000);
-    }
-
-    window.pauseTimer = () => {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
-
-    window.resetTimer = () => {
-        pauseTimer();
-        timeLeft = 25 * 60;
-        updateTimerDisplay();
-    }
-
-    function updateTimerDisplay() {
-        const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-        const s = (timeLeft % 60).toString().padStart(2, '0');
-        document.getElementById('timer').innerText = `${m}:${s}`;
-    }
-
-    function renderList(searchQuery = '') {
-        const list = document.getElementById('list');
-        
-        const notesByGrade = {};
-        grades.forEach(g => notesByGrade[g] = []);
-        notesByGrade['ungraded'] = [];
-        
-        notes.forEach(n => {
-            if(searchQuery && !(n.title || '').toLowerCase().includes(searchQuery)) return;
-            
-            if(n.grade && grades.includes(n.grade)) {
-                notesByGrade[n.grade].push(n);
-            } else {
-                notesByGrade['ungraded'].push(n);
-            }
-        });
-        
-        let html = '';
-        
-        grades.forEach(grade => {
-            if(notesByGrade[grade].length > 0) {
-                html += `
-                <div class="grade-section">
-                    <div class="grade-header active" onclick="toggleGrade('${grade}')">
-                        <div class="grade-title">
-                            <span>${gradeLabels[grade]}</span>
-                            <span class="grade-count">${notesByGrade[grade].length}</span>
-                        </div>
-                        <div class="grade-arrow">▶</div>
-                    </div>
-                    <div class="grade-notes expanded" id="grade-${grade}">
-                        ${notesByGrade[grade].map(n => {
-                            const hasLinks = n.linked_notes && n.linked_notes.length > 0;
-                            return `
-                            <div class="nav-item ${n.id === activeId ? 'active' : ''}" onclick="loadNote('${n.id}')">
-                                <span>${n.title || 'Untitled'}${hasLinks ? '<span class="linked-indicator">🔗</span>' : ''}</span>
-                            </div>`;
-                        }).join('')}
-                    </div>
-                </div>`;
-            }
-        });
-        
-        if(notesByGrade['ungraded'].length > 0) {
-            html += `
-            <div class="grade-section">
-                <div class="grade-header active" onclick="toggleGrade('ungraded')">
-                    <div class="grade-title">
-                        <span>Ungraded</span>
-                        <span class="grade-count">${notesByGrade['ungraded'].length}</span>
-                    </div>
-                    <div class="grade-arrow">▶</div>
-                </div>
-                <div class="grade-notes expanded" id="grade-ungraded">
-                    ${notesByGrade['ungraded'].map(n => {
-                        const hasLinks = n.linked_notes && n.linked_notes.length > 0;
-                        return `
-                        <div class="nav-item ${n.id === activeId ? 'active' : ''}" onclick="loadNote('${n.id}')">
-                            <span>${n.title || 'Untitled'}${hasLinks ? '<span class="linked-indicator">🔗</span>' : ''}</span>
-                        </div>`;
-                    }).join('')}
-                </div>
-            </div>`;
-        }
-        
-        list.innerHTML = html;
-    }
-    
-    window.toggleGrade = (grade) => {
-        const header = event.currentTarget;
-        const notesDiv = document.getElementById(`grade-${grade}`);
-        
-        header.classList.toggle('active');
-        notesDiv.classList.toggle('expanded');
-    }
+    window.toggleGrade=(g,e)=>{const h=e.currentTarget,d=document.getElementById('grade-'+g);h.classList.toggle('active');d.classList.toggle('expanded');}
 </script>
 </body>
 </html>
