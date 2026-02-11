@@ -2589,3 +2589,760 @@ function initSplitResize(){
     if(!draggingDivider) return
     const split=$('split')
     const rect=split.getBoundingClientRect()
+    const x=e.clientX-rect.left
+    const pct=clamp((x/rect.width)*100,20,80)
+    splitSizes=[pct,100-pct]
+    applySplitSizes()
+  })
+}
+
+function initGraph(){
+  graphCanvas=$('graph')
+  graphCtx=graphCanvas.getContext('2d')
+  resizeGraph()
+  window.addEventListener('resize',()=>{resizeGraph();renderGraph()})
+  graphCanvas.addEventListener('mousedown',gDown)
+  graphCanvas.addEventListener('mousemove',gMove)
+  graphCanvas.addEventListener('mouseup',gUp)
+  graphCanvas.addEventListener('wheel',gWheel,{passive:false})
+}
+
+function resizeGraph(){
+  const r=graphCanvas.getBoundingClientRect()
+  graphCanvas.width=Math.floor(r.width*devicePixelRatio)
+  graphCanvas.height=Math.floor(r.height*devicePixelRatio)
+  graphCtx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)
+}
+
+function buildGraph(){
+  const W=graphCanvas.getBoundingClientRect().width
+  const H=graphCanvas.getBoundingClientRect().height
+  const N=notes.length||1
+  graphNodes=notes.map((n,i)=>{
+    const a=(i/N)*Math.PI*2
+    const rad=Math.min(W,H)*0.25
+    return{
+      id:n.id,
+      label:(n.title&&n.title.trim()?n.title:'Untitled'),
+      x:Math.cos(a)*rad,
+      y:Math.sin(a)*rad,
+      vx:0,vy:0
+    }
+  })
+  graphEdges=links.map(l=>({a:l.note_a,b:l.note_b}))
+  gView={x:0,y:0,scale:1}
+}
+
+function worldToScreen(wx,wy){
+  const r=graphCanvas.getBoundingClientRect()
+  const cx=r.width/2, cy=r.height/2
+  return { x:cx + gView.x + wx*gView.scale, y:cy + gView.y + wy*gView.scale }
+}
+function screenToWorld(sx,sy){
+  const r=graphCanvas.getBoundingClientRect()
+  const cx=r.width/2, cy=r.height/2
+  return { x:(sx - cx - gView.x)/gView.scale, y:(sy - cy - gView.y)/gView.scale }
+}
+function hitNode(wx,wy){
+  for(const n of graphNodes){
+    const dx=n.x-wx
+    const dy=n.y-wy
+    if(Math.sqrt(dx*dx+dy*dy) < 22) return n
+  }
+  return null
+}
+
+function renderGraph(){
+  const r=graphCanvas.getBoundingClientRect()
+  const W=r.width,H=r.height
+  graphCtx.clearRect(0,0,W,H)
+
+  graphCtx.save()
+  graphCtx.translate(W/2+gView.x, H/2+gView.y)
+  graphCtx.scale(gView.scale,gView.scale)
+
+  graphCtx.lineWidth=2/gView.scale
+  graphEdges.forEach(e=>{
+    const a=graphNodes.find(n=>n.id===e.a)
+    const b=graphNodes.find(n=>n.id===e.b)
+    if(!a||!b) return
+    graphCtx.strokeStyle='rgba(255,106,0,.22)'
+    graphCtx.beginPath()
+    graphCtx.moveTo(a.x,a.y)
+    graphCtx.lineTo(b.x,b.y)
+    graphCtx.stroke()
+  })
+
+  graphNodes.forEach(n=>{
+    const isActive=n.id===activeId
+    const isLinked=graphEdges.some(e=>(e.a===activeId && e.b===n.id)||(e.b===activeId && e.a===n.id))
+    const r=22
+    graphCtx.fillStyle=isActive?'#ff6a00':(isLinked?'#22c55e':'rgba(255,255,255,.18)')
+    graphCtx.beginPath()
+    graphCtx.arc(n.x,n.y,r,0,Math.PI*2)
+    graphCtx.fill()
+
+    graphCtx.lineWidth=2/gView.scale
+    graphCtx.strokeStyle='rgba(0,0,0,.35)'
+    graphCtx.stroke()
+
+    if(isActive||isLinked){
+      graphCtx.shadowBlur=20/gView.scale
+      graphCtx.shadowColor=isActive?'rgba(255,106,0,.65)':'rgba(34,197,94,.55)'
+      graphCtx.beginPath()
+      graphCtx.arc(n.x,n.y,r,0,Math.PI*2)
+      graphCtx.strokeStyle='rgba(255,255,255,.25)'
+      graphCtx.stroke()
+      graphCtx.shadowBlur=0
+    }
+
+    graphCtx.fillStyle='rgba(238,242,255,.92)'
+    graphCtx.font=(900/gView.scale)+'px Inter'
+    graphCtx.textAlign='center'
+    const label=n.label.length>18?n.label.slice(0,18)+'…':n.label
+    graphCtx.fillText(label,n.x,n.y+46)
+  })
+
+  graphCtx.restore()
+}
+
+function stepGraph(){
+  if(!graphPhysics){renderGraph();gAnim=requestAnimationFrame(stepGraph);return}
+  const nodes=graphNodes
+  const edges=graphEdges
+  for(const n of nodes){
+    let fx=0,fy=0
+    for(const o of nodes){
+      if(o===n) continue
+      const dx=n.x-o.x
+      const dy=n.y-o.y
+      const d=Math.sqrt(dx*dx+dy*dy)||1
+      const f=1100/(d*d)
+      fx+=(dx/d)*f
+      fy+=(dy/d)*f
+    }
+    for(const e of edges){
+      if(e.a!==n.id && e.b!==n.id) continue
+      const oid=(e.a===n.id?e.b:e.a)
+      const o=nodes.find(x=>x.id===oid)
+      if(!o) continue
+      fx+=(o.x-n.x)*0.012
+      fy+=(o.y-n.y)*0.012
+    }
+    n.vx=(n.vx+fx)*0.88
+    n.vy=(n.vy+fy)*0.88
+  }
+  for(const n of nodes){
+    n.x+=n.vx
+    n.y+=n.vy
+  }
+  renderGraph()
+  gAnim=requestAnimationFrame(stepGraph)
+}
+
+function drawGraph(){
+  if(!graphCanvas) return
+  buildGraph()
+  renderGraph()
+  if(gAnim) cancelAnimationFrame(gAnim)
+  gAnim=requestAnimationFrame(stepGraph)
+}
+
+function gDown(e){
+  const rect=graphCanvas.getBoundingClientRect()
+  const sx=e.clientX-rect.left
+  const sy=e.clientY-rect.top
+  const w=screenToWorld(sx,sy)
+  const node=hitNode(w.x,w.y)
+  if(node){
+    gDragNode=node
+    graphPhysics=false
+    return
+  }
+  gPan=true
+  gPanStart={sx,sy,ox:gView.x,oy:gView.y}
+}
+function gMove(e){
+  const rect=graphCanvas.getBoundingClientRect()
+  const sx=e.clientX-rect.left
+  const sy=e.clientY-rect.top
+  if(gDragNode){
+    const w=screenToWorld(sx,sy)
+    gDragNode.x=w.x
+    gDragNode.y=w.y
+    renderGraph()
+    return
+  }
+  if(gPan && gPanStart){
+    gView.x=gPanStart.ox+(sx-gPanStart.sx)
+    gView.y=gPanStart.oy+(sy-gPanStart.sy)
+    renderGraph()
+  }
+}
+function gUp(e){
+  const rect=graphCanvas.getBoundingClientRect()
+  const sx=e.clientX-rect.left
+  const sy=e.clientY-rect.top
+  if(gDragNode){
+    const w=screenToWorld(sx,sy)
+    const node=hitNode(w.x,w.y)
+    const id=gDragNode.id
+    gDragNode=null
+    graphPhysics=true
+    renderGraph()
+    const clickNode=hitNode(w.x,w.y)
+    if(clickNode && clickNode.id===id){
+      loadNote(id)
+      setView('editor')
+    }
+    return
+  }
+  gPan=false
+  gPanStart=null
+}
+function gWheel(e){
+  e.preventDefault()
+  const rect=graphCanvas.getBoundingClientRect()
+  const sx=e.clientX-rect.left
+  const sy=e.clientY-rect.top
+  const before=screenToWorld(sx,sy)
+  const delta=Math.sign(e.deltaY)
+  const f=delta>0?0.92:1.08
+  gView.scale=clamp(gView.scale*f,0.45,2.8)
+  const after=screenToWorld(sx,sy)
+  gView.x+=(after.x-before.x)*gView.scale
+  gView.y+=(after.y-before.y)*gView.scale
+  renderGraph()
+}
+
+function initGames(){
+  snakeCanvas=$('snakeCanvas')
+  snakeCtx=snakeCanvas.getContext('2d')
+  tetrisCanvas=$('tetrisCanvas')
+  tetrisCtx=tetrisCanvas.getContext('2d')
+  resetSnake()
+  resetTetris()
+  syncCheatUI()
+}
+
+function syncCheatUI(){
+  $('snakeBest').textContent=String(gameCheats.snake?.highScore||0)
+  $('tBest').textContent=String(gameCheats.tetris?.highScore||0)
+  $('cSnakeNoDie').checked=!!gameCheats.snake?.noDie
+  $('cSnakeSpeed').value=gameCheats.snake?.speed??110
+  $('cSnakeSpeedV').textContent=(gameCheats.snake?.speed??110)+'ms'
+  $('cTNoOver').checked=!!gameCheats.tetris?.noGameOver
+  $('cTLevel').value=gameCheats.tetris?.startLevel??1
+}
+
+function resetSnake(){
+  snake=[{x:10,y:10}]
+  dir={x:0,y:0}
+  snakeScore=0
+  spawnFood()
+  $('snakeScore').textContent='0'
+  drawSnake()
+}
+function spawnFood(){
+  food={x:Math.floor(Math.random()*S_TILE),y:Math.floor(Math.random()*S_TILE)}
+  if(snake.some(s=>s.x===food.x&&s.y===food.y)) spawnFood()
+}
+function startSnake(){
+  stopSnake()
+  resetSnake()
+  snakeRunning=true
+  dir={x:1,y:0}
+  const sp=gameCheats.snake?.speed??110
+  snakeInterval=setInterval(tickSnake,sp)
+}
+function stopSnake(){
+  snakeRunning=false
+  if(snakeInterval){clearInterval(snakeInterval);snakeInterval=null}
+}
+function tickSnake(){
+  const head={x:(snake[0].x+dir.x+S_TILE)%S_TILE, y:(snake[0].y+dir.y+S_TILE)%S_TILE}
+  if(!gameCheats.snake?.noDie){
+    if(snake.some(s=>s.x===head.x&&s.y===head.y)){gameOverSnake();return}
+  }
+  snake.unshift(head)
+  if(head.x===food.x&&head.y===food.y){
+    snakeScore++
+    $('snakeScore').textContent=String(snakeScore)
+    spawnFood()
+    if(snakeScore>(gameCheats.snake?.highScore||0)){
+      gameCheats.snake.highScore=snakeScore
+      $('snakeBest').textContent=String(snakeScore)
+      saveSettings()
+    }
+  }else{
+    snake.pop()
+  }
+  drawSnake()
+}
+function drawSnake(){
+  const W=snakeCanvas.width,H=snakeCanvas.height
+  snakeCtx.fillStyle='#050505'
+  snakeCtx.fillRect(0,0,W,H)
+  snakeCtx.strokeStyle='rgba(255,106,0,0.06)'
+  snakeCtx.lineWidth=0.5
+  const gs=W/S_TILE
+  for(let i=0;i<=S_TILE;i++){
+    snakeCtx.beginPath();snakeCtx.moveTo(i*gs,0);snakeCtx.lineTo(i*gs,H);snakeCtx.stroke()
+    snakeCtx.beginPath();snakeCtx.moveTo(0,i*gs);snakeCtx.lineTo(W,i*gs);snakeCtx.stroke()
+  }
+  snake.forEach((seg,idx)=>{
+    const x=seg.x*gs,y=seg.y*gs
+    snakeCtx.fillStyle=idx===0?'#ff6a00':'rgba(255,177,0,'+(0.55-(idx/snake.length)*0.35)+')'
+    snakeCtx.fillRect(x+1,y+1,gs-2,gs-2)
+  })
+  snakeCtx.fillStyle='#ffb100'
+  snakeCtx.beginPath()
+  snakeCtx.arc(food.x*gs+gs/2,food.y*gs+gs/2,gs/2-3,0,Math.PI*2)
+  snakeCtx.fill()
+}
+function gameOverSnake(){
+  stopSnake()
+  drawSnake()
+  const W=snakeCanvas.width,H=snakeCanvas.height
+  snakeCtx.fillStyle='rgba(0,0,0,.75)'
+  snakeCtx.fillRect(0,0,W,H)
+  snakeCtx.fillStyle='#ff6a00'
+  snakeCtx.font='900 28px Inter'
+  snakeCtx.textAlign='center'
+  snakeCtx.fillText('GAME OVER',W/2,H/2-10)
+  snakeCtx.fillStyle='#ffb100'
+  snakeCtx.font='900 16px Inter'
+  snakeCtx.fillText('Score: '+snakeScore,W/2,H/2+18)
+}
+
+function resetTetris(){
+  tBoard=Array.from({length:TR},()=>Array(TC).fill(0))
+  tScore=0
+  tLines=0
+  tLevel=Math.max(1,gameCheats.tetris?.startLevel??1)
+  $('tScore').textContent='0'
+  $('tLines').textContent='0'
+  $('tLevel').textContent=String(tLevel)
+  $('tBest').textContent=String(gameCheats.tetris?.highScore||0)
+  tPiece=makePiece()
+  drawTetris()
+}
+function makePiece(){
+  const t=Math.floor(Math.random()*7)+1
+  const s=T_SHAPES[t]
+  return{type:t,shape:s.map(r=>[...r]),x:Math.floor(TC/2)-Math.floor(s[0].length/2),y:0}
+}
+function tCollide(){
+  for(let r=0;r<tPiece.shape.length;r++){
+    for(let c=0;c<tPiece.shape[r].length;c++){
+      if(!tPiece.shape[r][c]) continue
+      const nx=tPiece.x+c
+      const ny=tPiece.y+r
+      if(nx<0||nx>=TC||ny>=TR) return true
+      if(ny>=0 && tBoard[ny][nx]) return true
+    }
+  }
+  return false
+}
+function tMove(dx,dy){
+  tPiece.x+=dx
+  tPiece.y+=dy
+  if(tCollide()){
+    tPiece.x-=dx
+    tPiece.y-=dy
+    if(dy>0) tLock()
+  }
+}
+function tRotate(){
+  const orig=tPiece.shape
+  tPiece.shape=tPiece.shape[0].map((_,ci)=>tPiece.shape.map(row=>row[ci]).reverse())
+  if(tCollide()) tPiece.shape=orig
+}
+function tHardDrop(){
+  while(!tCollide()) tPiece.y++
+  tPiece.y--
+  tLock()
+}
+function tLock(){
+  for(let r=0;r<tPiece.shape.length;r++){
+    for(let c=0;c<tPiece.shape[r].length;c++){
+      if(!tPiece.shape[r][c]) continue
+      const ny=tPiece.y+r
+      if(ny<0){
+        if(gameCheats.tetris?.noGameOver){
+          resetTetris()
+          tRunning=true
+          requestAnimationFrame(tLoop)
+          return
+        }
+        tGameOver()
+        return
+      }
+      tBoard[ny][tPiece.x+c]=tPiece.type
+    }
+  }
+  clearLines()
+  tPiece=makePiece()
+  if(tCollide()){
+    if(gameCheats.tetris?.noGameOver){
+      resetTetris()
+      tRunning=true
+      requestAnimationFrame(tLoop)
+      return
+    }
+    tGameOver()
+  }
+}
+function clearLines(){
+  let cleared=0
+  for(let r=TR-1;r>=0;r--){
+    if(tBoard[r].every(v=>v!==0)){
+      tBoard.splice(r,1)
+      tBoard.unshift(Array(TC).fill(0))
+      cleared++
+      r++
+    }
+  }
+  if(cleared){
+    tScore+=[0,100,300,500,800][cleared]*tLevel
+    tLines+=cleared
+    tLevel=Math.max(tLevel,Math.floor(tLines/10)+1)
+    $('tScore').textContent=String(tScore)
+    $('tLines').textContent=String(tLines)
+    $('tLevel').textContent=String(tLevel)
+    if(tScore>(gameCheats.tetris?.highScore||0)){
+      gameCheats.tetris.highScore=tScore
+      $('tBest').textContent=String(tScore)
+      saveSettings()
+    }
+  }
+}
+function drawCell(c,r,col){
+  const x=c*TS,y=r*TS
+  tetrisCtx.fillStyle=col
+  tetrisCtx.fillRect(x+1,y+1,TS-2,TS-2)
+  tetrisCtx.fillStyle='rgba(255,255,255,.12)'
+  tetrisCtx.fillRect(x+2,y+2,TS-6,3)
+}
+function drawTetris(){
+  const W=tetrisCanvas.width,H=tetrisCanvas.height
+  tetrisCtx.fillStyle='#050505'
+  tetrisCtx.fillRect(0,0,W,H)
+  tetrisCtx.strokeStyle='rgba(255,106,0,0.06)'
+  tetrisCtx.lineWidth=0.5
+  for(let r=0;r<=TR;r++){tetrisCtx.beginPath();tetrisCtx.moveTo(0,r*TS);tetrisCtx.lineTo(W,r*TS);tetrisCtx.stroke()}
+  for(let c=0;c<=TC;c++){tetrisCtx.beginPath();tetrisCtx.moveTo(c*TS,0);tetrisCtx.lineTo(c*TS,H);tetrisCtx.stroke()}
+
+  for(let r=0;r<TR;r++) for(let c=0;c<TC;c++) if(tBoard[r][c]) drawCell(c,r,T_COLORS[tBoard[r][c]])
+
+  if(!tPiece) return
+  for(let r=0;r<tPiece.shape.length;r++){
+    for(let c=0;c<tPiece.shape[r].length;c++){
+      if(!tPiece.shape[r][c]) continue
+      drawCell(tPiece.x+c,tPiece.y+r,T_COLORS[tPiece.type])
+    }
+  }
+}
+function startTetris(){
+  stopTetris()
+  resetTetris()
+  tRunning=true
+  tDrop=0
+  tLast=0
+  requestAnimationFrame(tLoop)
+}
+function stopTetris(){tRunning=false}
+function tLoop(time=0){
+  if(!tRunning) return
+  const dt=time-tLast
+  tLast=time
+  tDrop+=dt
+  const speed=Math.max(85,700-(tLevel-1)*60)
+  if(tDrop>=speed){
+    tMove(0,1)
+    tDrop=0
+  }
+  drawTetris()
+  requestAnimationFrame(tLoop)
+}
+function tGameOver(){
+  tRunning=false
+  drawTetris()
+  const W=tetrisCanvas.width,H=tetrisCanvas.height
+  tetrisCtx.fillStyle='rgba(0,0,0,.75)'
+  tetrisCtx.fillRect(0,0,W,H)
+  tetrisCtx.fillStyle='#ff6a00'
+  tetrisCtx.font='900 22px Inter'
+  tetrisCtx.textAlign='center'
+  tetrisCtx.fillText('GAME OVER',W/2,H/2-12)
+  tetrisCtx.fillStyle='#ffb100'
+  tetrisCtx.font='900 14px Inter'
+  tetrisCtx.fillText('Score: '+tScore,W/2,H/2+14)
+}
+
+function switchGame(mode){
+  const snake=mode==='snake'
+  $('tabSnake').classList.toggle('active',snake)
+  $('tabTetris').classList.toggle('active',!snake)
+  $('snakeCanvas').style.display=snake?'block':'none'
+  $('tetrisCanvas').style.display=snake?'none':'block'
+  $('snakeScoreBox').style.display=snake?'block':'none'
+  $('tetrisScoreBox').style.display=snake?'none':'block'
+  $('snakeCheats').style.display=snake?'block':'none'
+  $('tetrisCheats').style.display=snake?'none':'block'
+  $('gTitle').textContent=snake?'Snake Break':'Tetris Break'
+}
+
+function initAuth(){
+  let mode='signin'
+  const setTabs=()=>{
+    $('tabSignIn').classList.toggle('active',mode==='signin')
+    $('tabSignUp').classList.toggle('active',mode==='signup')
+    $('authGo').textContent=mode==='signin'?'Enter':'Create'
+    $('authErr').textContent=''
+  }
+  $('tabSignIn').onclick=()=>{mode='signin';setTabs()}
+  $('tabSignUp').onclick=()=>{mode='signup';setTabs()}
+  $('authGo').onclick=async ()=>{
+    const email=$('authEmail').value.trim()
+    const pass=$('authPass').value
+    if(!email||!pass){$('authErr').textContent='Enter email + password';return}
+    if(mode==='signup'){
+      const {error}=await supabase.auth.signUp({email:email,password:pass})
+      if(error){$('authErr').textContent=error.message;return}
+      toast('Check email','Confirm your account then sign in','ok')
+    }else{
+      const {error}=await supabase.auth.signInWithPassword({email:email,password:pass})
+      if(error){$('authErr').textContent=error.message;return}
+    }
+  }
+  $('authMagic').onclick=async ()=>{
+    const email=$('authEmail').value.trim()
+    if(!email){$('authErr').textContent='Enter email';return}
+    const {error}=await supabase.auth.signInWithOtp({email:email})
+    if(error){$('authErr').textContent=error.message;return}
+    toast('Magic link sent','Check your email','ok')
+  }
+  $('authReset').onclick=async ()=>{
+    const email=$('authEmail').value.trim()
+    if(!email){$('authErr').textContent='Enter email';return}
+    const {error}=await supabase.auth.resetPasswordForEmail(email)
+    if(error){$('authErr').textContent=error.message;return}
+    toast('Reset sent','Check your email','ok')
+  }
+  setTabs()
+}
+
+async function signOut(){
+  await supabase.auth.signOut()
+  location.reload()
+}
+
+function wireUI(){
+  $('btnNew').onclick=createNote
+  $('saveNow').onclick=saveNote
+  $('delNote').onclick=deleteNote
+
+  $('modeEdit').onclick=()=>setView('editor')
+  $('modePreview').onclick=()=>setView('preview')
+  $('modeGraph').onclick=()=>setView('graph')
+
+  $('toggleFull').onclick=toggleFullPreview
+  $('toggleSplit').onclick=()=>{
+    if(splitMode==='split') setSplit('editor')
+    else if(splitMode==='editor') setSplit('split')
+    else setSplit('split')
+  }
+
+  $('doPdf').onclick=openPdfModal
+  $('pdfClose').onclick=closePdfModal
+  $('pdfCancel').onclick=closePdfModal
+  $('pdfGo').onclick=exportPdf
+
+  $('openSettings').onclick=openSettings
+  $('setClose').onclick=closeSettings
+  $('setCancel').onclick=closeSettings
+  $('setSave').onclick=saveSettingsFromModal
+
+  $('search').oninput=renderList
+  $('sort').onchange=()=>{
+    uiPrefs.sort=$('sort').value
+    saveSettings()
+    renderList()
+  }
+
+  $('openPalette').onclick=openPalette
+  $('paletteBack').onclick=e=>{if(e.target.id==='paletteBack') closePalette()}
+  $('paletteQ').oninput=()=>renderPalette($('paletteQ').value)
+  $('paletteQ').onkeydown=e=>{
+    if(e.key==='Escape'){closePalette();return}
+    if(e.key==='Enter'){
+      const first=$('paletteList').querySelector('.pItem')
+      if(first) first.click()
+    }
+  }
+
+  $('schoolPill').onclick=()=>{
+    currentSchool=(currentSchool==='Salesianum')?'St Peter Cathedral':'Salesianum'
+    $('schoolText').textContent=currentSchool
+    saveSettings()
+    autosave()
+    updateCrumb()
+    toast('School',currentSchool,'ok')
+  }
+
+  $('title').oninput=()=>{autosave();updatePreview();updateCrumb();renderList()}
+  $('body').oninput=()=>{autosave();updatePreview();refreshLinksUI()}
+  $('grade').onchange=()=>{autosave();updateCrumb();renderList();refreshLinksUI()}
+
+  document.querySelectorAll('.tool').forEach(t=>{
+    t.onclick=()=>applyMd(t.getAttribute('data-md'))
+  })
+
+  $('linkSearch').oninput=searchLinkCandidates
+  $('closeDrop').onclick=()=>{$('cardDrop').style.display='none';$('linkSearch').value=''}
+  $('unlinkAll').onclick=unlinkAll
+  $('jumpPreview').onclick=()=>setView('preview')
+  $('jumpGraph').onclick=()=>setView('graph')
+  $('linkAllMentions').onclick=linkAllMentions
+  $('backToEdit').onclick=()=>setView('editor')
+
+  $('tStart').onclick=startTimer
+  $('tPause').onclick=pauseTimer
+  $('tReset').onclick=resetTimer
+  $('mFocus').onclick=()=>setTimer(timerPresets.focus||25)
+  $('mBreak').onclick=()=>setTimer(timerPresets.break||5)
+  $('mLong').onclick=()=>setTimer(timerPresets.long||15)
+  $('mBreakGame').onclick=()=>{setTimer(timerPresets.break||5);setView('games')}
+
+  $('btnGames').onclick=()=>setView('games')
+
+  $('tabSnake').onclick=()=>switchGame('snake')
+  $('tabTetris').onclick=()=>switchGame('tetris')
+  $('gStart').onclick=()=>{
+    const snake=$('snakeCanvas').style.display!=='none'
+    if(snake) startSnake()
+    else startTetris()
+  }
+  $('gClose').onclick=()=>{
+    stopSnake()
+    stopTetris()
+    setView('editor')
+  }
+
+  $('cSnakeNoDie').onchange=()=>{
+    gameCheats.snake.noDie=$('cSnakeNoDie').checked
+    saveSettings()
+    toast('Cheat','Snake No-Die '+(gameCheats.snake.noDie?'ON':'OFF'),'warn')
+  }
+  $('cSnakeSpeed').oninput=()=>{
+    const v=parseInt($('cSnakeSpeed').value,10)
+    gameCheats.snake.speed=v
+    $('cSnakeSpeedV').textContent=v+'ms'
+    saveSettings()
+    if(snakeRunning){
+      clearInterval(snakeInterval)
+      snakeInterval=setInterval(tickSnake,v)
+    }
+  }
+  $('cTNoOver').onchange=()=>{
+    gameCheats.tetris.noGameOver=$('cTNoOver').checked
+    saveSettings()
+    toast('Cheat','Tetris No Game Over '+(gameCheats.tetris.noGameOver?'ON':'OFF'),'warn')
+  }
+  $('cTLevel').onchange=()=>{
+    const v=clamp(parseInt($('cTLevel').value||1,10),1,20)
+    gameCheats.tetris.startLevel=v
+    $('cTLevel').value=v
+    saveSettings()
+    toast('Cheat','Tetris Start Level '+v,'warn')
+  }
+
+  $('gReset').onclick=()=>{buildGraph();renderGraph()}
+  $('gPhys').onclick=()=>{graphPhysics=!graphPhysics;toast('Graph','Physics '+(graphPhysics?'ON':'OFF'),'warn')}
+  $('gCenter').onclick=()=>{gView={x:0,y:0,scale:1};renderGraph()}
+
+  $('signOut').onclick=signOut
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      if($('paletteBack').style.display==='flex') closePalette()
+      if($('modalPdf').style.display==='flex') closePdfModal()
+      if($('modalSettings').style.display==='flex') closeSettings()
+      if(document.body.classList.contains('previewFull')) toggleFullPreview()
+      closeMobileSidebar()
+      return
+    }
+    const k=e.key.toLowerCase()
+    if((e.ctrlKey||e.metaKey) && k==='k'){e.preventDefault();openPalette();return}
+    if((e.ctrlKey||e.metaKey) && k==='s'){e.preventDefault();saveNote();return}
+
+    if($('viewGames').classList.contains('active')){
+      const snake=$('snakeCanvas').style.display!=='none'
+      if(snake && snakeRunning){
+        if((k==='arrowup'||k==='w') && dir.y===0) dir={x:0,y:-1}
+        else if((k==='arrowdown'||k==='s') && dir.y===0) dir={x:0,y:1}
+        else if((k==='arrowleft'||k==='a') && dir.x===0) dir={x:-1,y:0}
+        else if((k==='arrowright'||k==='d') && dir.x===0) dir={x:1,y:0}
+      }else if(!snake && tRunning){
+        if(e.key==='ArrowLeft') tMove(-1,0)
+        else if(e.key==='ArrowRight') tMove(1,0)
+        else if(e.key==='ArrowDown') tMove(0,1)
+        else if(e.key==='ArrowUp') tRotate()
+        else if(e.key===' '){tHardDrop();e.preventDefault()}
+      }
+    }
+  })
+
+  $('backdrop').onclick=closeMobileSidebar
+  $('mobileMenu').onclick=openMobileSidebar
+
+  window.addEventListener('resize',maybeMobileUI)
+  maybeMobileUI()
+
+  window.addEventListener('online',()=>{if(activeId) setStatus('saved')})
+  window.addEventListener('offline',()=>setStatus('offline'))
+}
+
+async function boot(){
+  initAuth()
+  initSplitResize()
+  initGraph()
+  initGames()
+  wireUI()
+
+  const sess=await supabase.auth.getSession()
+  if(sess.data?.session){
+    user=sess.data.session.user
+    $('authBack').style.display='none'
+    $('userEmail').textContent=user.email||'Signed in'
+    $('avatar').textContent=((user.email||'U')[0]||'U').toUpperCase()
+    await ensureSettings()
+    await fetchNotes()
+    setSplit('split')
+    setStatus(navigator.onLine?'saved':'offline')
+  }else{
+    $('authBack').style.display='flex'
+  }
+
+  supabase.auth.onAuthStateChange(async (ev,session)=>{
+    if(session){
+      user=session.user
+      $('authBack').style.display='none'
+      $('userEmail').textContent=user.email||'Signed in'
+      $('avatar').textContent=((user.email||'U')[0]||'U').toUpperCase()
+      await ensureSettings()
+      await fetchNotes()
+      setSplit('split')
+      setStatus(navigator.onLine?'saved':'offline')
+    }else{
+      $('authBack').style.display='flex'
+    }
+  })
+}
+
+boot()
+</script>
+
+</body>
+</html>
