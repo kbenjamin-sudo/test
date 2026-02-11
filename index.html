@@ -538,11 +538,27 @@ button,input,select,textarea{font-family:var(--font)}
   font-size:11px;
   color:rgba(238,242,255,.75);
   user-select:none;
+  transition:border-color .3s;
 }
-.dot{width:8px;height:8px;border-radius:50%}
+.status.is-saving{border-color:rgba(255,177,0,.4)}
+.status.is-saved{border-color:rgba(34,197,94,.35)}
+.status.is-error{border-color:rgba(255,59,59,.4)}
+.dot{width:8px;height:8px;border-radius:50%;transition:all .3s}
 .dot.ok{background:var(--ok);box-shadow:0 0 16px rgba(34,197,94,.35)}
-.dot.warn{background:var(--warn);box-shadow:0 0 16px rgba(255,177,0,.35)}
+.dot.warn{background:var(--warn);box-shadow:0 0 16px rgba(255,177,0,.35);animation:dotPulse 1.1s ease infinite}
 .dot.bad{background:var(--bad);box-shadow:0 0 16px rgba(255,59,59,.35)}
+@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+/* DB setup banner */
+#dbBanner{
+  position:fixed;top:0;left:0;right:0;z-index:9999;
+  background:linear-gradient(90deg,rgba(180,20,20,.97),rgba(220,60,0,.97));
+  color:#fff;padding:11px 20px;font-size:12px;font-weight:800;
+  display:none;align-items:center;gap:10px;
+  box-shadow:0 4px 24px rgba(0,0,0,.5);
+}
+#dbBanner code{background:rgba(255,255,255,.2);padding:2px 6px;border-radius:6px;font-family:var(--mono);font-size:11px}
+#dbBanner .dbx{margin-left:auto;cursor:pointer;font-size:18px;opacity:.7;line-height:1}
+#dbBanner .dbx:hover{opacity:1}
 .iconbtn{
   width:44px;height:40px;
   border-radius:14px;
@@ -1325,6 +1341,12 @@ kbd{
 </head>
 <body>
 
+<div id="dbBanner">
+  ⚠️ Database not set up — notes won't save. Run the Supabase SQL from the setup instructions. 
+  <span style="opacity:.7;margin-left:4px">Open browser console (F12) for details.</span>
+  <span class="dbx" onclick="this.parentElement.style.display='none'">✕</span>
+</div>
+
 <div class="toastWrap" id="toastWrap"></div>
 
 <div class="paletteBack" id="paletteBack">
@@ -1705,6 +1727,23 @@ const SUPABASE_URL='https://cgmazcvmpcgistoimqlw.supabase.co'
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc'
 const supabase=createClient(SUPABASE_URL,SUPABASE_KEY)
 
+// ── DB DIAGNOSTICS: run once after login, surface real errors ──
+async function runDiagnostics(){
+  console.group('📊 StudyOS DB Diagnostics')
+  const tests=[
+    {name:'notes SELECT',fn:()=>supabase.from('notes').select('id').limit(1)},
+    {name:'notes INSERT (dry)',fn:()=>supabase.from('notes').select('id,title,content,grade,school,updated_at,created_at').limit(1)},
+    {name:'note_links SELECT',fn:()=>supabase.from('note_links').select('id,note_a,note_b,user_id').limit(1)},
+    {name:'user_settings SELECT',fn:()=>supabase.from('user_settings').select('user_id,current_school,ui,timer,game').limit(1)},
+  ]
+  for(const t of tests){
+    const {data,error}=await t.fn()
+    if(error) console.error(`❌ ${t.name}:`,error.message,'(code:',error.code+')')
+    else console.log(`✅ ${t.name}: ok`)
+  }
+  console.groupEnd()
+}
+
 marked.setOptions({
   breaks:true,
   highlight:(code,lang)=>{
@@ -1821,31 +1860,39 @@ function setStatus(mode){
   const el=$('saveStatus')
   const dot=el.querySelector('.dot')
   const txt=el.querySelectorAll('span')[1]
+  el.classList.remove('is-saving','is-saved','is-error')
   if(mode==='saving'){
-    dot.className='dot warn'
-    txt.textContent='Saving...'
+    dot.className='dot warn'; txt.textContent='Saving…'; el.classList.add('is-saving')
   }else if(mode==='saved'){
-    dot.className='dot ok'
-    txt.textContent='Saved '+fmtTime(Date.now())
+    dot.className='dot ok'; txt.textContent='Saved '+fmtTime(Date.now()); el.classList.add('is-saved')
   }else if(mode==='error'){
-    dot.className='dot bad'
-    txt.textContent='Save failed'
+    dot.className='dot bad'; txt.textContent='Save failed'; el.classList.add('is-error')
+    $('dbBanner').style.display='flex'
   }else if(mode==='offline'){
-    dot.className='dot bad'
-    txt.textContent='Offline'
+    dot.className='dot bad'; txt.textContent='Offline'; el.classList.add('is-error')
   }else{
-    dot.className='dot warn'
-    txt.textContent='Not saved'
+    dot.className='dot warn'; txt.textContent='Not saved'
   }
 }
 
 async function ensureSettings(){
-  const {data}=await supabase.from('user_settings').select('*').eq('user_id',user.id).maybeSingle()
-  if(!data){
-    const ins=await supabase.from('user_settings').insert({user_id:user.id}).select().single()
-    if(ins.data) applySettings(ins.data)
-  }else{
-    applySettings(data)
+  try{
+    const {data,error}=await supabase.from('user_settings').select('*').eq('user_id',user.id).maybeSingle()
+    if(error){
+      console.warn('user_settings fetch error (table may not exist yet):', error.message)
+      // Still try to create a default row
+      await supabase.from('user_settings').upsert({user_id:user.id},{onConflict:'user_id'})
+      return
+    }
+    if(!data){
+      const {data:ins,error:ie}=await supabase.from('user_settings').upsert({user_id:user.id},{onConflict:'user_id'}).select().single()
+      if(ins) applySettings(ins)
+      if(ie) console.warn('user_settings create error:',ie.message)
+    }else{
+      applySettings(data)
+    }
+  }catch(e){
+    console.warn('ensureSettings failed entirely, using defaults:',e)
   }
 }
 
@@ -1872,20 +1919,23 @@ function applySettings(s){
 
 let settingsT=null
 function saveSettings(){
+  if(!user) return
   clearTimeout(settingsT)
   settingsT=setTimeout(async ()=>{
-    await supabase.from('user_settings').upsert({
+    const {error}=await supabase.from('user_settings').upsert({
       user_id:user.id,
       current_school:currentSchool,
       ui:uiPrefs,
       timer:timerPresets,
       game:gameCheats
-    })
+    },{onConflict:'user_id'})
+    if(error) console.warn('saveSettings error:',error.message)
   },250)
 }
 
 async function fetchLinks(){
-  const {data}=await supabase.from('note_links').select('note_a,note_b').eq('user_id',user.id)
+  const {data,error}=await supabase.from('note_links').select('note_a,note_b').eq('user_id',user.id)
+  if(error){ console.warn('fetchLinks error:',error.message); links=[]; return }
   links=data||[]
 }
 
@@ -1900,7 +1950,14 @@ function rebuildLinkedOnClient(){
 }
 
 async function fetchNotes(){
-  const {data}=await supabase.from('notes').select('*').eq('user_id',user.id).order('updated_at',{ascending:false})
+  const {data,error}=await supabase.from('notes').select('*').eq('user_id',user.id).order('updated_at',{ascending:false})
+  if(error){
+    console.error('fetchNotes error:',error)
+    toast('Could not load notes',error.message,'bad')
+    $('dbBanner').style.display='flex'
+    return
+  }
+  $('dbBanner').style.display='none'
   notes=(data||[]).map(n=>({...n,linked_notes:[]}))
   await fetchLinks()
   rebuildLinkedOnClient()
@@ -2044,7 +2101,15 @@ function escapeHtml(s){
 }
 
 async function createNote(){
-  const {data,error}=await supabase.from('notes').insert({user_id:user.id,title:'',content:'',grade:'',school:currentSchool}).select().single()
+  if(!user){ toast('Not signed in','Please sign in','bad'); return }
+  // Try with school column first, fallback without
+  let data,error
+  const r1=await supabase.from('notes').insert({user_id:user.id,title:'',content:'',grade:'',school:currentSchool}).select().single()
+  data=r1.data; error=r1.error
+  if(error && (error.message.includes('school')||error.code==='42703')){
+    const r2=await supabase.from('notes').insert({user_id:user.id,title:'',content:'',grade:''}).select().single()
+    data=r2.data; error=r2.error
+  }
   if(error){toast('Create failed',error.message,'bad');return}
   notes.unshift({...data,linked_notes:[]})
   uiPrefs.lastOpenNoteId=data.id
@@ -2083,16 +2148,23 @@ function updateCrumb(){
   $('crumbSub').innerHTML=chips.join('')
 }
 
+let autosaveDirty=false
 function autosave(){
   if(!activeId) return
   if(!navigator.onLine){setStatus('offline');return}
+  autosaveDirty=true
   setStatus('saving')
   clearTimeout(autosaveT)
-  autosaveT=setTimeout(()=>saveNote(),650)
+  autosaveT=setTimeout(async ()=>{
+    if(!autosaveDirty) return
+    autosaveDirty=false
+    await saveNote()
+  },800)
 }
 
 async function saveNote(){
   if(!activeId) return
+  if(!user){ toast('Not signed in','Please sign in','bad'); return }
   const n=notes.find(x=>x.id===activeId)
   if(!n) return
   if(!navigator.onLine){setStatus('offline');return}
@@ -2100,25 +2172,32 @@ async function saveNote(){
   const title=$('title').value
   const content=$('body').value
   const grade=$('grade').value||''
-  const {error}=await supabase.from('notes').update({
-    title:title,
-    content:content,
-    grade:grade,
-    school:currentSchool,
-    updated_at:new Date().toISOString()
-  }).eq('id',activeId)
+  const now=new Date().toISOString()
+
+  // Try full update first (with school column)
+  let error=null
+  const r1=await supabase.from('notes').update({
+    title,content,grade,school:currentSchool,updated_at:now
+  }).eq('id',activeId).eq('user_id',user.id)
+  error=r1.error
+
+  // If school column doesn't exist, retry without it
+  if(error && (error.message.includes('school') || error.code==='42703')){
+    console.warn('school column missing, saving without it')
+    const r2=await supabase.from('notes').update({
+      title,content,grade,updated_at:now
+    }).eq('id',activeId).eq('user_id',user.id)
+    error=r2.error
+  }
 
   if(error){
     setStatus('error')
     toast('Save failed',error.message,'bad')
+    console.error('saveNote error:',error)
     return
   }
 
-  n.title=title
-  n.content=content
-  n.grade=grade
-  n.school=currentSchool
-  n.updated_at=new Date().toISOString()
+  n.title=title; n.content=content; n.grade=grade; n.school=currentSchool; n.updated_at=now
   setStatus('saved')
   updateCrumb()
   renderList()
@@ -3317,6 +3396,7 @@ async function boot(){
     $('authBack').style.display='none'
     $('userEmail').textContent=user.email||'Signed in'
     $('avatar').textContent=((user.email||'U')[0]||'U').toUpperCase()
+    runDiagnostics() // log DB health to console
     await ensureSettings()
     await fetchNotes()
     setSplit('split')
@@ -3331,6 +3411,7 @@ async function boot(){
       $('authBack').style.display='none'
       $('userEmail').textContent=user.email||'Signed in'
       $('avatar').textContent=((user.email||'U')[0]||'U').toUpperCase()
+      runDiagnostics()
       await ensureSettings()
       await fetchNotes()
       setSplit('split')
