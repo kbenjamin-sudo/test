@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,6 +39,12 @@
   --r22:22px;
   --side:320px;
   --top:66px;
+
+  --tabBg:rgba(255,255,255,.04);
+  --tabHoverBg:rgba(255,255,255,.06);
+  --tabActiveBg:rgba(255,255,255,.08);
+  --tabText:rgba(238,242,255,.86);
+  --tabActiveText:rgba(238,242,255,.95);
 }
 
 body.skyTheme{
@@ -227,7 +234,7 @@ button,input,select,textarea{font-family:var(--font)}
   border-color:rgba(255,106,0,.55);
   box-shadow:0 0 0 4px rgba(255,106,0,.12);
 }
-.search::placeholder{color:rgba(238,242,255,.35);font-weight:700}
+.search::placeholder{color:var(--muted);font-weight:700}
 
 .side-filters{
   padding:0 18px 10px;
@@ -332,7 +339,7 @@ button,input,select,textarea{font-family:var(--font)}
   flex-shrink:0;
 }
 .note-snippet{
-  color:rgba(238,242,255,.55);
+  color:var(--muted);
   font-weight:650;
   font-size:11px;
   line-height:1.4;
@@ -344,7 +351,7 @@ button,input,select,textarea{font-family:var(--font)}
   display:flex;
   justify-content:space-between;
   align-items:center;
-  color:rgba(238,242,255,.35);
+  color:var(--muted);
   font-weight:800;
   font-size:10px;
 }
@@ -363,7 +370,7 @@ button,input,select,textarea{font-family:var(--font)}
   color:rgba(238,242,255,.7);
 }
 .badge.link{border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.08);color:rgba(152,255,200,.95)}
-.badge.draft{border-color:rgba(255,255,255,.10);background:rgba(255,255,255,.03);color:rgba(238,242,255,.45)}
+.badge.draft{border-color:rgba(255,255,255,.10);background:rgba(255,255,255,.03);color:var(--muted)}
 
 .side-footer{
   padding:12px 18px 14px;
@@ -459,7 +466,7 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
   overflow:hidden;
   text-overflow:ellipsis;
   max-width:170px;
-  color:rgba(238,242,255,.8);
+  color:var(--text);opacity:.82;
 }
 .userline .out{padding:8px 10px;border-radius:14px}
 
@@ -492,21 +499,24 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
 .tab{
   padding:9px 12px;
   border-radius:14px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  color:rgba(238,242,255,.78);
+  border:1px solid var(--stroke);
+  background:var(--tabBg);
+  color:var(--tabText);
   font-weight:900;
   font-size:12px;
   cursor:pointer;
   user-select:none;
-  transition:transform .12s, border-color .12s, background .12s;
+  transition:transform .12s, border-color .12s, background .12s, box-shadow .12s;
 }
-.tab:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.35);background:rgba(255,255,255,.06)}
+.tab:hover{
+  transform:translateY(-1px);
+  background:var(--tabHoverBg);
+}
 .tab.active{
-  background:linear-gradient(135deg, rgba(255,106,0,.22), rgba(255,177,0,.10));
-  border-color:rgba(255,106,0,.6);
-  color:rgba(255,245,240,.98);
-  box-shadow:0 18px 48px rgba(0,0,0,.35);
+  background:var(--tabActiveBg);
+  color:var(--tabActiveText);
+  border-color:rgba(120,147,255,.45);
+  box-shadow:0 10px 30px rgba(120,147,255,.15);
 }
 .notecrumb{
   display:flex;
@@ -524,7 +534,7 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
 }
 .notecrumb .sub{
   font-weight:800;
-  color:rgba(238,242,255,.55);
+  color:var(--muted);
   font-size:11px;
   display:flex;
   gap:10px;
@@ -668,7 +678,7 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
   font-size:11px;
 }
 .metapick input{width:260px}
-.metapick input::placeholder{color:rgba(238,242,255,.35);font-weight:750}
+.metapick input::placeholder{color:var(--muted);font-weight:750}
 .metapick input:focus,.metapick select:focus{
   border-color:rgba(255,106,0,.55);
   box-shadow:0 0 0 4px rgba(255,106,0,.10);
@@ -1040,7 +1050,7 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
   box-shadow:0 0 0 5px rgba(255,106,0,.10);
 }
 .paletteTop .hint{
-  color:rgba(238,242,255,.55);
+  color:var(--muted);
   font-weight:900;
   font-size:11px;
   white-space:nowrap;
@@ -1087,13 +1097,13 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
   margin-top:2px;
   font-weight:750;
   font-size:11px;
-  color:rgba(238,242,255,.55);
+  color:var(--muted);
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 .pK{
-  color:rgba(238,242,255,.55);
+  color:var(--muted);
   font-weight:950;
   font-size:11px;
   white-space:nowrap;
@@ -1133,7 +1143,7 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
 .authHead .s{
   font-weight:800;
   font-size:11px;
-  color:rgba(238,242,255,.55);
+  color:var(--muted);
   margin-top:2px;
 }
 .authTabs{
@@ -1190,7 +1200,7 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
   display:flex;
   justify-content:space-between;
   gap:12px;
-  color:rgba(238,242,255,.55);
+  color:var(--muted);
   font-weight:850;
   font-size:11px;
 }
@@ -1341,7 +1351,7 @@ cheatBox input[type="range"]{accent-color:var(--brand);width:160px}
   flex-wrap:wrap;
 }
 .smallHint{
-  color:rgba(238,242,255,.55);
+  color:var(--muted);
   font-weight:800;
   font-size:11px;
   line-height:1.6;
@@ -1369,7 +1379,18 @@ body.skyTheme{
   --accent: #3b82f6;
   --accent2: #1d4ed8;
   --accent3: #60a5fa;
+
+  --tabBg: rgba(255,255,255,.72);
+  --tabHoverBg: rgba(255,255,255,.92);
+  --tabActiveBg: linear-gradient(135deg, #2e7bff, #5bb6ff);
+  --tabText: rgba(15,23,42,.78);
+  --tabActiveText: #ffffff;
 }
+body.skyTheme .tabsBar{background:rgba(255,255,255,.72);border-color:rgba(15,23,42,.10);box-shadow:0 14px 40px rgba(15,23,42,.08);}
+body.skyTheme .topbar{background:rgba(255,255,255,.72);border-color:rgba(15,23,42,.10);box-shadow:0 14px 40px rgba(15,23,42,.08);}
+body.skyTheme .notecrumb .sub{color:var(--muted);}
+body.skyTheme .userline .name{color:var(--text);opacity:.82;}
+
 body.skyTheme::before{
   content:"";
   position:fixed;
@@ -1509,7 +1530,7 @@ body.skyTheme input, body.skyTheme textarea, body.skyTheme select{
 
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
         <div style="font-weight:950;color:rgba(238,242,255,.85)">Settings for nerds</div>
-        <div style="font-size:11px;color:rgba(238,242,255,.55);font-weight:850">optional</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:850">optional</div>
       </div>
       <div style="height:10px"></div>
       <div class="row" id="nerdLockRow">
@@ -1916,7 +1937,7 @@ let currentSchool='Salesianum'
 let nerdUnlocked=false
 let nerdPrefs={musicMode:'off',sfxMode:'on'}
 
-let autosaveT=null
+let autosaveTimer=null
 let autosaveDirty=false
 let timerInterval=null
 let timeLeft=25*60
@@ -2044,20 +2065,49 @@ function escapeHtml(s){
 
 function setStatus(mode){
   const el=$('saveStatus')
+  if(!el) return
   const dot=el.querySelector('.dot')
-  const txt=el.querySelectorAll('span')[1]
+  const spans=el.querySelectorAll('span')
+  const txt=spans[spans.length-1]
+  const raw=(mode||'').toString().trim()
+  const m=raw.toLowerCase()
   el.classList.remove('is-saving','is-saved','is-error')
-  if(mode==='saving'){
-    dot.className='dot warn'; txt.textContent='Saving…'; el.classList.add('is-saving')
-  }else if(mode==='saved'){
-    dot.className='dot ok'; txt.textContent='Saved '+fmtTime(Date.now()); el.classList.add('is-saved')
-  }else if(mode==='error'){
-    dot.className='dot bad'; txt.textContent='Save failed'; el.classList.add('is-error')
-  }else if(mode==='offline'){
-    dot.className='dot bad'; txt.textContent='Offline'; el.classList.add('is-error')
-  }else{
-    dot.className='dot warn'; txt.textContent='Not saved'
+  if(!raw){
+    if(dot) dot.className='dot'
+    if(txt) txt.textContent=''
+    return
   }
+  if(m==='saving' || m.includes('saving')){
+    if(dot) dot.className='dot warn'
+    if(txt) txt.textContent='Saving…'
+    el.classList.add('is-saving')
+    return
+  }
+  if(m==='saved' || m.includes('saved')){
+    if(dot) dot.className='dot ok'
+    if(txt) txt.textContent='Saved '+fmtTime(Date.now())
+    el.classList.add('is-saved')
+    return
+  }
+  if(m==='offline' || m.includes('offline')){
+    if(dot) dot.className='dot bad'
+    if(txt) txt.textContent='Offline'
+    el.classList.add('is-error')
+    return
+  }
+  if(m==='error' || m.includes('error') || m.includes('failed')){
+    if(dot) dot.className='dot bad'
+    if(txt) txt.textContent='Not saved'
+    el.classList.add('is-error')
+    return
+  }
+  if(m==='dirty' || m.includes('edit')){
+    if(dot) dot.className='dot warn'
+    if(txt) txt.textContent='Editing…'
+    return
+  }
+  if(dot) dot.className='dot warn'
+  if(txt) txt.textContent=raw
 }
 
 async function ensureTables(){
@@ -2221,7 +2271,7 @@ function renderList(){
   })
 
   if(total===0){
-    wrap.innerHTML='<div style="padding:22px 12px;color:rgba(238,242,255,.55);font-weight:850;line-height:1.7">No notes found.<br><span style="color:rgba(255,220,200,.95)">Try another search</span> or press <span style="font-family:var(--mono)">Ctrl+K</span>.</div>'
+    wrap.innerHTML='<div style="padding:22px 12px;color:var(--muted);font-weight:850;line-height:1.7">No notes found.<br><span style="color:rgba(255,220,200,.95)">Try another search</span> or press <span style="font-family:var(--mono)">Ctrl+K</span>.</div>'
   }else{
     wrap.innerHTML=html
     wrap.querySelectorAll('.note-card').forEach(c=>{
@@ -2239,7 +2289,7 @@ function setEmptyState(){
   $('grade').value=''
   $('pTitle').textContent='Untitled'
   $('pMeta').innerHTML=''
-  $('pBody').innerHTML='<div style="color:rgba(238,242,255,.55);font-weight:850;line-height:1.7">Create your first note using <span style="font-family:var(--mono)">New Note</span>.</div>'
+  $('pBody').innerHTML='<div style="color:var(--muted);font-weight:850;line-height:1.7">Create your first note using <span style="font-family:var(--mono)">New Note</span>.</div>'
   hideLinkCards()
 }
 
@@ -2300,33 +2350,33 @@ async function createNote(){
 }
 
 function loadNote(id){
-  const n=notes.find(x=>x.id===id)
+  const n = notes.find(x=>x.id===id)
   if(!n) return
-  activeId=id
-  uiPrefs.lastOpenNoteId=id
+  activeId = id
+  uiPrefs.lastOpenNoteId = id
   saveSettingsDebounced()
 
-  $('title').value=n.title||''
-  $('body').value=n.content||''
-  $('grade').value=n.grade||''
+  $('title').value = n.title || ''
+  $('body').value = n.content || ''
+  $('grade').value = n.grade || ''
 
-  const d=loadDraft()
-  const serverMs = Date.parse(n.updated_at||n.created_at||0) || 0
-  if(d && (d.updated_at_ms||0) > serverMs){
+  const d = loadDraft()
+  const noteMs = n.updated_at ? Date.parse(n.updated_at) : 0
+  if(d && d.updated_at_ms && d.updated_at_ms > (noteMs || 0) + 1000){
     $('title').value = (d.title ?? $('title').value)
-    $('body').value = (d.body ?? $('body').value)
+    $('body').value = (d.content ?? $('body').value)
     $('grade').value = (d.grade ?? $('grade').value)
     autosaveDirty = true
-    setStatus('Recovered changes')
+    setStatus('dirty')
   }else{
-    setStatus('Saved')
+    autosaveDirty = false
+    setStatus('saved')
   }
 
   updateCrumb()
   renderList()
   updatePreview()
   refreshLinksUI()
-  setStatus('Saved')
 }
 
 function updateCrumb(){
@@ -2341,19 +2391,14 @@ function updateCrumb(){
 }
 
 function draftKey(){
-  return user && activeId ? `studyoS_draft_${user.id}_${activeId}` : null
+  return user && activeId ? `studyos_draft_${user.id}_${activeId}` : null
 }
 
 function saveDraft(){
   const k = draftKey()
   if(!k) return
-  const payload = {
-    title: $('title').value,
-    content: $('body').value,
-    grade: $('grade').value,
-    updated_at_ms: Date.now()
-  }
-  try{ localStorage.setItem(k, JSON.stringify(payload)) }catch{}
+  const payload = { id: activeId, title: $('title').value, content: $('body').value, grade: $('grade').value, updated_at_ms: Date.now() }
+  try{ localStorage.setItem(k, JSON.stringify(payload)) }catch(e){}
 }
 
 function loadDraft(){
@@ -2362,51 +2407,63 @@ function loadDraft(){
   try{
     const raw = localStorage.getItem(k)
     return raw ? JSON.parse(raw) : null
-  }catch{ return null }
+  }catch(e){ return null }
 }
 
 function clearDraft(){
   const k = draftKey()
   if(!k) return
-  try{ localStorage.removeItem(k) }catch{}
+  try{ localStorage.removeItem(k) }catch(e){}
 }
 
 function autosave(){
   if(!activeId) return
   autosaveDirty = true
   saveDraft()
-  setStatus('Editing…')
+  setStatus('dirty')
   if(autosaveTimer) clearTimeout(autosaveTimer)
   autosaveTimer = setTimeout(async ()=>{
-    const ok = await saveNote()
+    const ok = await saveNote({ silent:true })
     if(ok){
       autosaveDirty = false
       clearDraft()
+      setStatus('saved')
     }else{
       autosaveDirty = true
-      setStatus('Offline / not saved')
+      setStatus('error')
     }
-  }, 650)
+  }, 700)
 }
 
-async function saveNote(){
+async function saveNote({ silent=false } = {}){
   if(!user || !activeId) return false
   saveDraft()
-  const payload = {
-    id: activeId,
-    user_id: user.id,
-    title: $('title').value.trim() || 'Untitled',
-    body: $('body').value,
-    grade: $('grade').value || null,
-    updated_at: new Date().toISOString()
-  }
-  setStatus('Saving…')
+  const title = $('title').value.trim() || 'Untitled'
+  const content = $('body').value || ''
+  const grade = $('grade').value || ''
+  const updated_at = new Date().toISOString()
+  const payload = { id: activeId, user_id: user.id, title, content, grade, updated_at }
+  if(!silent) setStatus('saving')
   try{
-    const { error } = await supabase.from('notes').upsert(payload)
+    const { error } = await supabase.from('notes').upsert(payload, { onConflict: 'id' })
     if(error) throw error
-    setStatus('Saved')
+    let n = notes.find(x=>x.id===activeId)
+    if(!n){
+      n = { id: activeId, title, content, grade, updated_at }
+      notes.unshift(n)
+    }else{
+      n.title = title
+      n.content = content
+      n.grade = grade
+      n.updated_at = updated_at
+    }
+    clearDraft()
+    renderList()
+    refreshLinksUI()
+    if(!silent) setStatus('saved')
     return true
   }catch(e){
+    if(!silent) setStatus('error')
     return false
   }
 }
@@ -2551,13 +2608,13 @@ function showLinkDrop(list){
   $('cardDrop').style.display='block'
   const wrap=$('dropList')
   if(!list.length){
-    wrap.innerHTML='<div style="padding:10px;color:rgba(238,242,255,.55);font-weight:850">No matches</div>'
+    wrap.innerHTML='<div style="padding:10px;color:var(--muted);font-weight:850">No matches</div>'
     return
   }
   wrap.innerHTML=list.map(n=>{
     const t=(n.title&&n.title.trim()?n.title:'Untitled')
     const g=n.grade?(' · '+gradeLabels[n.grade]):''
-    return '<div class="pillnote" style="width:100%;justify-content:space-between" data-pick="'+n.id+'"><span>'+escapeHtml(t)+'</span><span style="color:rgba(238,242,255,.45);font-weight:950;font-size:11px">'+escapeHtml(g)+'</span></div>'
+    return '<div class="pillnote" style="width:100%;justify-content:space-between" data-pick="'+n.id+'"><span>'+escapeHtml(t)+'</span><span style="color:var(--muted);font-weight:950;font-size:11px">'+escapeHtml(g)+'</span></div>'
   }).join('')
   wrap.querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>linkNote(p.getAttribute('data-pick')))
 }
@@ -4137,8 +4194,8 @@ function wireUI(){
 
   document.addEventListener('visibilitychange',()=>{
     if(document.visibilityState!=='visible'){
-      if(activeId && autosaveDirty){saveNote()}
-      audio.pause();return
+      if(activeId){saveDraft(); if(autosaveDirty) saveNote({silent:true})}
+      saveSettingsNow();audio.pause();return
     }
     if(nerdPrefs.musicMode && nerdPrefs.musicMode!=='off') applyMusicMode()
   })
@@ -4198,3 +4255,4 @@ boot()
 
 </body>
 </html>
+
