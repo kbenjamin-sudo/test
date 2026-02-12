@@ -1448,7 +1448,7 @@ body{
       <div id="nerdBox" style="display:none;margin-top:10px">
         <p style="margin-bottom:10px">Private background audio (off by default). Quick mute: <span style="font-family:var(--mono)">Alt</span>+<span style="font-family:var(--mono)">M</span> or <span style="font-family:var(--mono)">`</span>.</p>
         <div class="row">
-          <select id="musicMode"><option value="off">Music: Off</option><option value="a">A — autumn! · one way (instrumental)</option><option value="j1">J — free jaydes · pluggnb type (instrumental)</option><option value="j2">J — jaydes · convenience (instrumental)</option><option value="j3">J — jaydes · entry four (instrumental)</option><option value="k">K — Kyle Richh x Sdot Go · Drive me crazy (instrumental)</option><option value="m">M — Me vs Me (instrumental)</option></select>
+          <select id="musicMode"><option value="off">Music: Off</option><option value="a">A — autumn! · one way (instrumental)</option><option value="j1">J — free jaydes · pluggnb type (instrumental)</option><option value="j2">J — jaydes · convenience (instrumental)</option><option value="k">K — Kyle Richh x Sdot Go · Drive me crazy (instrumental)</option><option value="m">M — Me vs Me (instrumental)</option></select>
           <select id="sfxMode">
             <option value="on">Game SFX: On</option>
             <option value="off">Game SFX: Off</option>
@@ -1890,7 +1890,6 @@ const MUSIC_URLS={
   a:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/autumn!%20-%20one%20way%20(instrumental).mp3',
   j1:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/free%20jaydes%20%20pluggnb%20type%20beat%20self%20(1).mp3',
   j2:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes%20%20convenience%20(fixed%20instrumental)%20(1).mp3',
-  j3:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes%20-%20entry%20four%20(instrumental)%20(prod.%20khozy)%20(1).mp3',
   k:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/Kyle%20Richh%20x%20Sdot%20Go%20-%20Drive%20me%20crazyOblivious%20(official%20instrumental)%20(1).mp3',
   m:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/Me%20vs%20Me%20(Instrumental)%20-%20Jaeychino%20and%20SlimeGetEm%20(1).mp3'
 }
@@ -2983,21 +2982,19 @@ function syncCheatUI(){
   $('snakeBest').textContent=String(gameCheats.snake?.highScore||0)
   $('tBest').textContent=String(gameCheats.tetris?.highScore||0)
   $('rBest').textContent=String(gameCheats.runner?.best||0)
-
-  $('cSnakeNoDie').checked=!!gameCheats.snake?.noDie
-  $('cSnakeGhost').checked=!!gameCheats.snake?.ghost
-  $('cSnakeWrap').checked=!!gameCheats.snake?.wrap
-  $('cSnakeNoObs').checked=!!gameCheats.snake?.noObstacles
-  $('cSnakeNoPoison').checked=!!gameCheats.snake?.noPoison
+  if($('cSnakeNoDie')) $('cSnakeNoDie').checked=!!gameCheats.snake?.noDie
+  if($('cSnakeGhost')) $('cSnakeGhost').checked=!!gameCheats.snake?.ghost
+  if($('cSnakeWrap')) $('cSnakeWrap').checked=!!gameCheats.snake?.wrap
+  if($('cSnakeNoObs')) $('cSnakeNoObs').checked=!!gameCheats.snake?.noObstacles
+  if($('cSnakeNoPoison')) $('cSnakeNoPoison').checked=!!gameCheats.snake?.noPoison
   $('cSnakeSpeed').value=gameCheats.snake?.speed??95
   $('cSnakeSpeedV').textContent=(gameCheats.snake?.speed??95)+'ms'
-  $('cSnakeBoost').checked=!!gameCheats.snake?.boost
-
-  $('cTNoOver').checked=!!gameCheats.tetris?.noGameOver
+  if($('cSnakeBoost')) $('cSnakeBoost').checked=!!gameCheats.snake?.boost
+  if($('cTNoOver')) $('cTNoOver').checked=!!gameCheats.tetris?.noGameOver
   $('cTLevel').value=gameCheats.tetris?.startLevel??1
 
-  $('cREasy').checked=!!(gameCheats.runner?.slow)
-  $('cRDash').checked=!!(gameCheats.runner?.noCrash)
+  if($('cRSlow')) $('cRSlow').checked=!!(gameCheats.runner?.slow)
+  if($('cRNoCrash')) $('cRNoCrash').checked=!!(gameCheats.runner?.noCrash)
 }
 
 function resetSnake(){
