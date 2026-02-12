@@ -1,2453 +1,2691 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>StudyOS</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
+/* ═══════════════════════════════════════════════
+   STUDYOS — BLACK FLAME THEME
+   Montserrat · Orange/Amber · Deep Black
+═══════════════════════════════════════════════ */
 :root{
-  --bg:#0a0c11;
-  --bg2:#0c0f16;
-  --surface:rgba(255,255,255,.04);
-  --surface2:rgba(255,255,255,.055);
-  --border:rgba(255,255,255,.10);
-  --border2:rgba(255,255,255,.14);
-  --text:#f4f6fb;
-  --muted:#a7afc2;
-  --muted2:#7f879b;
-  --accent:#4f8cff;
-  --accent2:#8ab7ff;
-  --bad:#ff4d4d;
-  --good:#41d98a;
-  --shadow: 0 18px 40px rgba(0,0,0,.40);
-  --radius:18px;
-  --radius2:22px;
+  --bg:     #080a0d;
+  --bg2:    #0b0e14;
+  --panel:  #0f1319;
+  --panel2: #13181f;
+  --card:   #161c24;
+  --border: rgba(255,255,255,.08);
+  --border2:rgba(255,255,255,.13);
+  --text:   #f0ece4;
+  --muted:  #8a8070;
+  --muted2: #5a5248;
+  --brand:  #ff6a00;
+  --brand2: #ffb100;
+  --brand3: #ff8c00;
+  --glow:   rgba(255,106,0,.28);
+  --glow2:  rgba(255,177,0,.18);
+  --bad:    #ff4040;
+  --good:   #3ecf80;
+  --shadow: 0 8px 32px rgba(0,0,0,.55);
+  --shadow2:0 20px 60px rgba(0,0,0,.75);
+  --font:   'Montserrat', system-ui, sans-serif;
+  --mono:   'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --side:   296px;
+  --top:    62px;
+  --r:      16px;
+  --r2:     20px;
 }
-*{box-sizing:border-box}
-html,body{height:100%}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-size:13px}
 body{
-  margin:0;
-  font-family:"Montserrat",sans-serif;
-  background:
-    radial-gradient(1200px 900px at 15% -10%, rgba(79,140,255,.18), transparent 55%),
-    radial-gradient(1000px 800px at 90% 0%, rgba(138,183,255,.11), transparent 55%),
-    linear-gradient(180deg, var(--bg2), var(--bg));
+  font-family:var(--font);
+  background:var(--bg);
+  background-image:
+    radial-gradient(ellipse 1400px 700px at 0% 0%, rgba(255,106,0,.07) 0%, transparent 55%),
+    radial-gradient(ellipse 800px 500px at 100% 100%, rgba(255,177,0,.06) 0%, transparent 55%);
   color:var(--text);
   overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-a{color:inherit}
-.hidden{display:none!important}
+button,input,select,textarea{ font-family:var(--font); font-size:13px }
+button{ cursor:pointer }
+a{ color:inherit; text-decoration:none }
+::selection{ background:rgba(255,106,0,.30) }
+::-webkit-scrollbar{ width:6px; height:6px }
+::-webkit-scrollbar-track{ background:transparent }
+::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.10); border-radius:99px }
+::-webkit-scrollbar-thumb:hover{ background:rgba(255,106,0,.35) }
 
-#app{
-  height:100dvh;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  padding:14px;
-  gap:12px;
+/* ── LAYOUT ── */
+.app{
+  height:100dvh; height:100vh;
+  display:grid;
+  grid-template-columns: var(--side) 1fr;
+  grid-template-rows: 1fr;
+  gap:0;
 }
 
-.shell{
-  flex:1;
-  min-height:0;
-  display:flex;
-  gap:12px;
+/* ══════════════ SIDEBAR ══════════════ */
+aside.sidebar{
+  background: linear-gradient(180deg, var(--panel) 0%, var(--bg2) 100%);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  height:100vh; overflow:hidden;
+  position:relative;
 }
+.side-inner{ display:flex; flex-direction:column; height:100%; min-height:0 }
+
+/* Brand */
+.brand{
+  padding:18px 16px 14px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+  background:linear-gradient(160deg, rgba(255,106,0,.06), transparent 60%);
+}
+.brand-top{ display:flex; align-items:center; gap:12px; margin-bottom:12px }
+.logo{
+  width:38px; height:38px; border-radius:12px; flex-shrink:0;
+  background:linear-gradient(135deg, var(--brand), var(--brand2));
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:18px; color:#0d0800;
+  box-shadow:0 6px 22px var(--glow), inset 0 1px 0 rgba(255,255,255,.25);
+  animation:logoFlicker 4s ease infinite;
+}
+@keyframes logoFlicker{
+  0%,100%{ box-shadow:0 6px 22px var(--glow), inset 0 1px 0 rgba(255,255,255,.25) }
+  50%{ box-shadow:0 8px 30px rgba(255,177,0,.35), 0 0 50px rgba(255,106,0,.12), inset 0 1px 0 rgba(255,255,255,.25) }
+}
+.brand-name .t{
+  font-size:16px; font-weight:800; letter-spacing:-.3px;
+  background:linear-gradient(90deg, var(--brand), var(--brand2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.brand-name .s{ font-size:11px; color:var(--muted); margin-top:2px; font-weight:500 }
+
+.school-pill{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 11px; border-radius:99px; margin-bottom:10px;
+  background:rgba(255,106,0,.09); border:1px solid rgba(255,106,0,.22);
+  cursor:pointer; transition:all .22s;
+}
+.school-pill:hover{ background:rgba(255,106,0,.16); border-color:rgba(255,106,0,.40) }
+.school-pill span{ font-size:11px; font-weight:700; color:var(--brand); letter-spacing:.02em }
+
+.side-actions{ display:flex; gap:8px }
+
+/* Search */
+.search-wrap{ padding:10px 12px 0; flex-shrink:0 }
+.search{
+  width:100%; padding:9px 12px; border-radius:12px;
+  background:rgba(0,0,0,.30); border:1px solid var(--border2);
+  color:var(--text); outline:none; transition:all .2s;
+}
+.search:focus{ border-color:rgba(255,106,0,.45); box-shadow:0 0 0 3px rgba(255,106,0,.12) }
+.search::placeholder{ color:var(--muted2) }
+
+/* Filters row */
+.side-filters{
+  padding:8px 12px 0; display:flex; gap:7px; align-items:center; flex-shrink:0
+}
+.side-filters select{
+  flex:1; padding:7px 10px; border-radius:11px;
+  background:rgba(0,0,0,.28); border:1px solid var(--border);
+  color:var(--text); outline:none; cursor:pointer; appearance:none;
+  transition:border-color .2s;
+}
+.side-filters select:focus{ border-color:rgba(255,106,0,.45) }
+
+/* Note list */
+.note-list{
+  flex:1; overflow-y:auto; padding:8px 8px; display:flex; flex-direction:column; gap:2px; min-height:0
+}
+
+/* Note groups */
+.group{ margin-bottom:4px }
+.group-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:6px 10px 4px; font-size:10px; font-weight:700;
+  color:var(--muted2); text-transform:uppercase; letter-spacing:.12em
+}
+.group-head .count{
+  font-size:11px; padding:1px 7px; border-radius:99px; font-weight:700;
+  background:rgba(255,106,0,.10); color:var(--brand); border:1px solid rgba(255,106,0,.20)
+}
+
+.note-card{
+  width:100%; text-align:left; padding:10px 12px; border-radius:12px;
+  background:transparent; border:1px solid transparent;
+  cursor:pointer; transition:all .18s;
+}
+.note-card:hover{ background:rgba(255,255,255,.04); border-color:var(--border) }
+.note-card.active{
+  background:linear-gradient(135deg, rgba(255,106,0,.12), rgba(255,177,0,.06));
+  border-color:rgba(255,106,0,.30);
+}
+.note-title{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:3px }
+.note-title .t{ font-size:12px; font-weight:700; color:var(--text); line-height:1.3 }
+.tag{
+  font-size:10px; padding:2px 8px; border-radius:99px; font-weight:700; flex-shrink:0;
+  background:rgba(255,106,0,.12); color:var(--brand); border:1px solid rgba(255,106,0,.22)
+}
+.note-snippet{ font-size:11px; color:var(--muted); line-height:1.4; margin-bottom:3px }
+.note-meta{ font-size:10px; color:var(--muted2); display:flex; align-items:center; justify-content:space-between }
+.badges{ display:flex; gap:4px }
+.badge{ font-size:9px; padding:2px 6px; border-radius:99px; font-weight:700; border:1px solid }
+.badge.link{ color:var(--brand2); border-color:rgba(255,177,0,.25); background:rgba(255,177,0,.08) }
+.badge.draft{ color:var(--muted); border-color:var(--border); background:rgba(255,255,255,.04) }
+
+/* Footer */
+.side-footer{
+  border-top:1px solid var(--border); flex-shrink:0;
+  padding:10px 12px; display:flex; flex-direction:column; gap:8px;
+  background:linear-gradient(0deg, rgba(255,106,0,.04), transparent)
+}
+
+/* Timer bar */
+.timerbar{
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(0,0,0,.28); border:1px solid var(--border); border-radius:12px; padding:8px 12px
+}
+.time{
+  font-size:22px; font-weight:800; letter-spacing:-.5px; font-family:var(--mono);
+  background:linear-gradient(90deg, var(--brand), var(--brand2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.tbtns{ display:flex; gap:4px }
+.tbtn{
+  width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.05); border:1px solid var(--border); cursor:pointer;
+  font-size:13px; color:var(--muted); transition:all .18s;
+}
+.tbtn:hover{ background:rgba(255,106,0,.15); border-color:rgba(255,106,0,.35); color:var(--brand) }
+
+.timer-modes{ display:flex; gap:5px; flex-wrap:wrap }
+.pill{
+  padding:5px 10px; border-radius:99px; font-size:10px; font-weight:700; cursor:pointer;
+  background:rgba(255,255,255,.05); border:1px solid var(--border); color:var(--muted);
+  transition:all .18s;
+}
+.pill:hover{ background:rgba(255,106,0,.14); border-color:rgba(255,106,0,.35); color:var(--brand) }
+
+/* User line */
+.userline{ display:flex; align-items:center; justify-content:space-between; gap:8px }
+.userline .left{ display:flex; align-items:center; gap:8px; min-width:0 }
+.avatar{
+  width:28px; height:28px; border-radius:9px; flex-shrink:0;
+  background:linear-gradient(135deg, var(--brand), var(--brand2));
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:12px; color:#0d0800
+}
+.email{ font-size:11px; color:var(--muted); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+
+/* ══════════════ MAIN PANEL ══════════════ */
+.main{ display:flex; flex-direction:column; height:100vh; overflow:hidden; min-width:0 }
 
 .topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  background:rgba(255,255,255,.035);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:var(--radius2);
-  padding:12px 14px;
-  box-shadow: var(--shadow);
+  height:var(--top); flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:0 14px; border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg, var(--panel) 0%, rgba(15,19,25,.8) 100%);
 }
-.brand{display:flex;align-items:center;gap:12px;min-width:0}
-.logo{
-  width:40px;height:40px;border-radius:14px;
-  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.35), transparent 35%),
-              linear-gradient(135deg, rgba(79,140,255,1), rgba(138,183,255,1));
-  box-shadow: 0 14px 30px rgba(79,140,255,.18);
-  flex:0 0 auto;
-}
-.brandtxt{min-width:0}
-.brand h1{
-  margin:0;
-  font-size:14px;
-  letter-spacing:.5px;
-  font-weight:700;
-}
-.mini{font-size:12px;color:var(--muted)}
-.row{display:flex;gap:10px;align-items:center;flex:0 0 auto}
+.top-left{ display:flex; align-items:center; gap:14px; min-width:0 }
+.top-right{ display:flex; align-items:center; gap:6px; flex-shrink:0 }
 
-.pill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 10px;
-  border-radius:999px;
-  background:rgba(0,0,0,.22);
-  border:1px solid rgba(255,255,255,.09);
+/* Mode tabs */
+.mode-tabs{ display:flex; gap:2px; background:rgba(0,0,0,.28); border:1px solid var(--border); border-radius:12px; padding:3px }
+.tab{
+  padding:6px 14px; border-radius:9px; font-size:12px; font-weight:700;
+  cursor:pointer; color:var(--muted); transition:all .18s; user-select:none;
 }
+.tab:hover{ color:var(--text) }
+.tab.active{
+  background:linear-gradient(135deg, var(--brand), var(--brand3));
+  color:#0d0800; box-shadow:0 3px 12px var(--glow)
+}
+
+/* Breadcrumb */
+.notecrumb{ min-width:0 }
+.notecrumb .title{ font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.notecrumb .sub{ font-size:11px; color:var(--muted); margin-top:1px; display:flex; gap:6px; flex-wrap:wrap }
+.chip{
+  display:inline-block; padding:1px 7px; border-radius:99px; font-size:10px; font-weight:700;
+  background:rgba(255,106,0,.10); color:var(--brand); border:1px solid rgba(255,106,0,.22)
+}
+
+/* Save status */
+.status{
+  display:flex; align-items:center; gap:6px;
+  padding:5px 10px; border-radius:99px; font-size:11px; font-weight:700;
+  background:rgba(0,0,0,.28); border:1px solid var(--border); color:var(--muted);
+  user-select:none; white-space:nowrap;
+}
+.dot{ width:7px; height:7px; border-radius:50%; transition:all .3s }
+.dot.ok{ background:var(--good); box-shadow:0 0 10px rgba(62,207,128,.4) }
+.dot.warn{ background:var(--brand2); box-shadow:0 0 10px rgba(255,177,0,.4); animation:dotBlink 1.2s ease infinite }
+.dot.bad{ background:var(--bad); box-shadow:0 0 10px rgba(255,64,64,.4) }
+@keyframes dotBlink{ 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
+
+/* Icon buttons */
+.iconbtn{
+  height:34px; min-width:34px; padding:0 10px; border-radius:10px;
+  background:rgba(255,255,255,.05); border:1px solid var(--border); color:var(--text);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  font-size:12px; font-weight:700; gap:5px; transition:all .18s; user-select:none;
+}
+.iconbtn:hover{ background:rgba(255,255,255,.08); border-color:var(--border2) }
+.iconbtn.primary{
+  background:linear-gradient(135deg, var(--brand), var(--brand3));
+  border:0; color:#0d0800; box-shadow:0 3px 12px var(--glow)
+}
+.iconbtn.primary:hover{ box-shadow:0 4px 18px rgba(255,106,0,.45); transform:translateY(-1px) }
+.iconbtn.danger{ background:rgba(255,64,64,.10); border-color:rgba(255,64,64,.22); color:#ff9999 }
+.iconbtn.danger:hover{ background:rgba(255,64,64,.20); border-color:rgba(255,64,64,.40) }
+
+/* Buttons (sidebar + modal) */
 .btn{
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.06);
-  color:var(--text);
-  padding:10px 12px;
-  border-radius:14px;
-  transition:transform .08s ease, border-color .12s ease, background .12s ease, opacity .12s ease;
+  padding:9px 14px; border-radius:11px; font-weight:700; font-size:12px;
+  background:rgba(255,255,255,.06); border:1px solid var(--border2); color:var(--text);
+  transition:all .18s; display:inline-flex; align-items:center; gap:6px;
 }
-.btn:hover{border-color: rgba(255,255,255,.18); background:rgba(255,255,255,.075)}
-.btn:active{transform:translateY(1px)}
+.btn:hover{ background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.20) }
+.btn:active{ transform:translateY(1px) }
 .btn.primary{
-  background: linear-gradient(135deg, rgba(79,140,255,1), rgba(138,183,255,1));
-  color:#0a0c11;
-  border:0;
+  background:linear-gradient(135deg, var(--brand), var(--brand3));
+  border:0; color:#0d0800; font-weight:800; box-shadow:0 4px 14px var(--glow)
 }
-.btn.danger{
-  background: rgba(255,77,77,.12);
-  border-color: rgba(255,77,77,.25);
-  color:#ffd2d2;
+.btn.primary:hover{ box-shadow:0 5px 20px rgba(255,106,0,.50); transform:translateY(-1px) }
+.btn.ghost{ background:transparent; border-color:var(--border) }
+.btn.ghost:hover{ background:rgba(255,255,255,.05) }
+.btn.kbtn{
+  width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0;
 }
-.btn.ghost{background:transparent}
-.btn:disabled{opacity:.55;cursor:not-allowed}
 
-.sidebar{
-  width:280px;min-width:240px;
-  background:rgba(255,255,255,.035);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:var(--radius2);
-  box-shadow: var(--shadow);
-  padding:12px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  min-height:0;
-}
-.navGroupTitle{
-  font-size:11px;
-  color:var(--muted2);
-  text-transform:uppercase;
-  letter-spacing:.14em;
-  margin:2px 8px 0;
-}
-.navbtn{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  width:100%;
-  padding:12px 12px;
-  border-radius:16px;
-  background:transparent;
-  border:1px solid transparent;
-  color:var(--text);
-  text-align:left;
-}
-.navbtn:hover{
-  background:rgba(255,255,255,.05);
-  border-color:rgba(255,255,255,.08);
-}
-.navbtn.active{
-  background:rgba(79,140,255,.14);
-  border-color:rgba(79,140,255,.28);
-}
-.badge{
-  font-size:12px;
-  padding:3px 9px;
-  border-radius:999px;
-  background:rgba(0,0,0,.22);
-  border:1px solid rgba(255,255,255,.10);
-  color:var(--muted);
-}
-.kbd{
-  font-size:12px;
-  padding:2px 7px;
-  border-radius:9px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.20);
-  color:var(--muted);
-}
-.hr{height:1px;background:rgba(255,255,255,.08);margin:10px 0}
+/* ══════════════ CONTENT AREA ══════════════ */
+.content{ flex:1; overflow:hidden; position:relative; display:flex; flex-direction:column }
+.view{ display:none; flex:1; overflow:auto; padding:16px }
+.view.active{ display:flex; flex-direction:column }
 
-.main{
-  flex:1;
-  min-width:0;
-  min-height:0;
-  background:rgba(255,255,255,.035);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:var(--radius2);
-  box-shadow: var(--shadow);
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
+/* Editor shell */
+.editor-shell{ display:flex; flex-direction:column; height:100%; gap:0 }
+.toolbar{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:8px 10px; border-bottom:1px solid var(--border); flex-shrink:0;
+  background:rgba(0,0,0,.18); flex-wrap:wrap; gap:6px;
+}
+.lefttools{ display:flex; gap:4px; flex-wrap:wrap }
+.tool{
+  padding:5px 10px; border-radius:8px; font-size:12px; font-weight:700;
+  background:rgba(255,255,255,.05); border:1px solid var(--border); color:var(--muted);
+  cursor:pointer; transition:all .15s; user-select:none;
+}
+.tool:hover{ background:rgba(255,106,0,.14); border-color:rgba(255,106,0,.30); color:var(--brand) }
+.metapick{ display:flex; gap:7px; align-items:center }
+.metapick select, .metapick input{
+  padding:5px 10px; border-radius:9px;
+  background:rgba(0,0,0,.28); border:1px solid var(--border); color:var(--text);
+  font-size:12px; outline:none; transition:border-color .2s; appearance:none;
+}
+.metapick select:focus, .metapick input:focus{ border-color:rgba(255,106,0,.45) }
+.metapick input::placeholder{ color:var(--muted2) }
+
+/* Split pane */
+.split{
+  flex:1; display:grid; grid-template-columns:50% 8px 1fr;
+  overflow:hidden; min-height:0;
+}
+.split.singleEditor{ grid-template-columns:1fr }
+.split.singlePreview{ grid-template-columns:1fr }
+.pane{ overflow:auto; display:flex; flex-direction:column; height:100% }
+#paneLeft{ border-right:1px solid var(--border) }
+
+.titleInput{
+  width:100%; padding:16px 18px; font-size:22px; font-weight:800; letter-spacing:-.5px;
+  background:transparent; border:none; color:var(--text); outline:none;
+  border-bottom:1px solid var(--border);
+}
+.titleInput::placeholder{ color:var(--muted2) }
+.bodyInput{
+  flex:1; width:100%; padding:16px 18px; line-height:1.72;
+  background:transparent; border:none; color:var(--text); outline:none;
+  resize:none; font-family:var(--mono); font-size:13px; font-weight:400;
+}
+.bodyInput::placeholder{ color:var(--muted2) }
+
+/* Divider */
+.divider{
+  width:8px; cursor:col-resize; background:transparent;
+  display:flex; align-items:center; justify-content:center; transition:background .15s;
+}
+.divider:hover{ background:rgba(255,106,0,.18) }
+.divider::after{
+  content:''; width:2px; height:40px; border-radius:99px; background:var(--border2)
+}
+
+/* Right pane */
+.rightpane{ padding:12px; display:flex; flex-direction:column; gap:10px }
+.card{
+  border-radius:14px; background:rgba(0,0,0,.22); border:1px solid var(--border); overflow:hidden
 }
 .cardhead{
-  padding:12px 12px 10px;
-  border-bottom:1px solid rgba(255,255,255,.08);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:9px 12px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.02)
 }
-.cardhead h2{
-  margin:0;
-  font-size:13px;
-  letter-spacing:.4px;
-  font-weight:700;
+.cardhead .h{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:var(--muted) }
+.act{ display:flex; gap:6px }
+.linkbtn{
+  font-size:11px; font-weight:700; color:var(--brand); cursor:pointer; padding:3px 8px;
+  border-radius:7px; border:1px solid rgba(255,106,0,.22); background:rgba(255,106,0,.08);
+  transition:all .18s;
 }
-.content{flex:1;min-height:0;overflow:auto;padding:12px}
+.linkbtn:hover{ background:rgba(255,106,0,.20); border-color:rgba(255,106,0,.45) }
+.pills{ padding:10px 12px; display:flex; flex-wrap:wrap; gap:6px }
+.pillnote{
+  display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:99px;
+  font-size:11px; font-weight:700; cursor:pointer;
+  background:rgba(255,106,0,.10); border:1px solid rgba(255,106,0,.22); color:var(--brand);
+  transition:all .18s;
+}
+.pillnote:hover{ background:rgba(255,106,0,.20); transform:translateY(-1px) }
+.pillnote .x{ opacity:.55; font-size:13px; line-height:1; margin-left:2px }
+.pillnote .x:hover{ opacity:1 }
 
-.inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.splitbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
-
-.grid2{
-  display:grid;
-  grid-template-columns: 360px 1fr;
-  gap:12px;
-  min-height:0;
-}
-@media (max-width: 980px){
-  body{overflow:auto}
-  #app{height:auto;min-height:100dvh}
-  .shell{flex-direction:column}
-  .sidebar{width:auto}
-  .grid2{grid-template-columns:1fr}
+.smallHint{ padding:10px 12px; font-size:12px; color:var(--muted); line-height:1.7 }
+kbd{
+  font-family:var(--mono); font-size:10px; padding:2px 6px; border-radius:6px;
+  background:rgba(0,0,0,.35); border:1px solid var(--border2); color:var(--muted)
 }
 
-.field{display:flex;flex-direction:column;gap:6px}
-label{font-size:12px;color:var(--muted)}
-input[type="text"],input[type="email"],input[type="password"],select,textarea{
-  width:100%;
-  background:rgba(0,0,0,.24);
-  border:1px solid rgba(255,255,255,.10);
-  color:var(--text);
-  border-radius:14px;
-  padding:11px 12px;
-  outline:none;
+/* ══════════════ PREVIEW VIEW ══════════════ */
+.preview{ max-width:780px; padding:0 4px }
+.preview h1{
+  font-size:30px; font-weight:800; letter-spacing:-.8px; margin-bottom:10px;
+  background:linear-gradient(90deg, var(--text), rgba(240,236,228,.7));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
 }
-select{appearance:none}
-textarea{resize:none;min-height:260px;line-height:1.55}
-input:focus,select:focus,textarea:focus{
-  border-color: rgba(79,140,255,.45);
-  box-shadow: 0 0 0 3px rgba(79,140,255,.18);
+.metaRow{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px }
+.preview .body{ line-height:1.8; color:rgba(240,236,228,.88); font-size:14px }
+.preview .body h1,.preview .body h2,.preview .body h3{
+  color:var(--text); margin:20px 0 10px; font-weight:800; -webkit-text-fill-color:unset
+}
+.preview .body code{
+  font-family:var(--mono); font-size:12px; padding:2px 6px; border-radius:6px;
+  background:rgba(255,106,0,.12); color:var(--brand2); border:1px solid rgba(255,106,0,.20)
+}
+.preview .body pre{
+  background:rgba(0,0,0,.35); border:1px solid var(--border); border-radius:12px;
+  padding:14px 16px; overflow-x:auto; margin:14px 0
+}
+.preview .body pre code{ background:transparent; border:none; padding:0; color:var(--text) }
+.preview .body blockquote{
+  border-left:3px solid var(--brand); margin:14px 0; padding:8px 16px;
+  background:rgba(255,106,0,.06); border-radius:0 10px 10px 0; color:var(--muted)
+}
+.preview .body a{ color:var(--brand2); border-bottom:1px solid rgba(255,177,0,.3) }
+
+/* ══════════════ GRAPH VIEW ══════════════ */
+.graphWrap{
+  position:relative; flex:1; display:flex; flex-direction:column;
+  border-radius:16px; background:rgba(0,0,0,.25); border:1px solid var(--border); overflow:hidden;
+}
+#graph{ flex:1; width:100%; display:block }
+.graphUI{
+  position:absolute; top:12px; right:12px; display:flex; gap:6px
+}
+.graphHint{
+  position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
+  font-size:11px; color:var(--muted); pointer-events:none;
+  background:rgba(0,0,0,.55); padding:5px 12px; border-radius:99px; border:1px solid var(--border)
 }
 
-.list{display:flex;flex-direction:column;gap:8px}
-.noteitem{
-  text-align:left;
-  width:100%;
-  padding:12px 12px;
-  border-radius:16px;
-  background:rgba(0,0,0,.18);
-  border:1px solid rgba(255,255,255,.10);
+/* ══════════════ GAMES VIEW ══════════════ */
+.gamesWrap{ display:flex; align-items:stretch; justify-content:center; padding:0; flex:1 }
+.gameCard{
+  width:100%; border-radius:18px; border:1px solid rgba(255,106,0,.18);
+  background:rgba(0,0,0,.25); padding:14px; display:flex; flex-direction:column; gap:10px;
 }
-.noteitem:hover{border-color:rgba(255,255,255,.16); background:rgba(0,0,0,.22)}
-.noteitem.active{
-  background:rgba(79,140,255,.14);
-  border-color:rgba(79,140,255,.28);
+.gameTop{
+  display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; flex-shrink:0
 }
-.noteitem b{display:block;font-size:13px; font-weight:700}
-.noteitem small{display:block;color:var(--muted);margin-top:2px;font-size:12px;line-height:1.35}
-
+.gameTitle{ font-size:16px; font-weight:800; color:var(--brand) }
+.gTabs{ display:flex; gap:6px }
+.gTab{
+  padding:7px 14px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer;
+  background:rgba(255,255,255,.05); border:1px solid var(--border); color:var(--muted);
+  transition:all .18s; user-select:none;
+}
+.gTab:hover{ border-color:rgba(255,106,0,.30) }
+.gTab.active{
+  background:linear-gradient(135deg, rgba(255,106,0,.20), rgba(255,177,0,.10));
+  border-color:rgba(255,106,0,.45); color:var(--brand)
+}
+.gameBtns{ display:flex; gap:7px }
+.gameBody{
+  flex:1; display:grid; grid-template-columns:1.2fr .8fr; gap:12px; min-height:0
+}
+@media(max-width:900px){ .gameBody{ grid-template-columns:1fr } }
 .canvasWrap{
-  width:100%;
-  height:520px;
-  border-radius:20px;
-  background:rgba(0,0,0,.22);
-  border:1px solid rgba(255,255,255,.10);
-  overflow:hidden;
+  border-radius:16px; background:rgba(0,0,0,.30); border:1px solid var(--border);
+  padding:10px; display:flex; align-items:center; justify-content:center; overflow:hidden;
 }
-.canvasWrap canvas{width:100%;height:100%}
-
-.gameRow{display:grid;grid-template-columns: 1fr 340px;gap:12px}
-@media (max-width: 980px){.gameRow{grid-template-columns:1fr}}
-.panel{
-  background:rgba(0,0,0,.20);
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:20px;
-  padding:12px;
+canvas{ display:block; border-radius:12px; background:#050505 }
+.gameSide{ display:flex; flex-direction:column; gap:10px; overflow-y:auto }
+.scoreBox{
+  border-radius:14px; background:rgba(0,0,0,.22); border:1px solid var(--border); padding:12px
 }
-.panel h3{margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:.2px}
-.smallbtn{
-  padding:9px 11px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.06);
-  color:var(--text);
-  transition:transform .08s ease, border-color .12s ease, background .12s ease;
+.scoreBox .r{
+  display:flex; justify-content:space-between; gap:10px; padding:5px 0;
+  font-size:12px; font-weight:700; border-bottom:1px solid var(--border); color:var(--muted)
 }
-.smallbtn:hover{border-color: rgba(255,255,255,.18); background:rgba(255,255,255,.075)}
-.smallbtn:active{transform:translateY(1px)}
-.smallbtn.primary{
-  background:rgba(79,140,255,.16);
-  border-color:rgba(79,140,255,.28);
+.scoreBox .r:last-child{ border-bottom:none }
+.scoreBox .r span{ color:var(--brand2) }
+.cheatBox{
+  border-radius:14px; background:rgba(0,0,0,.22); border:1px solid var(--border); padding:12px
 }
-
-.switch{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:11px 11px;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:16px;
-  background:rgba(0,0,0,.18);
+.cheatBox .h{
+  font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.12em;
+  color:var(--muted2); margin-bottom:10px
 }
-.switch b{font-size:12px;font-weight:700}
-.switch small{color:var(--muted);font-size:12px}
-
-.touchControls{
-  display:none;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:10px;
+.cheatBox label{
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+  font-size:12px; font-weight:700; color:rgba(240,236,228,.8); padding:8px 0;
+  border-bottom:1px solid var(--border)
 }
-.touchControls .smallbtn{flex:1;min-width:90px}
-@media (max-width: 980px){
-  .touchControls{display:flex}
+.cheatBox label:last-child{ border-bottom:none }
+.cheatBox input[type="checkbox"]{ accent-color:var(--brand); width:16px; height:16px }
+.cheatBox input[type="range"]{ accent-color:var(--brand); width:140px }
+.cheatBox input[type="number"]{
+  width:70px; padding:6px 8px; border-radius:9px;
+  background:rgba(0,0,0,.35); border:1px solid var(--border); color:var(--text); outline:none
 }
 
+/* ══════════════ TOAST ══════════════ */
 .toast{
-  position:fixed;
-  left:50%;
-  bottom:18px;
-  transform:translateX(-50%);
-  padding:10px 12px;
-  border-radius:16px;
-  background:rgba(0,0,0,.78);
-  border:1px solid rgba(255,255,255,.10);
-  color:var(--text);
-  box-shadow: var(--shadow);
-  max-width:min(640px, calc(100% - 24px));
-  display:none;
+  position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+  padding:10px 18px; border-radius:12px; font-size:12px; font-weight:700;
+  background:rgba(15,19,25,.92); border:1px solid rgba(255,106,0,.30); color:var(--text);
+  box-shadow:0 10px 30px rgba(0,0,0,.60), 0 0 20px var(--glow);
+  opacity:0; transition:opacity .25s; pointer-events:none; z-index:9999; white-space:nowrap;
 }
-.toast.show{display:block}
+.toast.show{ opacity:1; pointer-events:auto }
 
-.modalOverlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.65);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:14px;
-  z-index:50;
+/* ══════════════ PALETTE ══════════════ */
+.paletteBack{
+  position:fixed; inset:0; background:rgba(0,0,0,.78); backdrop-filter:blur(10px);
+  display:none; align-items:flex-start; justify-content:center; padding-top:120px; z-index:200
+}
+.palette{
+  width:min(640px, calc(100vw - 28px));
+  background:var(--panel2); border:1px solid rgba(255,106,0,.25);
+  border-radius:18px; overflow:hidden; box-shadow:var(--shadow2), 0 0 40px var(--glow)
+}
+.paletteTop{
+  display:flex; align-items:center; gap:10px;
+  padding:14px 16px; border-bottom:1px solid var(--border)
+}
+.paletteTop input{
+  flex:1; background:transparent; border:none; color:var(--text);
+  font-size:15px; font-weight:600; outline:none
+}
+.paletteTop input::placeholder{ color:var(--muted2) }
+.paletteTop .hint{ font-size:11px; color:var(--muted2); font-weight:600; white-space:nowrap }
+.paletteList{ max-height:380px; overflow-y:auto }
+.pItem{
+  width:100%; text-align:left; padding:11px 16px; border-bottom:1px solid var(--border);
+  background:transparent; border-left:none; border-right:none; color:var(--text);
+  font-size:13px; font-weight:600; cursor:pointer; transition:background .12s; border-radius:0;
+}
+.pItem:hover{ background:rgba(255,106,0,.10) }
+.pItem strong{ color:var(--brand) }
+.pItem small{ color:var(--muted); margin-left:8px; font-weight:500 }
+
+/* ══════════════ MODALS ══════════════ */
+.modalBack{
+  position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(8px);
+  display:none; align-items:center; justify-content:center; padding:14px; z-index:100
 }
 .modal{
-  width:min(520px,100%);
-  background:rgba(12,14,18,.96);
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:20px;
-  box-shadow: var(--shadow);
-  padding:14px;
+  width:min(480px, 100%); background:var(--panel2);
+  border:1px solid var(--border2); border-radius:18px;
+  box-shadow:var(--shadow2); padding:20px; display:flex; flex-direction:column; gap:14px
 }
-.modalTitle{font-weight:700}
-</style>
-</head>
+.modalTop{
+  display:flex; align-items:center; justify-content:space-between
+}
+.modalTop .h{ font-size:15px; font-weight:800 }
+.modalBody{ display:flex; flex-direction:column; gap:10px }
+.modalBody p{ font-size:12px; color:var(--muted); line-height:1.6 }
+.modalBody .row{ display:flex; gap:8px; flex-wrap:wrap }
+.modalBody select, .modalBody input[type="number"]{
+  flex:1; padding:9px 12px; border-radius:10px;
+  background:rgba(0,0,0,.35); border:1px solid var(--border2); color:var(--text);
+  outline:none; appearance:none; font-size:12px;
+}
+.modalBody select:focus, .modalBody input:focus{ border-color:rgba(255,106,0,.45) }
+.modalActions{ display:flex; gap:8px; justify-content:flex-end }
 
+/* ══════════════ AUTH SCREEN ══════════════ */
+.authBack{
+  position:fixed; inset:0; background:var(--bg);
+  background-image:
+    radial-gradient(ellipse 1200px 700px at 10% -5%, rgba(255,106,0,.09), transparent 55%),
+    radial-gradient(ellipse 900px 600px at 90% 100%, rgba(255,177,0,.07), transparent 55%);
+  display:flex; align-items:center; justify-content:center; z-index:300;
+}
+.authCard{
+  width:min(400px, calc(100vw - 28px));
+  background:var(--panel2); border:1px solid rgba(255,106,0,.22);
+  border-radius:20px; padding:28px; box-shadow:var(--shadow2), 0 0 60px var(--glow);
+  display:flex; flex-direction:column; gap:14px;
+}
+.authHead{ display:flex; align-items:center; gap:14px; margin-bottom:2px }
+.authHead .logo{
+  width:46px; height:46px; border-radius:14px;
+  background:linear-gradient(135deg, var(--brand), var(--brand2));
+  display:flex; align-items:center; justify-content:center;
+  font-weight:900; font-size:22px; color:#0d0800; flex-shrink:0;
+  box-shadow:0 8px 25px var(--glow)
+}
+.authHead .t{ font-size:22px; font-weight:800; letter-spacing:-.4px }
+.authHead .s{ font-size:12px; color:var(--muted); margin-top:2px }
+.authTabs{
+  display:flex; gap:4px; background:rgba(0,0,0,.30);
+  border:1px solid var(--border); border-radius:11px; padding:3px
+}
+.atab{
+  flex:1; text-align:center; padding:7px; border-radius:8px; font-size:12px; font-weight:700;
+  cursor:pointer; color:var(--muted); transition:all .18s; user-select:none
+}
+.atab:hover{ color:var(--text) }
+.atab.active{
+  background:linear-gradient(135deg, var(--brand), var(--brand3));
+  color:#0d0800; box-shadow:0 3px 10px var(--glow)
+}
+.authCard input[type="email"], .authCard input[type="password"]{
+  width:100%; padding:11px 14px; border-radius:12px;
+  background:rgba(0,0,0,.35); border:1px solid var(--border2); color:var(--text);
+  outline:none; font-size:13px; transition:border-color .2s
+}
+.authCard input:focus{ border-color:rgba(255,106,0,.50); box-shadow:0 0 0 3px rgba(255,106,0,.12) }
+.authCard input::placeholder{ color:var(--muted2) }
+.authRow{ display:flex; gap:8px }
+.authSmall{
+  display:flex; justify-content:space-between; font-size:11px; color:var(--muted);
+  font-weight:600;
+}
+.authSmall span{ cursor:pointer; transition:color .18s }
+.authSmall span:hover{ color:var(--brand) }
+.authErr{ font-size:12px; color:var(--bad); font-weight:700; min-height:16px }
+
+/* ══════════════ BACKDROP ══════════════ */
+.backdrop{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
+  z-index:50; backdrop-filter:blur(4px)
+}
+
+/* ══════════════ RESPONSIVE ══════════════ */
+@media(max-width:1024px){
+  .app{ grid-template-columns:1fr }
+  aside.sidebar{
+    position:fixed; left:-320px; top:0; bottom:0; z-index:60;
+    width:var(--side); transition:left .28s cubic-bezier(.4,0,.2,1);
+  }
+  .sidebar.mobile-open{ left:0 }
+  #mobileMenu{ display:flex!important }
+  .notecrumb{ display:none }
+}
+@media(max-width:640px){
+  .mode-tabs .tab span{ display:none }
+  .top-right .iconbtn.wide span{ display:none }
+  .gameBody{ grid-template-columns:1fr }
+}
+
+/* ══════════════ PREVIEWFULL ══════════════ */
+.previewFull #viewPreview.active{
+  position:fixed; inset:0; z-index:80; padding:48px;
+  background:var(--bg); overflow:auto;
+}
+
+/* ══════════════ DB BANNER ══════════════ */
+#dbBanner{
+  position:fixed; top:0; left:0; right:0; z-index:9999;
+  background:linear-gradient(90deg, rgba(180,20,20,.97), rgba(220,60,0,.97));
+  color:#fff; padding:10px 20px; font-size:12px; font-weight:700;
+  display:none; align-items:center; gap:10px; box-shadow:0 4px 24px rgba(0,0,0,.5)
+}
+#dbBanner .dbx{ margin-left:auto; cursor:pointer; font-size:18px; opacity:.7; line-height:1 }
+#dbBanner .dbx:hover{ opacity:1 }
+</style>
 <body>
-<div id="app">
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo" aria-hidden="true"></div>
-      <div class="brandtxt">
-        <h1>StudyOS</h1>
-        <div class="mini" id="statusLine">Offline demo</div>
+
+<div class="toastWrap" id="toastWrap"></div>
+
+<div class="paletteBack" id="paletteBack">
+  <div class="palette">
+    <div class="paletteTop">
+      <input id="paletteQ" placeholder="Search notes or type a command...">
+      <div class="hint">Enter · Esc · Ctrl+K</div>
+    </div>
+    <div class="paletteList" id="paletteList"></div>
+  </div>
+</div>
+
+<div class="modalBack" id="modalPdf">
+  <div class="modal">
+    <div class="modalTop">
+      <div class="h">Export PDF</div>
+      <div class="iconbtn" id="pdfClose">✕</div>
+    </div>
+    <div class="modalBody">
+      <p>Exports a styled PDF of the current note. Optionally include linked notes as an appendix.</p>
+      <div class="row">
+        <select id="pdfIncludeLinks">
+          <option value="1">Include linked notes</option>
+          <option value="0">Only this note</option>
+        </select>
+        <select id="pdfIncludeDates">
+          <option value="1">Include dates</option>
+          <option value="0">No dates</option>
+        </select>
       </div>
     </div>
-    <div class="row">
-      <div class="pill">
-        <small id="authText">Not signed in</small>
-      </div>
-      <button class="btn" id="btnOpenAuth">Sign in</button>
-      <button class="btn ghost hidden" id="btnLogout">Log out</button>
+    <div class="modalActions">
+      <button class="btn ghost" id="pdfCancel">Cancel</button>
+      <button class="btn primary" id="pdfGo">Export</button>
     </div>
   </div>
+</div>
 
-  <div class="shell">
-    <div class="sidebar">
-      <div class="navGroupTitle">Workspace</div>
-      <button class="navbtn active" data-tab="notes"><span>Notes</span><span class="badge" id="notesCount">0</span></button>
-      <button class="navbtn" data-tab="graph"><span>Graph</span><span class="badge">links</span></button>
-
-      <div class="navGroupTitle" style="margin-top:6px">Focus</div>
-      <button class="navbtn" data-tab="games"><span>Games</span><span class="badge">2</span></button>
-      <button class="navbtn" data-tab="timer"><span>Timer</span><span class="badge">focus</span></button>
-      <button class="navbtn" data-tab="settings"><span>Settings</span><span class="badge">prefs</span></button>
-
-      <div class="hr"></div>
-      <div class="mini">Quick mute: <span class="kbd">`</span></div>
-      <div class="mini">Quick new note: <span class="kbd">N</span></div>
+<div class="modalBack" id="modalSettings">
+  <div class="modal">
+    <div class="modalTop">
+      <div class="h">Settings</div>
+      <div class="iconbtn" id="setClose">✕</div>
     </div>
+    <div class="modalBody">
+      <p>These sync across devices.</p>
+      <div class="row">
+        <select id="setSidebar">
+          <option value="0">Sidebar: Normal</option>
+          <option value="1">Sidebar: Hidden (mobile style)</option>
+        </select>
+        <select id="setPreviewFull">
+          <option value="0">Preview Full-screen: Off</option>
+          <option value="1">Preview Full-screen: On</option>
+        </select>
+      </div>
+      <div style="height:10px"></div>
+      <div class="row">
+        <input id="setFocus" type="number" min="1" max="180" placeholder="Focus minutes">
+        <input id="setBreak" type="number" min="1" max="60" placeholder="Break minutes">
+        <input id="setLong" type="number" min="1" max="120" placeholder="Long break minutes">
+      </div>
+    </div>
+    <div class="modalActions">
+      <button class="btn ghost" id="setCancel">Cancel</button>
+      <button class="btn primary" id="setSave">Save</button>
+    </div>
+  </div>
+</div>
 
-    <div class="main">
-      <div class="cardhead">
-        <h2 id="panelTitle">Notes</h2>
-        <div class="inline">
-          <span class="mini" id="saveState">—</span>
-          <button class="btn primary" id="btnNewNote">New</button>
+<div class="authBack" id="authBack">
+  <div class="authCard">
+    <div class="authHead">
+      <div class="logo">S</div>
+      <div>
+        <div class="t">StudyOS</div>
+        <div class="s">Everything saves. Everywhere.</div>
+      </div>
+    </div>
+    <div class="authTabs">
+      <div class="atab active" id="tabSignIn">Sign In</div>
+      <div class="atab" id="tabSignUp">Sign Up</div>
+    </div>
+    <input id="authEmail" type="email" placeholder="Email">
+    <input id="authPass" type="password" placeholder="Password">
+    <div class="authRow">
+      <button class="btn primary" id="authGo">Enter</button>
+      <button class="btn ghost" id="authMagic">Magic Link</button>
+    </div>
+    <div class="authSmall">
+      <span id="authReset">Forgot password?</span>
+      <span id="authTip">Ctrl+K inside app</span>
+    </div>
+    <div class="authErr" id="authErr"></div>
+  </div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-inner">
+      <div class="brand">
+        <div class="brand-top">
+          <div class="logo">S</div>
+          <div class="brand-name">
+            <div class="t">StudyOS</div>
+            <div class="s">notes · links · graph · games</div>
+          </div>
+        </div>
+        <div class="school-pill" id="schoolPill"><span id="schoolText">Salesianum</span></div>
+        <div class="side-actions">
+          <button class="btn primary" id="btnNew">New Note</button>
+          <button class="btn" id="btnGames">Games</button>
         </div>
       </div>
 
-      <div class="content">
-        <section id="tab-notes">
-          <div class="grid2">
-            <div>
-              <div class="field">
-                <label>Search</label>
-                <input id="noteSearch" type="text" placeholder="Find a note...">
-              </div>
+      <div class="search-wrap">
+        <input class="search" id="search" placeholder="Search titles + content (Ctrl+K)">
+      </div>
 
-              <div class="inline" style="margin-top:10px">
-                <div class="field" style="flex:1;min-width:160px">
-                  <label>School</label>
-                  <select id="filterSchool">
-                    <option value="">All</option>
-                    <option>Salesianum</option>
-                    <option>St Peter</option>
-                    <option>McKean</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-                <div class="field" style="flex:1;min-width:160px">
-                  <label>Category</label>
-                  <select id="filterCategory">
-                    <option value="">All</option>
-                    <option>Math</option>
-                    <option>English</option>
-                    <option>Science</option>
-                    <option>History</option>
-                    <option>Language</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-              </div>
+      <div class="side-filters">
+        <select id="sort">
+          <option value="updated_desc">Sort: Updated</option>
+          <option value="title_asc">Sort: Title</option>
+          <option value="grade_asc">Sort: Grade</option>
+        </select>
+        <button class="btn kbtn" id="openPalette">⌘</button>
+      </div>
 
-              <div class="hr"></div>
-              <div class="list" id="notesList"></div>
-            </div>
+      <div class="note-list" id="noteList"></div>
 
-            <div>
-              <div class="inline">
-                <button class="btn" id="btnSaveNow">Save</button>
-                <button class="btn" id="btnPrint">Print/PDF</button>
-                <button class="btn" id="btnLink">Link</button>
-                <button class="btn danger" id="btnDelete">Delete</button>
-              </div>
-
-              <div class="hr"></div>
-
-              <div class="inline">
-                <div class="field" style="flex:1;min-width:240px">
-                  <label>Title</label>
-                  <input id="noteTitle" type="text" placeholder="Title">
-                </div>
-                <div class="field" style="min-width:170px">
-                  <label>School</label>
-                  <select id="noteSchool">
-                    <option>Salesianum</option>
-                    <option>St Peter</option>
-                    <option>McKean</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="inline" style="margin-top:10px">
-                <div class="field" style="min-width:170px">
-                  <label>Category</label>
-                  <select id="noteCategory">
-                    <option>Math</option>
-                    <option>English</option>
-                    <option>Science</option>
-                    <option>History</option>
-                    <option>Language</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-                <div class="field" style="min-width:170px">
-                  <label>Grade</label>
-                  <select id="noteGrade">
-                    <option value="">—</option>
-                    <option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option>
-                  </select>
-                </div>
-                <div class="field" style="flex:1;min-width:240px">
-                  <label>Tags (comma separated)</label>
-                  <input id="noteTags" type="text" placeholder="algebra, test, unit 2">
-                </div>
-              </div>
-
-              <div class="field" style="margin-top:10px">
-                <label>Content</label>
-                <textarea id="noteContent" placeholder="Write here..."></textarea>
-              </div>
-
-              <div class="mini" style="margin-top:8px" id="noteMeta">—</div>
-            </div>
+      <div class="side-footer">
+        <div class="timerbar">
+          <div class="time" id="timerText">25:00</div>
+          <div class="tbtns">
+            <div class="tbtn" id="tStart">▶</div>
+            <div class="tbtn" id="tPause">⏸</div>
+            <div class="tbtn" id="tReset">↺</div>
           </div>
-        </section>
-
-        <section id="tab-graph" class="hidden">
-          <div class="splitbar">
-            <div class="mini">Drag nodes. Scroll to zoom. Click a node to open.</div>
-            <button class="btn" id="btnReloadGraph">Reload</button>
+        </div>
+        <div class="timer-modes">
+          <div class="pill" id="mFocus">Focus</div>
+          <div class="pill" id="mBreak">Break</div>
+          <div class="pill" id="mLong">Long</div>
+          <div class="pill" id="mBreakGame">Break+Game</div>
+        </div>
+        <div class="userline">
+          <div class="left">
+            <div class="avatar" id="avatar">U</div>
+            <div class="email" id="userEmail">Signed out</div>
           </div>
-          <div class="hr"></div>
-          <div class="canvasWrap"><canvas id="graphCanvas"></canvas></div>
-        </section>
-
-        <section id="tab-games" class="hidden">
-          <div class="gameRow">
-            <div class="panel">
-              <div class="inline" style="justify-content:space-between">
-                <h3 id="gameTitle">Snake</h3>
-                <div class="inline">
-                  <button class="smallbtn" id="btnGameSnake">Snake</button>
-                  <button class="smallbtn" id="btnGameTetris">Tetris</button>
-                </div>
-              </div>
-              <div class="hr"></div>
-              <div class="canvasWrap" style="height:520px"><canvas id="gameCanvas"></canvas></div>
-              <div class="hr"></div>
-
-              <div class="inline" style="justify-content:space-between">
-                <div class="mini" id="gameHint">Arrow keys / WASD. Tap to turn. Space to restart.</div>
-                <div class="inline">
-                  <button class="smallbtn primary" id="btnGameStart">Start</button>
-                  <button class="smallbtn" id="btnGameReset">Reset</button>
-                </div>
-              </div>
-
-              <div class="touchControls" id="touchControls">
-                <button class="smallbtn" id="touchLeft">Left</button>
-                <button class="smallbtn" id="touchRotate">Rotate</button>
-                <button class="smallbtn" id="touchRight">Right</button>
-                <button class="smallbtn" id="touchDown">Down</button>
-                <button class="smallbtn primary" id="touchDrop">Drop</button>
-              </div>
-            </div>
-
-            <div class="panel">
-              <h3>Game settings</h3>
-
-              <div class="switch">
-                <div><b>Sound effects</b><small>Small beeps only</small></div>
-                <input id="sfxEnabled" type="checkbox" checked>
-              </div>
-
-              <div id="snakeSettings" style="margin-top:10px">
-                <div class="switch">
-                  <div><b>Snake hard mode</b><small>Faster + obstacles</small></div>
-                  <input id="snakeHard" type="checkbox" checked>
-                </div>
-
-                <div class="hr"></div>
-                <h3 style="margin:0 0 10px;font-size:13px;font-weight:700">Snake boosts</h3>
-
-                <div class="switch">
-                  <div><b>Wrap walls</b><small>Teleport through edges</small></div>
-                  <input id="cheatWrap" type="checkbox">
-                </div>
-                <div class="switch" style="margin-top:10px">
-                  <div><b>Slow time</b><small>Chill speed</small></div>
-                  <input id="cheatSlow" type="checkbox">
-                </div>
-                <div class="switch" style="margin-top:10px">
-                  <div><b>Magnet food</b><small>Food drifts to you</small></div>
-                  <input id="cheatMagnet" type="checkbox">
-                </div>
-                <div class="switch" style="margin-top:10px">
-                  <div><b>Invincible (10s)</b><small>Press to activate</small></div>
-                  <button class="smallbtn" id="btnInvincible">Activate</button>
-                </div>
-
-                <div class="inline" style="margin-top:10px">
-                  <button class="smallbtn" id="btnAdd5">+5 length</button>
-                  <button class="smallbtn" id="btnClearObs">Clear obstacles</button>
-                </div>
-              </div>
-
-              <div id="tetrisSettings" class="hidden" style="margin-top:10px">
-                <div class="switch">
-                  <div><b>Ghost piece</b><small>Show landing preview</small></div>
-                  <input id="tetrisGhost" type="checkbox" checked>
-                </div>
-                <div class="switch" style="margin-top:10px">
-                  <div><b>Lock delay</b><small>More forgiving placement</small></div>
-                  <input id="tetrisLock" type="checkbox" checked>
-                </div>
-              </div>
-
-              <div class="hr"></div>
-              <div class="mini" id="gameStats">—</div>
-            </div>
-          </div>
-        </section>
-
-        <section id="tab-timer" class="hidden">
-          <div class="inline" style="justify-content:space-between">
-            <div>
-              <div style="font-size:40px;font-weight:700" id="timerDisplay">25:00</div>
-              <div class="mini" id="timerState">Ready</div>
-            </div>
-            <div class="inline">
-              <button class="btn primary" id="btnTimerStart">Start</button>
-              <button class="btn" id="btnTimerPause">Pause</button>
-              <button class="btn" id="btnTimerReset">Reset</button>
-            </div>
-          </div>
-          <div class="hr"></div>
-          <div class="inline">
-            <div class="field" style="min-width:180px">
-              <label>Focus minutes</label>
-              <input id="focusMins" type="text" value="25">
-            </div>
-            <div class="field" style="min-width:180px">
-              <label>Break minutes</label>
-              <input id="breakMins" type="text" value="5">
-            </div>
-          </div>
-        </section>
-
-        <section id="tab-settings" class="hidden">
-          <div class="grid2" style="grid-template-columns: 1fr 1fr">
-            <div>
-              <h3 style="margin:0 0 8px;font-size:13px;font-weight:700">Defaults</h3>
-              <div class="field">
-                <label>Default school</label>
-                <select id="defaultSchool">
-                  <option>Salesianum</option>
-                  <option>St Peter</option>
-                  <option>McKean</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="field" style="margin-top:10px">
-                <label>Default category</label>
-                <select id="defaultCategory">
-                  <option>Math</option>
-                  <option>English</option>
-                  <option>Science</option>
-                  <option>History</option>
-                  <option>Language</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="hr"></div>
-              <div class="mini" id="settingsSaveState">—</div>
-              <button class="btn" id="btnSaveSettings">Save settings</button>
-            </div>
-
-            <div>
-              <h3 style="margin:0 0 8px;font-size:13px;font-weight:700">Nerd audio</h3>
-              <div class="mini" style="margin-bottom:10px">Password required (local only). Audio will not autoplay.</div>
-
-              <div class="inline">
-                <input id="nerdPass" type="password" placeholder="Password">
-                <button class="btn primary" id="nerdUnlock">Unlock</button>
-              </div>
-
-              <div id="nerdPanel" class="hidden" style="margin-top:12px">
-                <div class="switch">
-                  <div><b>Remember unlock</b><small>On this device only</small></div>
-                  <input id="rememberUnlock" type="checkbox">
-                </div>
-
-                <div class="hr"></div>
-
-                <div class="field">
-                  <label>Track</label>
-                  <select id="trackSelect"></select>
-                </div>
-
-                <div class="inline" style="margin-top:10px">
-                  <button class="btn primary" id="btnPlayPause">Play</button>
-                  <button class="btn" id="btnStop">Stop</button>
-                </div>
-
-                <div class="field" style="margin-top:10px">
-                  <label>Volume</label>
-                  <input id="musicVol" type="text" value="0.25">
-                </div>
-
-                <div class="mini" style="margin-top:10px">Quick mute key: <span class="kbd">`</span></div>
-                <audio id="bgAudio" preload="none" class="hidden"></audio>
-              </div>
-            </div>
-          </div>
-        </section>
-
+          <button class="btn ghost out" id="signOut">Sign out</button>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+  </aside>
 
-<div class="toast" id="toast"></div>
+  <main class="main">
+    <div class="topbar">
+      <div class="top-left">
+        <div class="mode-tabs">
+          <div class="tab active" id="modeEdit">Edit</div>
+          <div class="tab" id="modePreview">Preview</div>
+          <div class="tab" id="modeGraph">Graph</div>
+        </div>
+        <div class="notecrumb">
+          <div class="title" id="crumbTitle">No note selected</div>
+          <div class="sub" id="crumbSub"></div>
+        </div>
+      </div>
 
-<div id="authModal" class="modalOverlay hidden">
-  <div class="modal">
-    <div class="inline" style="justify-content:space-between">
-      <div>
-        <div class="modalTitle">Account</div>
-        <div class="mini">Supabase email + password</div>
+      <div class="top-right">
+        <div class="status" id="saveStatus"><span class="dot warn"></span><span>Not saved</span></div>
+        <div class="iconbtn wide" id="toggleSplit"><span>Split</span></div>
+        <div class="iconbtn wide" id="toggleFull"><span>Full</span></div>
+        <div class="iconbtn wide" id="doPdf"><span>PDF</span></div>
+        <div class="iconbtn" id="openSettings">⚙</div>
+        <div class="iconbtn primary" id="saveNow">Save</div>
+        <div class="iconbtn danger" id="delNote">🗑</div>
+        <div class="iconbtn" id="mobileMenu" style="display:none">☰</div>
       </div>
-      <button class="btn" id="btnCloseAuth">Close</button>
     </div>
-    <div class="hr"></div>
-    <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">
-      <div class="field" style="grid-column:1/-1">
-        <label>Email</label>
-        <input id="authEmail" type="email" placeholder="you@example.com">
-      </div>
-      <div class="field" style="grid-column:1/-1">
-        <label>Password</label>
-        <input id="authPass" type="password" placeholder="••••••••">
-      </div>
-      <button class="btn primary" id="btnSignIn">Sign in</button>
-      <button class="btn" id="btnSignUp">Sign up</button>
+
+    <div class="content">
+      <section class="view active" id="viewEditor">
+        <div class="editor-shell">
+          <div class="toolbar">
+            <div class="lefttools">
+              <div class="tool" data-md="bold">B</div>
+              <div class="tool" data-md="italic">I</div>
+              <div class="tool" data-md="h1">H1</div>
+              <div class="tool" data-md="h2">H2</div>
+              <div class="tool" data-md="ul">• List</div>
+              <div class="tool" data-md="ol">1. List</div>
+              <div class="tool" data-md="quote">Quote</div>
+              <div class="tool" data-md="code">Code</div>
+              <div class="tool" data-md="link">Link</div>
+            </div>
+            <div class="metapick">
+              <select id="grade">
+                <option value="">Grade: (none)</option>
+                <option value="8th">8th</option>
+                <option value="9th">9th</option>
+                <option value="10th">10th</option>
+                <option value="11th">11th</option>
+                <option value="12th">12th</option>
+              </select>
+              <input id="linkSearch" placeholder="Link notes by title...">
+            </div>
+          </div>
+
+          <div class="split" id="split">
+            <div class="pane" id="paneLeft">
+              <input class="titleInput" id="title" placeholder="Untitled">
+              <textarea class="bodyInput" id="body" placeholder="Write in Markdown..."></textarea>
+            </div>
+
+            <div class="divider" id="divider"></div>
+
+            <div class="pane" id="paneRight">
+              <div class="rightpane">
+                <div class="card" id="cardLinks" style="display:none">
+                  <div class="cardhead">
+                    <div class="h">Linked notes</div>
+                    <div class="act">
+                      <div class="linkbtn" id="unlinkAll">Unlink all</div>
+                      <div class="linkbtn" id="jumpPreview">Preview</div>
+                    </div>
+                  </div>
+                  <div class="pills" id="linksPills"></div>
+                </div>
+
+                <div class="card" id="cardBack" style="display:none">
+                  <div class="cardhead">
+                    <div class="h">Backlinks</div>
+                    <div class="act">
+                      <div class="linkbtn" id="jumpGraph">Graph</div>
+                    </div>
+                  </div>
+                  <div class="pills" id="backPills"></div>
+                </div>
+
+                <div class="card" id="cardMentions" style="display:none">
+                  <div class="cardhead">
+                    <div class="h">Unlinked mentions</div>
+                    <div class="act">
+                      <div class="linkbtn" id="linkAllMentions">Link all</div>
+                    </div>
+                  </div>
+                  <div class="pills" id="menPills"></div>
+                </div>
+
+                <div class="card">
+                  <div class="cardhead">
+                    <div class="h">Shortcuts</div>
+                    <div class="act"></div>
+                  </div>
+                  <div class="smallHint">
+                    <div><kbd>Ctrl</kbd> + <kbd>S</kbd> save</div>
+                    <div><kbd>Ctrl</kbd> + <kbd>K</kbd> command palette</div>
+                    <div><kbd>Esc</kbd> exit full-screen preview / close dialogs</div>
+                  </div>
+                </div>
+
+                <div class="card" id="cardDrop" style="display:none">
+                  <div class="cardhead">
+                    <div class="h">Link results</div>
+                    <div class="act"><div class="linkbtn" id="closeDrop">Close</div></div>
+                  </div>
+                  <div id="dropList"></div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="view" id="viewPreview">
+        <div class="preview">
+          <h1 id="pTitle">Untitled</h1>
+          <div class="metaRow" id="pMeta"></div>
+          <div class="body" id="pBody"></div>
+          <div class="card" id="pLinksCard" style="margin-top:20px;display:none">
+            <div class="cardhead">
+              <div class="h">Linked notes</div>
+              <div class="act"><div class="linkbtn" id="backToEdit">Back</div></div>
+            </div>
+            <div class="pills" id="pLinks"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="viewGraph">
+        <div class="graphWrap">
+          <canvas id="graph"></canvas>
+          <div class="graphUI">
+            <div class="iconbtn wide" id="gReset"><span>Reset</span></div>
+            <div class="iconbtn wide" id="gPhys"><span>Physics</span></div>
+            <div class="iconbtn wide" id="gCenter"><span>Center</span></div>
+          </div>
+          <div class="graphHint">Drag to pan · Scroll to zoom · Click a node to open</div>
+        </div>
+      </section>
+
+      <section class="view" id="viewGames">
+        <div class="gamesWrap">
+          <div class="gameCard">
+            <div class="gameTop">
+              <div class="gameTitle" id="gTitle">Break Games</div>
+              <div class="gTabs">
+                <div class="gTab active" id="tabSnake">Snake</div>
+                <div class="gTab" id="tabTetris">Tetris</div>
+              </div>
+              <div class="gameBtns">
+                <button class="btn primary" id="gStart">Start</button>
+                <button class="btn" id="gClose">Back</button>
+              </div>
+            </div>
+
+            <div class="gameBody">
+              <div class="canvasWrap">
+                <canvas id="snakeCanvas" width="420" height="420"></canvas>
+                <canvas id="tetrisCanvas" width="240" height="480" style="display:none"></canvas>
+              </div>
+
+              <div class="gameSide">
+                <div class="scoreBox" id="snakeScoreBox">
+                  <div class="r">Score <span id="snakeScore">0</span></div>
+                  <div class="r">Best <span id="snakeBest">0</span></div>
+                  <div class="smallHint">Move: <kbd>WASD</kbd> / <kbd>Arrows</kbd></div>
+                </div>
+
+                <div class="scoreBox" id="tetrisScoreBox" style="display:none">
+                  <div class="r">Score <span id="tScore">0</span></div>
+                  <div class="r">Best <span id="tBest">0</span></div>
+                  <div class="r">Level <span id="tLevel">1</span></div>
+                  <div class="r">Lines <span id="tLines">0</span></div>
+                  <div class="smallHint">Rotate <kbd>↑</kbd> · Drop <kbd>Space</kbd></div>
+                </div>
+
+                <div class="cheatBox">
+                  <div class="h">Cheats (saved)</div>
+                  <div id="snakeCheats">
+                    <label>Snake No-Die <input type="checkbox" id="cSnakeNoDie"></label>
+                    <label>Snake Speed <input type="range" id="cSnakeSpeed" min="40" max="200" step="5"></label>
+                    <div class="smallHint">Speed: <span id="cSnakeSpeedV" style="color:rgba(255,210,170,.95);font-weight:950"></span></div>
+                  </div>
+                  <div id="tetrisCheats" style="display:none">
+                    <label>No Game Over <input type="checkbox" id="cTNoOver"></label>
+                    <label>Start Level <input type="number" id="cTLevel" min="1" max="20"></label>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="cardhead">
+                    <div class="h">Tip</div>
+                  </div>
+                  <div class="smallHint">Timer + games works best as a break reset. Use <kbd>Break+Game</kbd>.</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
-    <div class="mini" style="margin-top:10px" id="authMsg">—</div>
-  </div>
+  </main>
 </div>
 
 <script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const SUPABASE_URL = "https://cgmazcvmpcgistoimqlw.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc";
+const SUPABASE_URL='https://cgmazcvmpcgistoimqlw.supabase.co'
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc'
+const supabase=createClient(SUPABASE_URL,SUPABASE_KEY)
 
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-});
-
-const el = (id) => document.getElementById(id);
-const qsa = (s, r=document) => Array.from(r.querySelectorAll(s));
-
-let toastTimer = null;
-function toast(msg){
-  const t = el("toast");
-  if(!t) return;
-  t.textContent = msg;
-  t.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove("show"), 2200);
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
-}
-
-function fmtTime(ts){
-  try{
-    const d = new Date(ts);
-    return d.toLocaleString([], { month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-  }catch(_){ return ""; }
-}
-
-function setStatus(line){
-  const s = el("statusLine");
-  if(s) s.textContent = line;
-}
-
-function setSaveState(t){
-  const s = el("saveState");
-  if(s) s.textContent = t;
-}
-
-const APP = {
-  user: null,
-  notes: [],
-  activeNote: null,
-  links: [],
-  saveDebounce: null,
-  settings: { defaults: { school:"Salesianum", category:"Math" }, nerd: { track:0, vol:0.25, remember:false } },
-  sfxOn: true,
-  audioUnlocked: false,
-  invincibleUntil: 0
-};
-
-function requireUser(){
-  if(!APP.user){
-    toast("Sign in to save.");
-    return false;
+marked.setOptions({
+  breaks:true,
+  highlight:(code,lang)=>{
+    try{
+      if(lang && hljs.getLanguage(lang)) return hljs.highlight(code,{language:lang}).value
+      return hljs.highlightAuto(code).value
+    }catch(e){
+      return code
+    }
   }
-  return true;
+})
+
+const $=id=>document.getElementById(id)
+
+const gradeLabels={ '':'', '8th':'8th', '9th':'9th', '10th':'10th', '11th':'11th', '12th':'12th' }
+const gradeOrder={ '':99, '8th':0, '9th':1, '10th':2, '11th':3, '12th':4 }
+
+let user=null
+let notes=[]
+let links=[]
+let activeId=null
+
+let uiPrefs={sort:'updated_desc',previewFull:false,sidebarHidden:false,lastOpenNoteId:null}
+let timerPresets={focus:25,break:5,long:15}
+let gameCheats={snake:{highScore:0,noDie:false,speed:110},tetris:{highScore:0,noGameOver:false,startLevel:1}}
+let currentSchool='Salesianum'
+
+let autosaveT=null
+let statusMode='idle'
+let statusAt=0
+
+let timerInterval=null
+let timeLeft=25*60
+
+let splitMode='split'
+let splitSizes=[50,50]
+let draggingDivider=false
+
+let graphCanvas=null
+let graphCtx=null
+let graphNodes=[]
+let graphEdges=[]
+let graphPhysics=true
+let gView={x:0,y:0,scale:1}
+let gPan=false
+let gPanStart=null
+let gDragNode=null
+let gAnim=null
+
+let snakeCanvas=null
+let snakeCtx=null
+let snake=[]
+let food=null
+let dir={x:0,y:0}
+let snakeScore=0
+let snakeRunning=false
+let snakeInterval=null
+const S_GRID=20
+const S_TILE=21
+
+let tetrisCanvas=null
+let tetrisCtx=null
+let tBoard=null
+let tPiece=null
+let tScore=0
+let tLines=0
+let tLevel=1
+let tRunning=false
+let tDrop=0
+let tLast=0
+const TC=12,TR=24,TS=20
+const T_COLORS=[null,'#ff6a00','#ffb100','#ff7e2b','#ff3b3b','#ff9a00','#ffcc00','#ff5500']
+const T_SHAPES=[null,[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]]]
+
+function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
+function esc(s){return (s||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+function orderedPair(a,b){return a<b?[a,b]:[b,a]}
+function now(){return Date.now()}
+function fmtTime(d){
+  try{return new Date(d).toLocaleString(undefined,{hour:'numeric',minute:'2-digit'})}catch(e){return ''}
+}
+function fmtShort(d){
+  try{return new Date(d).toLocaleString(undefined,{month:'short',day:'numeric'})}catch(e){return ''}
+}
+function relTime(iso){
+  if(!iso) return ''
+  const t=new Date(iso).getTime()
+  const diff=Math.max(0,Date.now()-t)
+  const m=Math.floor(diff/60000)
+  if(m<1) return 'just now'
+  if(m<60) return m+'m ago'
+  const h=Math.floor(m/60)
+  if(h<24) return h+'h ago'
+  const d=Math.floor(h/24)
+  if(d<7) return d+'d ago'
+  return fmtShort(iso)
 }
 
-function setAuthedUI(){
-  const authText = el("authText");
-  const btnOpenAuth = el("btnOpenAuth");
-  const btnLogout = el("btnLogout");
-  if(APP.user){
-    if(authText) authText.textContent = APP.user.email || "Signed in";
-    if(btnOpenAuth) btnOpenAuth.classList.add("hidden");
-    if(btnLogout) btnLogout.classList.remove("hidden");
-    setStatus("Online");
+function toast(title,body,type='ok'){
+  const wrap=$('toastWrap')
+  const el=document.createElement('div')
+  el.className='toast '+(type==='ok'?'ok':type==='warn'?'warn':'bad')
+  el.innerHTML='<div class="t1"></div><div class="t2"></div>'
+  el.querySelector('.t1').textContent=title
+  el.querySelector('.t2').textContent=body
+  wrap.appendChild(el)
+  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(6px)'},2400)
+  setTimeout(()=>{el.remove()},2900)
+}
+
+function setStatus(mode){
+  statusMode=mode
+  statusAt=Date.now()
+  const el=$('saveStatus')
+  const dot=el.querySelector('.dot')
+  const txt=el.querySelectorAll('span')[1]
+  if(mode==='saving'){
+    dot.className='dot warn'
+    txt.textContent='Saving...'
+  }else if(mode==='saved'){
+    dot.className='dot ok'
+    txt.textContent='Saved '+fmtTime(Date.now())
+  }else if(mode==='error'){
+    dot.className='dot bad'
+    txt.textContent='Save failed'
+  }else if(mode==='offline'){
+    dot.className='dot bad'
+    txt.textContent='Offline'
   }else{
-    if(authText) authText.textContent = "Not signed in";
-    if(btnOpenAuth) btnOpenAuth.classList.remove("hidden");
-    if(btnLogout) btnLogout.classList.add("hidden");
-    setStatus("Offline demo");
+    dot.className='dot warn'
+    txt.textContent='Not saved'
   }
 }
 
-async function ensureSettingsRow(){
-  if(!APP.user) return;
-  const payload = {
-    user_id: APP.user.id,
-    current_school: APP.settings.defaults.school,
-    ui: { defaults: { school: APP.settings.defaults.school, category: APP.settings.defaults.category } },
-    nerd: { track: APP.settings.nerd.track, vol: APP.settings.nerd.vol }
-  };
-  await sb.from("user_settings").upsert(payload, { onConflict: "user_id" });
-}
-
-async function loadSettings(){
-  if(!APP.user) return;
-  const { data } = await sb.from("user_settings").select("*").eq("user_id", APP.user.id).maybeSingle();
-  if(!data) return;
-
-  const defaults = (data.ui && data.ui.defaults) ? data.ui.defaults : null;
-  APP.settings.defaults.school = defaults?.school || data.current_school || "Salesianum";
-  APP.settings.defaults.category = defaults?.category || "Math";
-
-  const nerd = data.nerd || {};
-  APP.settings.nerd.track = Number.isFinite(nerd.track) ? nerd.track : 0;
-  APP.settings.nerd.vol = Number.isFinite(nerd.vol) ? nerd.vol : 0.25;
-
-  const ds = el("defaultSchool");
-  const dc = el("defaultCategory");
-  if(ds) ds.value = APP.settings.defaults.school;
-  if(dc) dc.value = APP.settings.defaults.category;
-
-  const ns = el("noteSchool");
-  const nc = el("noteCategory");
-  if(ns) ns.value = APP.settings.defaults.school;
-  if(nc) nc.value = APP.settings.defaults.category;
-
-  const v = el("musicVol");
-  if(v) v.value = String(APP.settings.nerd.vol);
-}
-
-async function saveSettings(){
-  if(!requireUser()) return;
-  APP.settings.defaults.school = el("defaultSchool")?.value || "Salesianum";
-  APP.settings.defaults.category = el("defaultCategory")?.value || "Math";
-
-  const payload = {
-    user_id: APP.user.id,
-    current_school: APP.settings.defaults.school,
-    ui: { defaults: { school: APP.settings.defaults.school, category: APP.settings.defaults.category } },
-    nerd: { track: APP.settings.nerd.track, vol: APP.settings.nerd.vol }
-  };
-  const { error } = await sb.from("user_settings").upsert(payload, { onConflict: "user_id" });
-  const s = el("settingsSaveState");
-  if(error){
-    if(s) s.textContent = "Save failed";
-    toast("Settings save failed");
-    return;
-  }
-  if(s) s.textContent = "Saved";
-  toast("Saved settings");
-}
-
-function setEditorEnabled(on){
-  const ids = ["btnSaveNow","btnPrint","btnLink","btnDelete","noteTitle","noteSchool","noteCategory","noteGrade","noteTags","noteContent"];
-  for(const id of ids){
-    const x = el(id);
-    if(x) x.disabled = !on;
+async function ensureSettings(){
+  const {data}=await supabase.from('user_settings').select('*').eq('user_id',user.id).maybeSingle()
+  if(!data){
+    const ins=await supabase.from('user_settings').insert({user_id:user.id}).select().single()
+    if(ins.data) applySettings(ins.data)
+  }else{
+    applySettings(data)
   }
 }
 
-function fillEditor(note){
-  APP.activeNote = note;
+function applySettings(s){
+  currentSchool=s.current_school||currentSchool
+  uiPrefs=s.ui||uiPrefs
+  timerPresets=s.timer||timerPresets
+  gameCheats=s.game||gameCheats
 
-  if(el("noteTitle")) el("noteTitle").value = note?.title ?? "";
-  if(el("noteSchool")) el("noteSchool").value = note?.school || APP.settings.defaults.school;
-  if(el("noteCategory")) el("noteCategory").value = note?.category || APP.settings.defaults.category;
-  if(el("noteGrade")) el("noteGrade").value = note?.grade ?? "";
-  if(el("noteTags")) el("noteTags").value = (note?.tags || []).join(", ");
-  if(el("noteContent")) el("noteContent").value = note?.content ?? "";
+  $('schoolText').textContent=currentSchool
+  $('sort').value=uiPrefs.sort||'updated_desc'
+  $('setSidebar').value=uiPrefs.sidebarHidden? '1':'0'
+  $('setPreviewFull').value=uiPrefs.previewFull? '1':'0'
+  $('setFocus').value=timerPresets.focus||25
+  $('setBreak').value=timerPresets.break||5
+  $('setLong').value=timerPresets.long||15
 
-  const meta = el("noteMeta");
-  if(meta){
-    const parts = [];
-    if(note?.created_at) parts.push("Created " + fmtTime(note.created_at));
-    if(note?.updated_at) parts.push("Updated " + fmtTime(note.updated_at));
-    meta.textContent = parts.length ? parts.join(" • ") : "—";
-  }
+  if(uiPrefs.previewFull) document.body.classList.add('previewFull')
+  else document.body.classList.remove('previewFull')
 
-  setEditorEnabled(!!note);
-  renderNotesList();
+  syncCheatUI()
+  updateTimerDisplay()
 }
 
-function editorToPayload(){
-  const title = el("noteTitle")?.value ?? "";
-  const school = el("noteSchool")?.value ?? APP.settings.defaults.school;
-  const category = el("noteCategory")?.value ?? APP.settings.defaults.category;
-  const grade = el("noteGrade")?.value ?? "";
-  const tagsRaw = el("noteTags")?.value ?? "";
-  const tags = tagsRaw.split(",").map(s=>s.trim()).filter(Boolean).slice(0, 30);
-  const content = el("noteContent")?.value ?? "";
-  return { title, school, category, grade, tags, content };
-}
-
-function renderNotesList(){
-  const list = el("notesList");
-  if(!list) return;
-  list.innerHTML = "";
-
-  const q = (el("noteSearch")?.value || "").trim().toLowerCase();
-  const fs = el("filterSchool")?.value || "";
-  const fc = el("filterCategory")?.value || "";
-
-  const filtered = APP.notes.filter(n=>{
-    const t = (n.title || "").toLowerCase();
-    const c = (n.content || "").toLowerCase();
-    const okQ = !q || t.includes(q) || c.includes(q);
-    const okS = !fs || (n.school || "") === fs;
-    const okC = !fc || (n.category || "") === fc;
-    return okQ && okS && okC;
-  }).sort((a,b)=> new Date(b.updated_at) - new Date(a.updated_at));
-
-  if(el("notesCount")) el("notesCount").textContent = String(filtered.length);
-
-  if(filtered.length === 0){
-    const div = document.createElement("div");
-    div.className = "mini";
-    div.textContent = APP.user ? "No notes yet. Hit New." : "Sign in to save notes.";
-    list.appendChild(div);
-    return;
-  }
-
-  for(const n of filtered){
-    const b = document.createElement("button");
-    b.className = "noteitem" + (APP.activeNote && APP.activeNote.id === n.id ? " active" : "");
-    const title = (n.title || "").trim() || "(untitled)";
-    const meta = `${n.school || ""}${n.category ? " • " + n.category : ""}${n.grade ? " • grade " + n.grade : ""}`;
-    b.innerHTML = `<b>${escapeHtml(title)}</b><small>${escapeHtml(meta)} • ${escapeHtml(fmtTime(n.updated_at))}</small>`;
-    b.addEventListener("click", ()=> openNote(n.id));
-    list.appendChild(b);
-  }
-}
-
-async function fetchNotes(){
-  if(!APP.user){
-    APP.notes = [];
-    fillEditor(null);
-    renderNotesList();
-    return;
-  }
-  setSaveState("Loading...");
-  const { data, error } = await sb.from("notes")
-    .select("id,title,content,school,category,grade,tags,created_at,updated_at")
-    .order("updated_at", { ascending:false })
-    .limit(250);
-
-  if(error){
-    setSaveState("Load failed");
-    toast("Notes load failed");
-    return;
-  }
-  APP.notes = data || [];
-  setSaveState("Ready");
-  renderNotesList();
-  if(!APP.activeNote && APP.notes.length) await openNote(APP.notes[0].id);
-  if(!APP.notes.length) fillEditor(null);
-}
-
-async function openNote(id){
-  if(!APP.user){
-    toast("Sign in to open notes.");
-    return;
-  }
-  setSaveState("Loading note...");
-  const { data, error } = await sb.from("notes").select("*").eq("id", id).single();
-  if(error){
-    setSaveState("Open failed");
-    toast("Open failed");
-    return;
-  }
-  fillEditor(data);
-  setSaveState("Ready");
-}
-
-async function createNote(){
-  if(!requireUser()) return;
-  setSaveState("Creating...");
-  const payload = {
-    user_id: APP.user.id,
-    title:"",
-    content:"",
-    school: APP.settings.defaults.school,
-    category: APP.settings.defaults.category,
-    grade:"",
-    tags:[]
-  };
-  const { data, error } = await sb.from("notes").insert(payload).select("*").single();
-  if(error){
-    setSaveState("Create failed");
-    toast("Create failed");
-    return;
-  }
-  APP.notes.unshift(data);
-  fillEditor(data);
-  setSaveState("Ready");
-  toast("New note");
-}
-
-async function deleteNote(){
-  if(!requireUser()) return;
-  if(!APP.activeNote) return;
-  const id = APP.activeNote.id;
-  setSaveState("Deleting...");
-  const { error } = await sb.from("notes").delete().eq("id", id);
-  if(error){
-    setSaveState("Delete failed");
-    toast("Delete failed");
-    return;
-  }
-  APP.notes = APP.notes.filter(n=>n.id !== id);
-  fillEditor(null);
-  renderNotesList();
-  setSaveState("Ready");
-  toast("Deleted");
-}
-
-async function saveNow(){
-  if(!requireUser()) return;
-  if(!APP.activeNote) return;
-  const id = APP.activeNote.id;
-  setSaveState("Saving...");
-  const patch = editorToPayload();
-  const { data, error } = await sb.from("notes").update(patch).eq("id", id).select("*").single();
-  if(error){
-    setSaveState("Save failed");
-    toast("Save failed");
-    return;
-  }
-  APP.activeNote = data;
-  const idx = APP.notes.findIndex(n=>n.id===id);
-  if(idx>=0) APP.notes[idx]=data;
-  fillEditor(data);
-  setSaveState("Saved");
-}
-
-function scheduleAutosave(){
-  clearTimeout(APP.saveDebounce);
-  APP.saveDebounce = setTimeout(()=>saveNow(), 600);
-}
-
-function printActive(){
-  if(!APP.activeNote){
-    toast("Open a note first");
-    return;
-  }
-  const note = { ...APP.activeNote, ...editorToPayload() };
-  const w = window.open("", "_blank", "noopener,noreferrer");
-  if(!w){
-    toast("Popup blocked");
-    return;
-  }
-  const safeTitle = escapeHtml(note.title || "Note");
-  const safeMeta = escapeHtml(`${note.school || ""}${note.category ? " • "+note.category : ""}${note.grade ? " • grade "+note.grade : ""}`);
-  const safeTags = escapeHtml((note.tags || []).join(", "));
-  const safeContent = escapeHtml(note.content || "").replace(/\n/g, "<br>");
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${safeTitle}</title><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:Montserrat,system-ui,Segoe UI,Arial;margin:24px;line-height:1.5}h1{margin:0 0 6px}small{color:#555}hr{border:0;border-top:1px solid #ddd;margin:14px 0}.tags{color:#555;font-size:12px;margin-top:6px}</style></head><body><h1>${safeTitle}</h1><small>${safeMeta}</small><div class="tags">${safeTags}</div><hr><div>${safeContent}</div></body></html>`);
-  w.document.close();
-  w.focus();
-  w.print();
+let settingsT=null
+function saveSettings(){
+  clearTimeout(settingsT)
+  settingsT=setTimeout(async ()=>{
+    await supabase.from('user_settings').upsert({
+      user_id:user.id,
+      current_school:currentSchool,
+      ui:uiPrefs,
+      timer:timerPresets,
+      game:gameCheats
+    })
+  },250)
 }
 
 async function fetchLinks(){
-  if(!APP.user){
-    APP.links=[];
-    return;
-  }
-  const { data } = await sb.from("note_links").select("note_a,note_b,created_at").limit(1000);
-  APP.links = data || [];
+  const {data}=await supabase.from('note_links').select('note_a,note_b').eq('user_id',user.id)
+  links=data||[]
 }
 
-async function linkNoteFlow(){
-  if(!requireUser()) return;
-  if(!APP.activeNote){
-    toast("Open a note first");
-    return;
+function rebuildLinkedOnClient(){
+  const map={}
+  notes.forEach(n=>map[n.id]=[])
+  links.forEach(l=>{
+    if(map[l.note_a]) map[l.note_a].push(l.note_b)
+    if(map[l.note_b]) map[l.note_b].push(l.note_a)
+  })
+  notes=notes.map(n=>({...n,linked_notes:map[n.id]||[]}))
+}
+
+async function fetchNotes(){
+  const {data}=await supabase.from('notes').select('*').eq('user_id',user.id).order('updated_at',{ascending:false})
+  notes=(data||[]).map(n=>({...n,linked_notes:[]}))
+  await fetchLinks()
+  rebuildLinkedOnClient()
+  renderList()
+  const last=uiPrefs.lastOpenNoteId
+  if(last && notes.some(n=>n.id===last)) loadNote(last)
+  else if(notes.length) loadNote(notes[0].id)
+  else setEmptyState()
+}
+
+function sortNotes(arr){
+  const mode=uiPrefs.sort||'updated_desc'
+  const copy=[...arr]
+  if(mode==='title_asc'){
+    copy.sort((a,b)=>((a.title||'').toLowerCase()).localeCompare((b.title||'').toLowerCase()))
+  }else if(mode==='grade_asc'){
+    copy.sort((a,b)=>(gradeOrder[a.grade||'']-gradeOrder[b.grade||''])||(((b.updated_at||'')>(a.updated_at||''))?1:-1))
+  }else{
+    copy.sort((a,b)=>((b.updated_at||'')>(a.updated_at||''))?1:-1)
   }
-  const others = APP.notes.filter(n=>n.id!==APP.activeNote.id);
-  if(!others.length){
-    toast("Need at least 2 notes");
-    return;
+  return copy
+}
+
+function noteSnippet(n){
+  const s=(n.content||'').replace(/\s+/g,' ').trim()
+  if(!s) return 'No content yet.'
+  return s.length>90? s.slice(0,90)+'…' : s
+}
+
+function renderList(){
+  const q=($('search').value||'').trim().toLowerCase()
+  const sorted=sortNotes(notes)
+  const groups={}
+  sorted.forEach(n=>{
+    const title=(n.title||'').toLowerCase()
+    const body=(n.content||'').toLowerCase()
+    if(q && !(title.includes(q)||body.includes(q))) return
+    const g=n.grade||''
+    if(!groups[g]) groups[g]=[]
+    groups[g].push(n)
+  })
+
+  const order=['8th','9th','10th','11th','12th','']
+  const wrap=$('noteList')
+  let html=''
+  let total=0
+  order.forEach(g=>{
+    const arr=groups[g]||[]
+    if(!arr.length) return
+    total+=arr.length
+    const head=g?('Grade '+gradeLabels[g]):'Ungraded'
+    html+='<div class="group"><div class="group-head"><div>'+head+'</div><div class="count">'+arr.length+'</div></div>'
+    arr.forEach(n=>{
+      const t=(n.title&&n.title.trim()?n.title:'Untitled')
+      const tag=n.grade?('<div class="tag">'+gradeLabels[n.grade]+'</div>'):''
+      const linked=(n.linked_notes||[]).length>0
+      const draft=(!n.title && !n.content)
+      const badges=[]
+      if(linked) badges.push('<div class="badge link">LINK</div>')
+      if(draft) badges.push('<div class="badge draft">DRAFT</div>')
+      const isActive=n.id===activeId
+      html+='<div class="note-card '+(isActive?'active':'')+'" data-id="'+n.id+'">'
+      html+='<div class="note-title"><div class="t">'+escapeHtml(t)+'</div>'+tag+'</div>'
+      html+='<div class="note-snippet">'+escapeHtml(noteSnippet(n))+'</div>'
+      html+='<div class="note-meta"><div>'+escapeHtml(relTime(n.updated_at||n.created_at))+'</div><div class="badges">'+badges.join('')+'</div></div>'
+      html+='</div>'
+    })
+    html+='</div>'
+  })
+
+  if(total===0){
+    wrap.innerHTML='<div style="padding:22px 12px;color:rgba(238,242,255,.55);font-weight:850;line-height:1.7">No notes found.<br><span style="color:rgba(255,220,200,.95)">Try another search</span> or press <span style="font-family:var(--mono)">Ctrl+K</span>.</div>'
+  }else{
+    wrap.innerHTML=html
+    wrap.querySelectorAll('.note-card').forEach(c=>{
+      c.onclick=()=>loadNote(c.getAttribute('data-id'))
+    })
   }
-  const pick = prompt("Type part of the note title to link to:");
-  if(!pick) return;
-  const p = pick.trim().toLowerCase();
-  const found = others.find(n=> (n.title||"").toLowerCase().includes(p));
-  if(!found){
-    toast("No match");
-    return;
+}
+
+function setEmptyState(){
+  activeId=null
+  $('crumbTitle').textContent='No notes yet'
+  $('crumbSub').innerHTML=''
+  $('title').value=''
+  $('body').value=''
+  $('grade').value=''
+  $('pTitle').textContent='Untitled'
+  $('pMeta').innerHTML=''
+  $('pBody').innerHTML='<div style="color:rgba(238,242,255,.55);font-weight:850;line-height:1.7">Create your first note using <span style="font-family:var(--mono)">New Note</span>.</div>'
+  hideLinkCards()
+}
+
+function setView(v){
+  $('viewEditor').classList.toggle('active',v==='editor')
+  $('viewPreview').classList.toggle('active',v==='preview')
+  $('viewGraph').classList.toggle('active',v==='graph')
+  $('viewGames').classList.toggle('active',v==='games')
+
+  $('modeEdit').classList.toggle('active',v==='editor')
+  $('modePreview').classList.toggle('active',v==='preview')
+  $('modeGraph').classList.toggle('active',v==='graph')
+
+  if(v==='preview') updatePreview()
+  if(v==='graph') drawGraph()
+}
+
+function setSplit(mode){
+  splitMode=mode
+  const split=$('split')
+  split.classList.remove('singleEditor','singlePreview')
+  $('divider').style.display='flex'
+  $('paneRight').style.display='block'
+  $('paneLeft').style.display='block'
+
+  if(mode==='editor'){
+    split.classList.add('singleEditor')
+    $('paneRight').style.display='none'
+    $('divider').style.display='none'
+  }else if(mode==='preview'){
+    split.classList.add('singlePreview')
+    $('paneLeft').style.display='none'
+    $('divider').style.display='none'
+    updatePreviewInSide()
+  }else{
+    applySplitSizes()
+    updatePreviewInSide()
   }
-  const payload = { user_id: APP.user.id, note_a: APP.activeNote.id, note_b: found.id };
-  const { error } = await sb.from("note_links").insert(payload);
+  $('toggleSplit').classList.toggle('active',mode==='split')
+}
+
+function applySplitSizes(){
+  const split=$('split')
+  const a=clamp(splitSizes[0],20,80)
+  const b=100-a
+  split.style.gridTemplateColumns=a+'% 12px '+b+'%'
+}
+
+function escapeHtml(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
+}
+
+async function createNote(){
+  const {data,error}=await supabase.from('notes').insert({user_id:user.id,title:'',content:'',grade:'',school:currentSchool}).select().single()
+  if(error){toast('Create failed',error.message,'bad');return}
+  notes.unshift({...data,linked_notes:[]})
+  uiPrefs.lastOpenNoteId=data.id
+  saveSettings()
+  renderList()
+  loadNote(data.id)
+  toast('New note','Created','ok')
+}
+
+function loadNote(id){
+  const n=notes.find(x=>x.id===id)
+  if(!n) return
+  activeId=id
+  uiPrefs.lastOpenNoteId=id
+  saveSettings()
+
+  $('title').value=n.title||''
+  $('body').value=n.content||''
+  $('grade').value=n.grade||''
+
+  updateCrumb()
+  renderList()
+  updatePreview()
+  refreshLinksUI()
+  setStatus('saved')
+}
+
+function updateCrumb(){
+  const n=notes.find(x=>x.id===activeId)
+  const title=(n?.title&&n.title.trim()?n.title:'Untitled')
+  $('crumbTitle').textContent=title
+  const chips=[]
+  if(n?.grade) chips.push('<span class="chip">Grade '+escapeHtml(gradeLabels[n.grade]||n.grade)+'</span>')
+  chips.push('<span class="chip">'+escapeHtml(currentSchool)+'</span>')
+  if(n?.updated_at) chips.push('<span class="chip">'+escapeHtml(relTime(n.updated_at))+'</span>')
+  $('crumbSub').innerHTML=chips.join('')
+}
+
+function autosave(){
+  if(!activeId) return
+  if(!navigator.onLine){setStatus('offline');return}
+  setStatus('saving')
+  clearTimeout(autosaveT)
+  autosaveT=setTimeout(()=>saveNote(),650)
+}
+
+async function saveNote(){
+  if(!activeId) return
+  const n=notes.find(x=>x.id===activeId)
+  if(!n) return
+  if(!navigator.onLine){setStatus('offline');return}
+  setStatus('saving')
+  const title=$('title').value
+  const content=$('body').value
+  const grade=$('grade').value||''
+  const {error}=await supabase.from('notes').update({
+    title:title,
+    content:content,
+    grade:grade,
+    school:currentSchool,
+    updated_at:new Date().toISOString()
+  }).eq('id',activeId)
+
   if(error){
-    toast("Link failed");
-    return;
+    setStatus('error')
+    toast('Save failed',error.message,'bad')
+    return
   }
-  await fetchLinks();
-  toast("Linked");
+
+  n.title=title
+  n.content=content
+  n.grade=grade
+  n.school=currentSchool
+  n.updated_at=new Date().toISOString()
+  setStatus('saved')
+  updateCrumb()
+  renderList()
+  updatePreview()
+  refreshLinksUI()
 }
 
-let graph = null;
+async function deleteNote(){
+  if(!activeId) return
+  const n=notes.find(x=>x.id===activeId)
+  const t=(n?.title&&n.title.trim()?n.title:'Untitled')
+  if(!confirm('Delete "'+t+'"?')) return
+  await supabase.from('note_links').delete().eq('user_id',user.id).or('note_a.eq.'+activeId+',note_b.eq.'+activeId)
+  const {error}=await supabase.from('notes').delete().eq('id',activeId)
+  if(error){toast('Delete failed',error.message,'bad');return}
+  notes=notes.filter(x=>x.id!==activeId)
+  links=links.filter(l=>l.note_a!==activeId && l.note_b!==activeId)
+  rebuildLinkedOnClient()
+  renderList()
+  toast('Deleted',t,'warn')
+  if(notes.length) loadNote(notes[0].id)
+  else setEmptyState()
+}
 
-function fitCanvas(canvas){
-  const rect = canvas.getBoundingClientRect();
-  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-  const w = Math.max(2, Math.floor(rect.width * dpr));
-  const h = Math.max(2, Math.floor(rect.height * dpr));
-  if(canvas.width !== w || canvas.height !== h){
-    canvas.width = w;
-    canvas.height = h;
+function updatePreview(){
+  const n=notes.find(x=>x.id===activeId)
+  const title=( $('title').value || (n?.title||'') || 'Untitled' ).trim() || 'Untitled'
+  $('pTitle').textContent=title
+  const meta=[]
+  const g=$('grade').value||n?.grade||''
+  if(g) meta.push('<span class="chip">Grade '+escapeHtml(gradeLabels[g]||g)+'</span>')
+  meta.push('<span class="chip">'+escapeHtml(currentSchool)+'</span>')
+  if(n?.updated_at) meta.push('<span class="chip">Updated '+escapeHtml(new Date(n.updated_at).toLocaleString())+'</span>')
+  $('pMeta').innerHTML=meta.join('')
+  const md=$('body').value||n?.content||''
+  $('pBody').innerHTML=marked.parse(md)
+  $('pBody').querySelectorAll('pre code').forEach(b=>{try{hljs.highlightElement(b)}catch(e){}})
+  updatePreviewLinks()
+  updatePreviewInSide()
+}
+
+function updatePreviewInSide(){
+  if(splitMode==='preview'){
+    setView('preview')
   }
-  const ctx = canvas.getContext("2d");
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  return { ctx, dpr, cssW: rect.width, cssH: rect.height };
+}
+
+function updatePreviewLinks(){
+  const n=notes.find(x=>x.id===activeId)
+  const ids=(n?.linked_notes||[])
+  if(ids.length){
+    $('pLinksCard').style.display='block'
+    $('pLinks').innerHTML=ids.map(id=>{
+      const ln=notes.find(x=>x.id===id)
+      if(!ln) return ''
+      const t=(ln.title&&ln.title.trim()?ln.title:'Untitled')
+      return '<div class="pillnote" data-open="'+id+'">'+escapeHtml(t)+'</div>'
+    }).join('')
+    $('pLinks').querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>loadNote(p.getAttribute('data-open')))
+  }else{
+    $('pLinksCard').style.display='none'
+  }
+}
+
+function getBacklinks(id){
+  const res=[]
+  notes.forEach(n=>{
+    if(n.id===id) return
+    if((n.linked_notes||[]).includes(id)) res.push(n.id)
+  })
+  return res
+}
+
+function getUnlinkedMentions(){
+  const cur=notes.find(x=>x.id===activeId)
+  if(!cur) return []
+  const content=($('body').value||'').toLowerCase()
+  const linked=new Set(cur.linked_notes||[])
+  const out=[]
+  notes.forEach(o=>{
+    if(o.id===activeId) return
+    const t=(o.title||'').trim()
+    if(!t) return
+    if(t.length<4) return
+    if(linked.has(o.id)) return
+    if(content.includes(t.toLowerCase())) out.push(o.id)
+  })
+  return out.slice(0,18)
+}
+
+function hideLinkCards(){
+  $('cardLinks').style.display='none'
+  $('cardBack').style.display='none'
+  $('cardMentions').style.display='none'
+  $('cardDrop').style.display='none'
+}
+
+function refreshLinksUI(){
+  const cur=notes.find(x=>x.id===activeId)
+  if(!cur){hideLinkCards();return}
+  const linked=cur.linked_notes||[]
+  if(linked.length){
+    $('cardLinks').style.display='block'
+    $('linksPills').innerHTML=linked.map(id=>{
+      const ln=notes.find(x=>x.id===id)
+      if(!ln) return ''
+      const t=(ln.title&&ln.title.trim()?ln.title:'Untitled')
+      return '<div class="pillnote" data-open="'+id+'" data-id="'+id+'">'+escapeHtml(t)+'<div class="x" data-x="'+id+'">×</div></div>'
+    }).join('')
+    $('linksPills').querySelectorAll('.pillnote').forEach(p=>{
+      p.onclick=e=>{
+        const xid=e.target?.getAttribute?.('data-x')
+        if(xid){unlinkNote(xid);return}
+        loadNote(p.getAttribute('data-open'))
+      }
+    })
+  }else{
+    $('cardLinks').style.display='none'
+  }
+
+  const bl=getBacklinks(activeId)
+  if(bl.length){
+    $('cardBack').style.display='block'
+    $('backPills').innerHTML=bl.map(id=>{
+      const ln=notes.find(x=>x.id===id)
+      if(!ln) return ''
+      const t=(ln.title&&ln.title.trim()?ln.title:'Untitled')
+      return '<div class="pillnote" data-open="'+id+'">'+escapeHtml(t)+'</div>'
+    }).join('')
+    $('backPills').querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>loadNote(p.getAttribute('data-open')))
+  }else{
+    $('cardBack').style.display='none'
+  }
+
+  const men=getUnlinkedMentions()
+  if(men.length){
+    $('cardMentions').style.display='block'
+    $('menPills').innerHTML=men.map(id=>{
+      const ln=notes.find(x=>x.id===id)
+      if(!ln) return ''
+      const t=(ln.title&&ln.title.trim()?ln.title:'Untitled')
+      return '<div class="pillnote" data-link="'+id+'">'+escapeHtml(t)+'</div>'
+    }).join('')
+    $('menPills').querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>linkNote(p.getAttribute('data-link')))
+  }else{
+    $('cardMentions').style.display='none'
+  }
+}
+
+function showLinkDrop(list){
+  $('cardDrop').style.display='block'
+  const wrap=$('dropList')
+  if(!list.length){
+    wrap.innerHTML='<div style="padding:10px;color:rgba(238,242,255,.55);font-weight:850">No matches</div>'
+    return
+  }
+  wrap.innerHTML=list.map(n=>{
+    const t=(n.title&&n.title.trim()?n.title:'Untitled')
+    const g=n.grade?(' · '+gradeLabels[n.grade]):''
+    return '<div class="pillnote" style="width:100%;justify-content:space-between" data-pick="'+n.id+'"><span>'+escapeHtml(t)+'</span><span style="color:rgba(238,242,255,.45);font-weight:950;font-size:11px">'+escapeHtml(g)+'</span></div>'
+  }).join('')
+  wrap.querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>linkNote(p.getAttribute('data-pick')))
+}
+
+function searchLinkCandidates(){
+  if(!activeId) return
+  const cur=notes.find(x=>x.id===activeId)
+  if(!cur) return
+  const q=($('linkSearch').value||'').trim().toLowerCase()
+  if(!q){$('cardDrop').style.display='none';return}
+  const already=new Set(cur.linked_notes||[])
+  const list=notes.filter(n=>n.id!==activeId)
+    .filter(n=>!already.has(n.id))
+    .filter(n=>((n.title||'').toLowerCase().includes(q)))
+    .slice(0,8)
+  showLinkDrop(list)
+}
+
+async function linkNote(lid){
+  if(!activeId || !lid || activeId===lid) return
+  const [a,b]=orderedPair(activeId,lid)
+  const {error}=await supabase.from('note_links').upsert({user_id:user.id,note_a:a,note_b:b},{onConflict:'user_id,note_a,note_b'})
+  if(error){toast('Link failed',error.message,'bad');return}
+  $('linkSearch').value=''
+  $('cardDrop').style.display='none'
+  await fetchLinks()
+  rebuildLinkedOnClient()
+  refreshLinksUI()
+  renderList()
+  toast('Linked','Notes connected','ok')
+}
+
+async function unlinkNote(lid){
+  if(!activeId || !lid) return
+  const [a,b]=orderedPair(activeId,lid)
+  const {error}=await supabase.from('note_links').delete().eq('user_id',user.id).eq('note_a',a).eq('note_b',b)
+  if(error){toast('Unlink failed',error.message,'bad');return}
+  await fetchLinks()
+  rebuildLinkedOnClient()
+  refreshLinksUI()
+  renderList()
+  toast('Unlinked','Connection removed','warn')
+}
+
+async function unlinkAll(){
+  if(!activeId) return
+  if(!confirm('Unlink all?')) return
+  await supabase.from('note_links').delete().eq('user_id',user.id).or('note_a.eq.'+activeId+',note_b.eq.'+activeId)
+  await fetchLinks()
+  rebuildLinkedOnClient()
+  refreshLinksUI()
+  renderList()
+  toast('Unlinked','All connections removed','warn')
+}
+
+async function linkAllMentions(){
+  const ids=getUnlinkedMentions()
+  for(const id of ids) await linkNote(id)
+}
+
+function applyMd(action){
+  const ta=$('body')
+  const start=ta.selectionStart
+  const end=ta.selectionEnd
+  const sel=ta.value.slice(start,end)
+  const before=ta.value.slice(0,start)
+  const after=ta.value.slice(end)
+  let rep=''
+  if(action==='bold') rep='**'+(sel||'bold')+'**'
+  if(action==='italic') rep='*'+(sel||'italic')+'*'
+  if(action==='h1') rep='# '+(sel||'Heading')
+  if(action==='h2') rep='## '+(sel||'Heading')
+  if(action==='ul') rep='- '+(sel||'Item')
+  if(action==='ol') rep='1. '+(sel||'Item')
+  if(action==='quote') rep='> '+(sel||'Quote')
+  if(action==='code') rep='```\\n'+(sel||'code')+'\\n```'
+  if(action==='link') rep='['+(sel||'text')+'](https://)'
+  ta.value=before+rep+after
+  const pos=before.length+rep.length
+  ta.setSelectionRange(pos,pos)
+  ta.focus()
+  autosave()
+  updatePreview()
+  refreshLinksUI()
+}
+
+function openPdfModal(){ $('modalPdf').style.display='flex' }
+function closePdfModal(){ $('modalPdf').style.display='none' }
+
+async function exportPdf(){
+  if(!activeId) return
+  const n=notes.find(x=>x.id===activeId)
+  if(!n) return
+  const includeLinks=$('pdfIncludeLinks').value==='1'
+  const includeDates=$('pdfIncludeDates').value==='1'
+
+  const wrap=document.createElement('div')
+  wrap.style.width='820px'
+  wrap.style.padding='34px'
+  wrap.style.background='#ffffff'
+  wrap.style.color='#111111'
+  wrap.style.fontFamily='Inter,Arial,sans-serif'
+  wrap.style.lineHeight='1.7'
+
+  const h=document.createElement('div')
+  h.style.fontSize='34px'
+  h.style.fontWeight='900'
+  h.style.marginBottom='10px'
+  h.textContent=(n.title&&n.title.trim()?n.title:'Untitled')
+  wrap.appendChild(h)
+
+  const meta=document.createElement('div')
+  meta.style.display='flex'
+  meta.style.flexWrap='wrap'
+  meta.style.gap='8px'
+  meta.style.marginBottom='18px'
+  const chip=(txt)=>{
+    const s=document.createElement('span')
+    s.textContent=txt
+    s.style.fontSize='12px'
+    s.style.fontWeight='800'
+    s.style.padding='6px 10px'
+    s.style.borderRadius='999px'
+    s.style.border='1px solid #e7e7e7'
+    s.style.background='#fafafa'
+    return s
+  }
+  if(n.grade) meta.appendChild(chip('Grade: '+(gradeLabels[n.grade]||n.grade)))
+  meta.appendChild(chip('School: '+(n.school||currentSchool)))
+  if(includeDates && n.created_at) meta.appendChild(chip('Created: '+new Date(n.created_at).toLocaleDateString()))
+  if(includeDates && n.updated_at) meta.appendChild(chip('Updated: '+new Date(n.updated_at).toLocaleString()))
+  wrap.appendChild(meta)
+
+  const body=document.createElement('div')
+  body.innerHTML=marked.parse(n.content||'')
+  body.querySelectorAll('pre').forEach(p=>{
+    p.style.background='#0f1117'
+    p.style.color='#f5f5f5'
+    p.style.padding='14px'
+    p.style.borderRadius='12px'
+    p.style.overflowX='auto'
+  })
+  body.querySelectorAll('code').forEach(c=>{
+    c.style.fontFamily='JetBrains Mono,Consolas,monospace'
+    c.style.fontSize='12px'
+  })
+  wrap.appendChild(body)
+
+  if(includeLinks && (n.linked_notes||[]).length){
+    const tt=document.createElement('div')
+    tt.style.marginTop='22px'
+    tt.style.fontWeight='900'
+    tt.style.fontSize='16px'
+    tt.textContent='Linked Notes'
+    wrap.appendChild(tt)
+    const ul=document.createElement('ul')
+    ul.style.marginTop='8px'
+    ul.style.paddingLeft='18px'
+    ;(n.linked_notes||[]).forEach(id=>{
+      const ln=notes.find(x=>x.id===id)
+      if(!ln) return
+      const li=document.createElement('li')
+      li.textContent=(ln.title&&ln.title.trim()?ln.title:'Untitled')
+      li.style.fontWeight='750'
+      li.style.margin='6px 0'
+      ul.appendChild(li)
+    })
+    wrap.appendChild(ul)
+  }
+
+  const {jsPDF}=window.jspdf
+  const doc=new jsPDF('p','pt','a4')
+  toast('Exporting','Rendering PDF…','warn')
+  await doc.html(wrap,{
+    x:24,
+    y:24,
+    width:547,
+    windowWidth:820,
+    html2canvas:{scale:1.25,backgroundColor:'#ffffff'}
+  })
+  doc.save(((n.title&&n.title.trim()?n.title:'note')+'.pdf').replace(/[\\/:*?"<>|]+/g,'_'))
+  closePdfModal()
+  toast('Exported','PDF saved','ok')
+}
+
+function openSettings(){ $('modalSettings').style.display='flex' }
+function closeSettings(){ $('modalSettings').style.display='none' }
+function saveSettingsFromModal(){
+  uiPrefs.sidebarHidden=$('setSidebar').value==='1'
+  uiPrefs.previewFull=$('setPreviewFull').value==='1'
+  timerPresets.focus=clamp(parseInt($('setFocus').value||25,10),1,180)
+  timerPresets.break=clamp(parseInt($('setBreak').value||5,10),1,60)
+  timerPresets.long=clamp(parseInt($('setLong').value||15,10),1,120)
+  applySettings({current_school:currentSchool,ui:uiPrefs,timer:timerPresets,game:gameCheats})
+  saveSettings()
+  closeSettings()
+  toast('Saved','Settings synced','ok')
+}
+
+function toggleFullPreview(){
+  uiPrefs.previewFull=!uiPrefs.previewFull
+  if(uiPrefs.previewFull) document.body.classList.add('previewFull')
+  else document.body.classList.remove('previewFull')
+  saveSettings()
+}
+
+function openPalette(){
+  $('paletteBack').style.display='flex'
+  $('paletteQ').value=''
+  renderPalette('')
+  setTimeout(()=>$('paletteQ').focus(),0)
+}
+function closePalette(){ $('paletteBack').style.display='none' }
+
+function renderPalette(q){
+  const query=(q||'').toLowerCase().trim()
+  const items=[]
+  const add=(ico,a,b,k,fn)=>items.push({ico,a,b,k,fn})
+
+  add('✏','New note','Create a new note','Enter',()=>createNote())
+  add('📝','Edit','Go to editor','Enter',()=>setView('editor'))
+  add('👁','Preview','Go to preview','Enter',()=>setView('preview'))
+  add('🕸','Graph','Open graph view','Enter',()=>setView('graph'))
+  add('🎮','Games','Open break games','Enter',()=>setView('games'))
+  add('⛶','Toggle full preview','Full-screen preview','Enter',()=>toggleFullPreview())
+  add('📄','Export PDF','Export current note','Enter',()=>openPdfModal())
+  add('⚙','Settings','Open settings','Enter',()=>openSettings())
+  if(activeId) add('💾','Save now','Force save','Enter',()=>saveNote())
+
+  const noteHits=notes
+    .map(n=>({id:n.id,title:(n.title&&n.title.trim()?n.title:'Untitled'),body:(n.content||'')}))
+    .filter(n=>{
+      if(!query) return false
+      return n.title.toLowerCase().includes(query) || n.body.toLowerCase().includes(query)
+    })
+    .slice(0,10)
+  noteHits.forEach(n=>add('📌',n.title,'Open note','Enter',()=>loadNote(n.id)))
+
+  const filtered=items.filter(it=>{
+    if(!query) return true
+    return it.a.toLowerCase().includes(query) || it.b.toLowerCase().includes(query)
+  })
+
+  const list=$('paletteList')
+  list.innerHTML=filtered.map((it,i)=>{
+    return '<div class="pItem" data-i="'+i+'"><div class="l"><div class="pIco">'+it.ico+'</div><div class="pTxt"><div class="pA">'+escapeHtml(it.a)+'</div><div class="pB">'+escapeHtml(it.b)+'</div></div></div><div class="pK">'+escapeHtml(it.k)+'</div></div>'
+  }).join('')
+
+  list.querySelectorAll('.pItem').forEach(row=>{
+    row.onclick=()=>{
+      const idx=parseInt(row.getAttribute('data-i'),10)
+      closePalette()
+      filtered[idx].fn()
+    }
+  })
+}
+
+function setTimer(min){
+  pauseTimer()
+  timeLeft=min*60
+  updateTimerDisplay()
+}
+function updateTimerDisplay(){
+  const m=Math.floor(timeLeft/60).toString().padStart(2,'0')
+  const s=(timeLeft%60).toString().padStart(2,'0')
+  $('timerText').textContent=m+':'+s
+}
+function startTimer(){
+  if(timerInterval) return
+  timerInterval=setInterval(()=>{
+    if(timeLeft>0){timeLeft--;updateTimerDisplay()}
+    else{
+      pauseTimer()
+      toast('Timer',"Time's up",'ok')
+      try{new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play()}catch(e){}
+    }
+  },1000)
+}
+function pauseTimer(){clearInterval(timerInterval);timerInterval=null}
+function resetTimer(){pauseTimer();setTimer(timerPresets.focus||25)}
+
+function openMobileSidebar(){
+  $('sidebar').classList.add('open')
+  $('backdrop').classList.add('show')
+}
+function closeMobileSidebar(){
+  $('sidebar').classList.remove('open')
+  $('backdrop').classList.remove('show')
+}
+
+function maybeMobileUI(){
+  const isMobile=window.innerWidth<=900
+  $('mobileMenu').style.display=isMobile?'flex':'none'
+}
+
+function initSplitResize(){
+  const div=$('divider')
+  div.addEventListener('mousedown',e=>{
+    draggingDivider=true
+    document.body.style.cursor='col-resize'
+  })
+  window.addEventListener('mouseup',e=>{
+    if(!draggingDivider) return
+    draggingDivider=false
+    document.body.style.cursor=''
+  })
+  window.addEventListener('mousemove',e=>{
+    if(!draggingDivider) return
+    const split=$('split')
+    const rect=split.getBoundingClientRect()
+    const x=e.clientX-rect.left
+    const pct=clamp((x/rect.width)*100,20,80)
+    splitSizes=[pct,100-pct]
+    applySplitSizes()
+  })
 }
 
 function initGraph(){
-  const canvas = el("graphCanvas");
-  if(!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const state = { canvas, ctx, nodes:[], edges:[], dragging:null, pan:{x:40,y:40}, zoom:1, last:performance.now() };
+  graphCanvas=$('graph')
+  graphCtx=graphCanvas.getContext('2d')
+  resizeGraph()
+  window.addEventListener('resize',()=>{resizeGraph();renderGraph()})
+  graphCanvas.addEventListener('mousedown',gDown)
+  graphCanvas.addEventListener('mousemove',gMove)
+  graphCanvas.addEventListener('mouseup',gUp)
+  graphCanvas.addEventListener('wheel',gWheel,{passive:false})
+}
 
-  function resize(){
-    fitCanvas(canvas);
-  }
+function resizeGraph(){
+  const r=graphCanvas.getBoundingClientRect()
+  graphCanvas.width=Math.floor(r.width*devicePixelRatio)
+  graphCanvas.height=Math.floor(r.height*devicePixelRatio)
+  graphCtx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)
+}
 
-  function rebuild(){
-    const nodes = APP.notes.map((n,i)=>( {
+function buildGraph(){
+  const W=graphCanvas.getBoundingClientRect().width
+  const H=graphCanvas.getBoundingClientRect().height
+  const N=notes.length||1
+  graphNodes=notes.map((n,i)=>{
+    const a=(i/N)*Math.PI*2
+    const rad=Math.min(W,H)*0.25
+    return{
       id:n.id,
-      title:(n.title||"(untitled)").slice(0,22),
-      x: 260 + Math.cos(i)*140,
-      y: 220 + Math.sin(i)*140,
-      vx:0, vy:0
-    }));
-    const idx = new Map(nodes.map((n,i)=>[n.id,i]));
-    const edges = [];
-    for(const e of APP.links){
-      const ia = idx.get(e.note_a);
-      const ib = idx.get(e.note_b);
-      if(ia==null||ib==null) continue;
-      edges.push([ia,ib]);
+      label:(n.title&&n.title.trim()?n.title:'Untitled'),
+      x:Math.cos(a)*rad,
+      y:Math.sin(a)*rad,
+      vx:0,vy:0
     }
-    state.nodes = nodes;
-    state.edges = edges;
+  })
+  graphEdges=links.map(l=>({a:l.note_a,b:l.note_b}))
+  gView={x:0,y:0,scale:1}
+}
+
+function worldToScreen(wx,wy){
+  const r=graphCanvas.getBoundingClientRect()
+  const cx=r.width/2, cy=r.height/2
+  return { x:cx + gView.x + wx*gView.scale, y:cy + gView.y + wy*gView.scale }
+}
+function screenToWorld(sx,sy){
+  const r=graphCanvas.getBoundingClientRect()
+  const cx=r.width/2, cy=r.height/2
+  return { x:(sx - cx - gView.x)/gView.scale, y:(sy - cy - gView.y)/gView.scale }
+}
+function hitNode(wx,wy){
+  for(const n of graphNodes){
+    const dx=n.x-wx
+    const dy=n.y-wy
+    if(Math.sqrt(dx*dx+dy*dy) < 22) return n
   }
+  return null
+}
 
-  function screenToWorld(mx,my){
-    return { x: (mx - state.pan.x)/state.zoom, y: (my - state.pan.y)/state.zoom };
-  }
+function renderGraph(){
+  const r=graphCanvas.getBoundingClientRect()
+  const W=r.width,H=r.height
+  graphCtx.clearRect(0,0,W,H)
 
-  function pickNode(mx,my){
-    const p = screenToWorld(mx,my);
-    let best=null, bestD=1e9;
-    for(const n of state.nodes){
-      const dx=p.x-n.x, dy=p.y-n.y;
-      const d=dx*dx+dy*dy;
-      if(d<bestD && d<18*18){ best=n; bestD=d; }
-    }
-    return best;
-  }
+  graphCtx.save()
+  graphCtx.translate(W/2+gView.x, H/2+gView.y)
+  graphCtx.scale(gView.scale,gView.scale)
 
-  function draw(){
-    const rect = canvas.getBoundingClientRect();
-    ctx.clearRect(0,0,rect.width,rect.height);
-    ctx.save();
-    ctx.translate(state.pan.x, state.pan.y);
-    ctx.scale(state.zoom, state.zoom);
+  graphCtx.lineWidth=2/gView.scale
+  graphEdges.forEach(e=>{
+    const a=graphNodes.find(n=>n.id===e.a)
+    const b=graphNodes.find(n=>n.id===e.b)
+    if(!a||!b) return
+    graphCtx.strokeStyle='rgba(255,106,0,.22)'
+    graphCtx.beginPath()
+    graphCtx.moveTo(a.x,a.y)
+    graphCtx.lineTo(b.x,b.y)
+    graphCtx.stroke()
+  })
 
-    ctx.lineWidth = 2/state.zoom;
-    ctx.strokeStyle = "rgba(255,255,255,.18)";
-    for(const [ia,ib] of state.edges){
-      const a=state.nodes[ia], b=state.nodes[ib];
-      ctx.beginPath();
-      ctx.moveTo(a.x,a.y);
-      ctx.lineTo(b.x,b.y);
-      ctx.stroke();
-    }
+  graphNodes.forEach(n=>{
+    const isActive=n.id===activeId
+    const isLinked=graphEdges.some(e=>(e.a===activeId && e.b===n.id)||(e.b===activeId && e.a===n.id))
+    const r=22
+    graphCtx.fillStyle=isActive?'#ff6a00':(isLinked?'#22c55e':'rgba(255,255,255,.18)')
+    graphCtx.beginPath()
+    graphCtx.arc(n.x,n.y,r,0,Math.PI*2)
+    graphCtx.fill()
 
-    for(const n of state.nodes){
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(79,140,255,.18)";
-      ctx.strokeStyle = "rgba(79,140,255,.55)";
-      ctx.arc(n.x,n.y, 16, 0, Math.PI*2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = "rgba(244,246,251,.92)";
-      ctx.font = `${12/state.zoom}px Montserrat, sans-serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-      ctx.fillText(n.title, n.x, n.y+18);
-    }
+    graphCtx.lineWidth=2/gView.scale
+    graphCtx.strokeStyle='rgba(0,0,0,.35)'
+    graphCtx.stroke()
 
-    ctx.restore();
-  }
-
-  function tick(){
-    const now = performance.now();
-    const dt = Math.min(0.03, (now - state.last)/1000);
-    state.last = now;
-
-    const cx = 520, cy = 320;
-    for(const n of state.nodes){
-      n.vx += (cx - n.x)*0.012;
-      n.vy += (cy - n.y)*0.012;
+    if(isActive||isLinked){
+      graphCtx.shadowBlur=20/gView.scale
+      graphCtx.shadowColor=isActive?'rgba(255,106,0,.65)':'rgba(34,197,94,.55)'
+      graphCtx.beginPath()
+      graphCtx.arc(n.x,n.y,r,0,Math.PI*2)
+      graphCtx.strokeStyle='rgba(255,255,255,.25)'
+      graphCtx.stroke()
+      graphCtx.shadowBlur=0
     }
 
-    for(let i=0;i<state.nodes.length;i++){
-      for(let j=i+1;j<state.nodes.length;j++){
-        const a=state.nodes[i], b=state.nodes[j];
-        const dx=a.x-b.x, dy=a.y-b.y;
-        const d2=dx*dx+dy*dy+0.001;
-        const f=12000/d2;
-        const inv=Math.sqrt(d2);
-        a.vx += (dx/inv)*f*dt;
-        a.vy += (dy/inv)*f*dt;
-        b.vx -= (dx/inv)*f*dt;
-        b.vy -= (dy/inv)*f*dt;
-      }
+    graphCtx.fillStyle='rgba(238,242,255,.92)'
+    graphCtx.font=(900/gView.scale)+'px Inter'
+    graphCtx.textAlign='center'
+    const label=n.label.length>18?n.label.slice(0,18)+'…':n.label
+    graphCtx.fillText(label,n.x,n.y+46)
+  })
+
+  graphCtx.restore()
+}
+
+function stepGraph(){
+  if(!graphPhysics){renderGraph();gAnim=requestAnimationFrame(stepGraph);return}
+  const nodes=graphNodes
+  const edges=graphEdges
+  for(const n of nodes){
+    let fx=0,fy=0
+    for(const o of nodes){
+      if(o===n) continue
+      const dx=n.x-o.x
+      const dy=n.y-o.y
+      const d=Math.sqrt(dx*dx+dy*dy)||1
+      const f=1100/(d*d)
+      fx+=(dx/d)*f
+      fy+=(dy/d)*f
     }
-
-    for(const [ia,ib] of state.edges){
-      const a=state.nodes[ia], b=state.nodes[ib];
-      const dx=b.x-a.x, dy=b.y-a.y;
-      const dist=Math.sqrt(dx*dx+dy*dy)+0.001;
-      const desired=180;
-      const diff=(dist-desired);
-      const fx=(dx/dist)*diff*0.020;
-      const fy=(dy/dist)*diff*0.020;
-      a.vx += fx; a.vy += fy;
-      b.vx -= fx; b.vy -= fy;
+    for(const e of edges){
+      if(e.a!==n.id && e.b!==n.id) continue
+      const oid=(e.a===n.id?e.b:e.a)
+      const o=nodes.find(x=>x.id===oid)
+      if(!o) continue
+      fx+=(o.x-n.x)*0.012
+      fy+=(o.y-n.y)*0.012
     }
+    n.vx=(n.vx+fx)*0.88
+    n.vy=(n.vy+fy)*0.88
+  }
+  for(const n of nodes){
+    n.x+=n.vx
+    n.y+=n.vy
+  }
+  renderGraph()
+  gAnim=requestAnimationFrame(stepGraph)
+}
 
-    for(const n of state.nodes){
-      if(state.dragging && state.dragging.id===n.id) continue;
-      n.x += n.vx; n.y += n.vy;
-      n.vx *= 0.86; n.vy *= 0.86;
+function drawGraph(){
+  if(!graphCanvas) return
+  buildGraph()
+  renderGraph()
+  if(gAnim) cancelAnimationFrame(gAnim)
+  gAnim=requestAnimationFrame(stepGraph)
+}
+
+function gDown(e){
+  const rect=graphCanvas.getBoundingClientRect()
+  const sx=e.clientX-rect.left
+  const sy=e.clientY-rect.top
+  const w=screenToWorld(sx,sy)
+  const node=hitNode(w.x,w.y)
+  if(node){
+    gDragNode=node
+    graphPhysics=false
+    return
+  }
+  gPan=true
+  gPanStart={sx,sy,ox:gView.x,oy:gView.y}
+}
+function gMove(e){
+  const rect=graphCanvas.getBoundingClientRect()
+  const sx=e.clientX-rect.left
+  const sy=e.clientY-rect.top
+  if(gDragNode){
+    const w=screenToWorld(sx,sy)
+    gDragNode.x=w.x
+    gDragNode.y=w.y
+    renderGraph()
+    return
+  }
+  if(gPan && gPanStart){
+    gView.x=gPanStart.ox+(sx-gPanStart.sx)
+    gView.y=gPanStart.oy+(sy-gPanStart.sy)
+    renderGraph()
+  }
+}
+function gUp(e){
+  const rect=graphCanvas.getBoundingClientRect()
+  const sx=e.clientX-rect.left
+  const sy=e.clientY-rect.top
+  if(gDragNode){
+    const w=screenToWorld(sx,sy)
+    const node=hitNode(w.x,w.y)
+    const id=gDragNode.id
+    gDragNode=null
+    graphPhysics=true
+    renderGraph()
+    const clickNode=hitNode(w.x,w.y)
+    if(clickNode && clickNode.id===id){
+      loadNote(id)
+      setView('editor')
     }
-
-    draw();
-    requestAnimationFrame(tick);
+    return
   }
-
-  canvas.addEventListener("pointerdown", (e)=>{
-    const r = canvas.getBoundingClientRect();
-    const mx = e.clientX - r.left;
-    const my = e.clientY - r.top;
-    const n = pickNode(mx,my);
-    if(n){
-      state.dragging = { id:n.id };
-      canvas.setPointerCapture(e.pointerId);
-    }else{
-      state.dragging = { pan:true, ox: mx, oy: my, px: state.pan.x, py: state.pan.y };
-      canvas.setPointerCapture(e.pointerId);
-    }
-  });
-
-  canvas.addEventListener("pointermove", (e)=>{
-    if(!state.dragging) return;
-    const r = canvas.getBoundingClientRect();
-    const mx = e.clientX - r.left;
-    const my = e.clientY - r.top;
-
-    if(state.dragging.pan){
-      state.pan.x = state.dragging.px + (mx - state.dragging.ox);
-      state.pan.y = state.dragging.py + (my - state.dragging.oy);
-      return;
-    }
-
-    const node = state.nodes.find(x=>x.id===state.dragging.id);
-    if(!node) return;
-    const p = screenToWorld(mx,my);
-    node.x = p.x; node.y = p.y;
-    node.vx = 0; node.vy = 0;
-  });
-
-  canvas.addEventListener("pointerup", (e)=>{
-    if(!state.dragging) return;
-    if(!state.dragging.pan){
-      const r = canvas.getBoundingClientRect();
-      const mx = e.clientX - r.left;
-      const my = e.clientY - r.top;
-      const n = pickNode(mx,my);
-      if(n) openNote(n.id);
-    }
-    state.dragging = null;
-    canvas.releasePointerCapture(e.pointerId);
-  });
-
-  canvas.addEventListener("wheel", (e)=>{
-    e.preventDefault();
-    const r = canvas.getBoundingClientRect();
-    const mx = e.clientX - r.left;
-    const my = e.clientY - r.top;
-    const p = screenToWorld(mx,my);
-    const factor = e.deltaY > 0 ? 0.92 : 1.08;
-    state.zoom = Math.max(0.35, Math.min(2.2, state.zoom*factor));
-    state.pan.x = mx - p.x*state.zoom;
-    state.pan.y = my - p.y*state.zoom;
-  }, { passive:false });
-
-  window.addEventListener("resize", ()=>{ resize(); });
-
-  graph = { resize, rebuild };
-  resize();
-  rebuild();
-  requestAnimationFrame(tick);
+  gPan=false
+  gPanStart=null
+}
+function gWheel(e){
+  e.preventDefault()
+  const rect=graphCanvas.getBoundingClientRect()
+  const sx=e.clientX-rect.left
+  const sy=e.clientY-rect.top
+  const before=screenToWorld(sx,sy)
+  const delta=Math.sign(e.deltaY)
+  const f=delta>0?0.92:1.08
+  gView.scale=clamp(gView.scale*f,0.45,2.8)
+  const after=screenToWorld(sx,sy)
+  gView.x+=(after.x-before.x)*gView.scale
+  gView.y+=(after.y-before.y)*gView.scale
+  renderGraph()
 }
 
-async function reloadGraph(){
-  await fetchLinks();
-  if(graph){
-    graph.rebuild();
-    graph.resize();
-  }else{
-    initGraph();
-  }
-  toast("Graph updated");
-}
-
-const TRACKS = [
-  { key:"A", name:"autumn! - one way (instrumental)", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/autumn!%20-%20one%20way%20(instrumental).mp3" },
-  { key:"J", name:"jaydes pluggnb type beat", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/free%20jaydes%20%20pluggnb%20type%20beat%20self%20(1).mp3" },
-  { key:"J", name:"jaydes - convenience (instrumental)", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes%20%20convenience%20(fixed%20instrumental)%20(1).mp3" },
-  { key:"M", name:"Me vs Me (instrumental)", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/Me%20vs%20Me%20(Instrumental)%20-%20Jaeychino%20and%20SlimeGetEm%20(1).mp3" },
-  { key:"K", name:"Kyle Richh x Sdot Go - Drive me crazy (instrumental)", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/Kyle%20Richh%20x%20Sdot%20Go%20-%20Drive%20me%20crazyOblivious%20(official%20instrumental)%20(1).mp3" },
-  { key:"X", name:"ex", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/ex.mp3" },
-  { key:"T", name:"jaydes - who can i trust (instrumental)", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes-who%20can%20i%20trust%20ft.rich%20amiri%20(instrumental).mp3" }
-];
-
-function clamp01(n){
-  n = Number(n);
-  return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0.25;
-}
-
-function setupNerdAudio(){
-  const sel = el("trackSelect");
-  if(sel){
-    sel.innerHTML = "";
-    for(let i=0;i<TRACKS.length;i++){
-      const o = document.createElement("option");
-      o.value = String(i);
-      o.textContent = TRACKS[i].name;
-      sel.appendChild(o);
-    }
-    sel.value = String(APP.settings.nerd.track || 0);
-  }
-  const audio = el("bgAudio");
-  if(audio){
-    audio.loop = true;
-    audio.volume = clamp01(APP.settings.nerd.vol);
-  }
-  const v = el("musicVol");
-  if(v) v.value = String(APP.settings.nerd.vol);
-}
-
-function setTrack(idx){
-  const audio = el("bgAudio");
-  if(!audio) return;
-  const i = Math.max(0, Math.min(TRACKS.length-1, Number(idx)||0));
-  APP.settings.nerd.track = i;
-  audio.src = TRACKS[i].url;
-}
-
-function stopMusic(){
-  const audio = el("bgAudio");
-  const btn = el("btnPlayPause");
-  if(audio){
-    audio.pause();
-    audio.currentTime = 0;
-  }
-  if(btn) btn.textContent = "Play";
-}
-
-function playPauseMusic(){
-  if(!APP.audioUnlocked){
-    toast("Unlock first");
-    return;
-  }
-  const audio = el("bgAudio");
-  if(!audio) return;
-
-  if(!audio.src) setTrack(el("trackSelect")?.value ?? 0);
-
-  const btn = el("btnPlayPause");
-  if(audio.paused){
-    audio.play().then(()=>{
-      if(btn) btn.textContent = "Pause";
-    }).catch(()=>{
-      toast("Tap Play again");
-    });
-  }else{
-    audio.pause();
-    if(btn) btn.textContent = "Play";
-  }
-}
-
-function applyMusicVol(){
-  const audio = el("bgAudio");
-  const v = clamp01(el("musicVol")?.value ?? 0.25);
-  APP.settings.nerd.vol = v;
-  if(audio) audio.volume = v;
-}
-
-function unlockNerd(){
-  const pass = el("nerdPass")?.value ?? "";
-  if(pass !== "9999"){
-    toast("Wrong password");
-    return;
-  }
-  APP.audioUnlocked = true;
-  const panel = el("nerdPanel");
-  if(panel) panel.classList.remove("hidden");
-  const remember = !!el("rememberUnlock")?.checked;
-  if(remember){
-    localStorage.setItem("studyos_nerd_unlocked", "1");
-  }else{
-    localStorage.removeItem("studyos_nerd_unlocked");
-  }
-  toast("Unlocked");
-}
-
-function quickMute(){
-  const audio = el("bgAudio");
-  if(audio && !audio.paused){
-    stopMusic();
-    toast("Muted");
-  }
-}
-
-let audioCtx = null;
-function sfx(freq=440, dur=0.07, type="sine", gain=0.05){
-  if(!APP.sfxOn) return;
-  try{
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    const t0 = audioCtx.currentTime;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = type;
-    o.frequency.setValueAtTime(freq, t0);
-    g.gain.setValueAtTime(gain, t0);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    o.connect(g).connect(audioCtx.destination);
-    o.start(t0);
-    o.stop(t0 + dur);
-  }catch(_){}
-}
-
-const GAME = {
-  mode: "snake",
-  running: false,
-  last: 0,
-  score: 0,
-  bestSnake: 0,
-  bestTetris: 0,
-  snake: null,
-  tetris: null
-};
-
-function gameCanvas(){ return el("gameCanvas"); }
-function snakeSettingsUI(on){
-  el("snakeSettings")?.classList.toggle("hidden", !on);
-  el("tetrisSettings")?.classList.toggle("hidden", on);
-  el("touchControls")?.classList.toggle("hidden", on);
-}
-
-function updateGameStats(){
-  const st = el("gameStats");
-  if(!st) return;
-  const best = GAME.mode==="snake" ? GAME.bestSnake : GAME.bestTetris;
-  st.textContent = `Score: ${GAME.score}   Best: ${best}`;
-}
-
-function resizeGameCanvas(){
-  const canvas = gameCanvas();
-  if(!canvas) return;
-  fitCanvas(canvas);
+function initGames(){
+  snakeCanvas=$('snakeCanvas')
+  snakeCtx=snakeCanvas.getContext('2d')
+  tetrisCanvas=$('tetrisCanvas')
+  tetrisCtx=tetrisCanvas.getContext('2d')
+  resetSnake()
+  resetTetris()
+  syncCheatUI()
 }
 
 function syncCheatUI(){
-  const wrap = el("cheatWrap");
-  const slow = el("cheatSlow");
-  const mag = el("cheatMagnet");
-  if(wrap && GAME.snake) wrap.checked = !!GAME.snake.cheats.wrap;
-  if(slow && GAME.snake) slow.checked = !!GAME.snake.cheats.slow;
-  if(mag && GAME.snake) mag.checked = !!GAME.snake.cheats.magnet;
+  $('snakeBest').textContent=String(gameCheats.snake?.highScore||0)
+  $('tBest').textContent=String(gameCheats.tetris?.highScore||0)
+  $('cSnakeNoDie').checked=!!gameCheats.snake?.noDie
+  $('cSnakeSpeed').value=gameCheats.snake?.speed??110
+  $('cSnakeSpeedV').textContent=(gameCheats.snake?.speed??110)+'ms'
+  $('cTNoOver').checked=!!gameCheats.tetris?.noGameOver
+  $('cTLevel').value=gameCheats.tetris?.startLevel??1
 }
 
-function initSnake(drawOnly){
-  const canvas = gameCanvas();
-  if(!canvas) return;
-  const { ctx, cssW, cssH } = fitCanvas(canvas);
-  const hard = el("snakeHard")?.checked ?? true;
-
-  const size = Math.max(16, Math.min(26, Math.floor(Math.min(cssW/44, cssH/32))));
-  const cols = Math.max(18, Math.floor(cssW / size));
-  const rows = Math.max(16, Math.floor(cssH / size));
-
-  const randCell = () => ({ x: Math.floor(Math.random()*cols), y: Math.floor(Math.random()*rows) });
-
-  function placeFree(s){
-    let tries = 0;
-    while(tries++ < 900){
-      const p = randCell();
-      if(s.body.some(b=>b.x===p.x&&b.y===p.y)) continue;
-      if(s.obstacles.some(o=>o.x===p.x&&o.y===p.y)) continue;
-      if(s.poison && s.poison.x===p.x && s.poison.y===p.y) continue;
-      if(s.food && s.food.x===p.x && s.food.y===p.y) continue;
-      return p;
-    }
-    return randCell();
-  }
-
-  const snake = {
-    size, cols, rows, ctx, canvas,
-    dir:{x:1,y:0},
-    nextDir:{x:1,y:0},
-    body:[{x:Math.floor(cols/2), y:Math.floor(rows/2)}],
-    grow:3,
-    food:null,
-    poison:null,
-    obstacles:[],
-    stepAcc:0,
-    alive:true,
-    hard,
-    baseSpeed: hard ? 14 : 10,
-    cheats:{wrap:false, slow:false, magnet:false}
-  };
-
-  if(hard){
-    for(let i=0;i<12;i++){
-      const o = placeFree(snake);
-      if(Math.abs(o.x-snake.body[0].x)<4 && Math.abs(o.y-snake.body[0].y)<4) continue;
-      snake.obstacles.push(o);
-    }
-  }
-
-  snake.food = placeFree(snake);
-
-  GAME.snake = snake;
-  GAME.running = false;
-  GAME.score = 0;
-  updateGameStats();
-  syncCheatUI();
-
-  function draw(){
-    const w = cssW, h = cssH;
-    ctx.clearRect(0,0,w,h);
-    ctx.fillStyle = "rgba(0,0,0,.18)";
-    ctx.fillRect(0,0,w,h);
-
-    ctx.strokeStyle = "rgba(255,255,255,.06)";
-    ctx.lineWidth = 1;
-    for(let x=0;x<w;x+=snake.size){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
-    for(let y=0;y<h;y+=snake.size){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
-
-    const drawCell = (p, fill, glow) => {
-      const px = p.x*snake.size;
-      const py = p.y*snake.size;
-      ctx.fillStyle = fill;
-      ctx.fillRect(px+2, py+2, snake.size-4, snake.size-4);
-      if(glow){
-        ctx.strokeStyle = "rgba(79,140,255,.60)";
-        ctx.strokeRect(px+1.5, py+1.5, snake.size-3, snake.size-3);
-      }
-    };
-
-    for(const o of snake.obstacles) drawCell(o, "rgba(255,255,255,.10)");
-    if(snake.poison) drawCell(snake.poison, "rgba(255,77,77,.28)", true);
-    drawCell(snake.food, "rgba(79,140,255,.30)", true);
-
-    const inv = performance.now() < APP.invincibleUntil;
-    for(let i=snake.body.length-1;i>=0;i--){
-      const b = snake.body[i];
-      const isHead = i===0;
-      drawCell(b, isHead ? (inv ? "rgba(65,217,138,.40)" : "rgba(138,183,255,.30)") : "rgba(79,140,255,.18)", isHead);
-    }
-
-    if(!snake.alive){
-      ctx.fillStyle = "rgba(0,0,0,.58)";
-      ctx.fillRect(0,0,w,h);
-      ctx.fillStyle = "rgba(244,246,251,.95)";
-      ctx.font = "700 30px Montserrat, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("Game Over", w/2, h/2 - 10);
-      ctx.font = "13px Montserrat, sans-serif";
-      ctx.fillStyle = "rgba(244,246,251,.72)";
-      ctx.fillText("Press Start to try again", w/2, h/2 + 22);
-    }else if(!GAME.running){
-      ctx.fillStyle = "rgba(0,0,0,.42)";
-      ctx.fillRect(0,0,w,h);
-      ctx.fillStyle = "rgba(244,246,251,.92)";
-      ctx.font = "700 24px Montserrat, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("Press Start", w/2, h/2);
-      ctx.font = "12px Montserrat, sans-serif";
-      ctx.fillStyle = "rgba(244,246,251,.72)";
-      ctx.fillText("or Space / tap canvas", w/2, h/2 + 28);
-    }
-  }
-
-  function step(dt){
-    if(!GAME.running || !snake.alive) return;
-
-    const speed = snake.cheats.slow ? Math.max(7, snake.baseSpeed - 6) : snake.baseSpeed + Math.min(18, Math.floor(GAME.score/4));
-    snake.stepAcc += dt * speed;
-
-    if(snake.cheats.magnet){
-      const head = snake.body[0];
-      const dx = head.x - snake.food.x;
-      const dy = head.y - snake.food.y;
-      if(Math.abs(dx)+Math.abs(dy) > 2){
-        snake.food.x += dx>0 ? 1 : -1;
-        snake.food.y += dy>0 ? 1 : -1;
-        snake.food.x = (snake.food.x + snake.cols) % snake.cols;
-        snake.food.y = (snake.food.y + snake.rows) % snake.rows;
-      }
-    }
-
-    while(snake.stepAcc >= 1){
-      snake.stepAcc -= 1;
-      snake.dir = snake.nextDir;
-
-      const head = { ...snake.body[0] };
-      head.x += snake.dir.x;
-      head.y += snake.dir.y;
-
-      if(snake.cheats.wrap){
-        head.x = (head.x + snake.cols) % snake.cols;
-        head.y = (head.y + snake.rows) % snake.rows;
-      }
-
-      const hitWall = head.x<0 || head.x>=snake.cols || head.y<0 || head.y>=snake.rows;
-      const hitSelf = snake.body.some((b,i)=> i>0 && b.x===head.x && b.y===head.y);
-      const hitObs = snake.obstacles.some(o=>o.x===head.x && o.y===head.y);
-      const inv = performance.now() < APP.invincibleUntil;
-
-      if((hitWall || hitSelf || hitObs) && !inv){
-        snake.alive = false;
-        GAME.running = false;
-        sfx(130, 0.16, "square", 0.08);
-        if(GAME.score > GAME.bestSnake) GAME.bestSnake = GAME.score;
-        toast("Game over");
-        draw();
-        updateGameStats();
-        return;
-      }
-
-      snake.body.unshift(head);
-
-      if(head.x===snake.food.x && head.y===snake.food.y){
-        snake.grow += 1;
-        GAME.score += 1;
-        sfx(700, 0.06, "sine", 0.04);
-        if(snake.hard && GAME.score % 3 === 0) snake.obstacles.push(placeFree(snake));
-        if(snake.hard && !snake.poison && Math.random() < 0.20) snake.poison = placeFree(snake);
-        snake.food = placeFree(snake);
-        updateGameStats();
-      }
-
-      if(snake.poison && head.x===snake.poison.x && head.y===snake.poison.y){
-        snake.poison = null;
-        snake.grow = Math.max(0, snake.grow - 2);
-        GAME.score = Math.max(0, GAME.score - 2);
-        sfx(220, 0.10, "sawtooth", 0.05);
-        updateGameStats();
-      }
-
-      if(snake.grow>0){
-        snake.grow -= 1;
-      }else{
-        snake.body.pop();
-      }
-    }
-
-    draw();
-  }
-
-  GAME.snake.step = step;
-  GAME.snake.draw = draw;
-  if(drawOnly) draw();
+function resetSnake(){
+  snake=[{x:10,y:10}]
+  dir={x:0,y:0}
+  snakeScore=0
+  spawnFood()
+  $('snakeScore').textContent='0'
+  drawSnake()
 }
-
-function snakeInput(dx,dy){
-  const s = GAME.snake;
-  if(!s || !s.alive) return;
-  if(dx === -s.dir.x && dy === -s.dir.y) return;
-  s.nextDir = { x:dx, y:dy };
+function spawnFood(){
+  food={x:Math.floor(Math.random()*S_TILE),y:Math.floor(Math.random()*S_TILE)}
+  if(snake.some(s=>s.x===food.x&&s.y===food.y)) spawnFood()
 }
-
-const TETRIS_PIECES = [
-  { k:"I", m:[[1,1,1,1]] },
-  { k:"O", m:[[1,1],[1,1]] },
-  { k:"T", m:[[0,1,0],[1,1,1]] },
-  { k:"S", m:[[0,1,1],[1,1,0]] },
-  { k:"Z", m:[[1,1,0],[0,1,1]] },
-  { k:"J", m:[[1,0,0],[1,1,1]] },
-  { k:"L", m:[[0,0,1],[1,1,1]] }
-];
-
-function tetrisCloneMatrix(m){ return m.map(r=>r.slice()); }
-function tetrisRotate(m){
-  const h = m.length, w = m[0].length;
-  const out = Array.from({length:w}, ()=>Array.from({length:h}, ()=>0));
-  for(let y=0;y<h;y++) for(let x=0;x<w;x++) out[x][h-1-y] = m[y][x];
-  return out;
+function startSnake(){
+  stopSnake()
+  resetSnake()
+  snakeRunning=true
+  dir={x:1,y:0}
+  const sp=gameCheats.snake?.speed??110
+  snakeInterval=setInterval(tickSnake,sp)
 }
-
-function initTetris(drawOnly){
-  const canvas = gameCanvas();
-  if(!canvas) return;
-  const { ctx, cssW, cssH } = fitCanvas(canvas);
-
-  const t = {
-    ctx, canvas,
-    w: 10, h: 20,
-    board: Array.from({length:20}, ()=>Array.from({length:10}, ()=>0)),
-    piece: null,
-    next: null,
-    x: 3, y: 0,
-    fallAcc: 0,
-    fallRate: 0.65,
-    alive: true,
-    lockAcc: 0,
-    lockDelay: 0.20,
-    didTouchFloor: false
-  };
-
-  function randPiece(){
-    const p = TETRIS_PIECES[Math.floor(Math.random()*TETRIS_PIECES.length)];
-    return { k:p.k, m:tetrisCloneMatrix(p.m) };
-  }
-
-  t.next = randPiece();
-
-  function spawn(){
-    t.piece = t.next;
-    t.next = randPiece();
-    t.x = 3;
-    t.y = 0;
-    t.fallAcc = 0;
-    t.lockAcc = 0;
-    t.didTouchFloor = false;
-    if(collides(t.board, t.piece.m, t.x, t.y)){
-      t.alive = false;
-      GAME.running = false;
-      if(GAME.score > GAME.bestTetris) GAME.bestTetris = GAME.score;
-      updateGameStats();
-      sfx(120, 0.18, "square", 0.08);
-      toast("Tetris over");
-      draw();
-    }
-  }
-
-  function collides(board, m, ox, oy){
-    for(let y=0;y<m.length;y++){
-      for(let x=0;x<m[y].length;x++){
-        if(!m[y][x]) continue;
-        const bx = ox + x;
-        const by = oy + y;
-        if(bx < 0 || bx >= t.w || by >= t.h) return true;
-        if(by >= 0 && board[by][bx]) return true;
-      }
-    }
-    return false;
-  }
-
-  function merge(){
-    const m = t.piece.m;
-    for(let y=0;y<m.length;y++){
-      for(let x=0;x<m[y].length;x++){
-        if(!m[y][x]) continue;
-        const bx = t.x + x;
-        const by = t.y + y;
-        if(by >= 0 && by < t.h && bx >= 0 && bx < t.w) t.board[by][bx] = 1;
-      }
-    }
-  }
-
-  function clearLines(){
-    let cleared = 0;
-    for(let y=t.h-1;y>=0;y--){
-      let full = true;
-      for(let x=0;x<t.w;x++) if(!t.board[y][x]) { full = false; break; }
-      if(full){
-        t.board.splice(y,1);
-        t.board.unshift(Array.from({length:t.w}, ()=>0));
-        cleared++;
-        y++;
-      }
-    }
-    if(cleared){
-      const add = cleared===1 ? 100 : cleared===2 ? 260 : cleared===3 ? 420 : 700;
-      GAME.score += add;
-      sfx(860, 0.06, "triangle", 0.045);
-      updateGameStats();
-    }
-  }
-
-  function hardDrop(){
-    if(!t.alive) return;
-    let dy = 0;
-    while(!collides(t.board, t.piece.m, t.x, t.y + dy + 1)) dy++;
-    t.y += dy;
-    lockNow();
-    sfx(500, 0.04, "sine", 0.03);
-  }
-
-  function lockNow(){
-    merge();
-    clearLines();
-    spawn();
-  }
-
-  function move(dx){
-    if(!t.alive) return;
-    if(!collides(t.board, t.piece.m, t.x + dx, t.y)){
-      t.x += dx;
-      sfx(420, 0.03, "sine", 0.02);
-      t.didTouchFloor = false;
-      t.lockAcc = 0;
-    }
-  }
-
-  function rotate(){
-    if(!t.alive) return;
-    const r = tetrisRotate(t.piece.m);
-    const kicks = [0, -1, 1, -2, 2];
-    for(const k of kicks){
-      if(!collides(t.board, r, t.x + k, t.y)){
-        t.piece.m = r;
-        t.x += k;
-        sfx(680, 0.04, "sine", 0.03);
-        t.didTouchFloor = false;
-        t.lockAcc = 0;
-        return;
-      }
-    }
-  }
-
-  function softDrop(){
-    if(!t.alive) return;
-    if(!collides(t.board, t.piece.m, t.x, t.y + 1)){
-      t.y += 1;
-      GAME.score += 1;
-      updateGameStats();
-      return true;
-    }
-    return false;
-  }
-
-  function drawCell(x, y, cell, fill, stroke){
-    const px = x*cell;
-    const py = y*cell;
-    ctx.fillStyle = fill;
-    ctx.fillRect(px+1.5, py+1.5, cell-3, cell-3);
-    if(stroke){
-      ctx.strokeStyle = stroke;
-      ctx.strokeRect(px+1.5, py+1.5, cell-3, cell-3);
-    }
-  }
-
-  function ghostY(){
-    let gy = t.y;
-    while(!collides(t.board, t.piece.m, t.x, gy + 1)) gy++;
-    return gy;
-  }
-
-  function draw(){
-    const w = cssW, h = cssH;
-    ctx.clearRect(0,0,w,h);
-    ctx.fillStyle = "rgba(0,0,0,.18)";
-    ctx.fillRect(0,0,w,h);
-
-    const pad = 20;
-    const wantPreview = w >= 520;
-    const previewW = wantPreview ? Math.min(160, w*0.26) : 0;
-    const boardAreaW = w - pad*2 - (wantPreview ? (previewW + 14) : 0);
-    const cell = Math.max(12, Math.floor(Math.min(boardAreaW / 10, (h - pad*2) / 20)));
-    const boardPxW = cell * 10;
-    const boardPxH = cell * 20;
-    const bx = pad;
-    const by = Math.floor((h - boardPxH) / 2);
-
-    ctx.fillStyle = "rgba(255,255,255,.05)";
-    ctx.fillRect(bx-10, by-10, boardPxW+20, boardPxH+20);
-    ctx.strokeStyle = "rgba(255,255,255,.10)";
-    ctx.strokeRect(bx-10.5, by-10.5, boardPxW+21, boardPxH+21);
-
-    ctx.strokeStyle = "rgba(255,255,255,.06)";
-    for(let x=0;x<=10;x++){
-      ctx.beginPath();
-      ctx.moveTo(bx + x*cell, by);
-      ctx.lineTo(bx + x*cell, by + boardPxH);
-      ctx.stroke();
-    }
-    for(let y=0;y<=20;y++){
-      ctx.beginPath();
-      ctx.moveTo(bx, by + y*cell);
-      ctx.lineTo(bx + boardPxW, by + y*cell);
-      ctx.stroke();
-    }
-
-    ctx.save();
-    ctx.translate(bx, by);
-
-    for(let y=0;y<t.h;y++){
-      for(let x=0;x<t.w;x++){
-        if(t.board[y][x]) drawCell(x,y,cell,"rgba(255,255,255,.12)","rgba(255,255,255,.08)");
-      }
-    }
-
-    if(t.alive && t.piece){
-      const showGhost = !!el("tetrisGhost")?.checked;
-      const gy = showGhost ? ghostY() : t.y;
-      if(showGhost){
-        for(let y=0;y<t.piece.m.length;y++){
-          for(let x=0;x<t.piece.m[y].length;x++){
-            if(!t.piece.m[y][x]) continue;
-            const px = t.x + x;
-            const py = gy + y;
-            if(py < 0) continue;
-            drawCell(px, py, cell, "rgba(79,140,255,.10)", "rgba(79,140,255,.20)");
-          }
-        }
-      }
-
-      for(let y=0;y<t.piece.m.length;y++){
-        for(let x=0;x<t.piece.m[y].length;x++){
-          if(!t.piece.m[y][x]) continue;
-          const px = t.x + x;
-          const py = t.y + y;
-          if(py < 0) continue;
-          drawCell(px, py, cell, "rgba(79,140,255,.28)", "rgba(138,183,255,.42)");
-        }
-      }
-    }
-
-    ctx.restore();
-
-    if(wantPreview){
-      const px = bx + boardPxW + 18;
-      const py = by + 12;
-      ctx.fillStyle = "rgba(255,255,255,.05)";
-      ctx.fillRect(px, py, previewW, 160);
-      ctx.strokeStyle = "rgba(255,255,255,.10)";
-      ctx.strokeRect(px+0.5, py+0.5, previewW-1, 160-1);
-
-      ctx.fillStyle = "rgba(244,246,251,.86)";
-      ctx.font = "700 12px Montserrat, sans-serif";
-      ctx.fillText("Next", px + 12, py + 22);
-
-      const nm = t.next?.m || [[1]];
-      const scaleCell = Math.floor(Math.min((previewW-24)/4, 18));
-      const ox = px + 12;
-      const oy = py + 40;
-      for(let y=0;y<nm.length;y++){
-        for(let x=0;x<nm[y].length;x++){
-          if(!nm[y][x]) continue;
-          ctx.fillStyle = "rgba(79,140,255,.22)";
-          ctx.fillRect(ox + x*scaleCell, oy + y*scaleCell, scaleCell-2, scaleCell-2);
-          ctx.strokeStyle = "rgba(138,183,255,.35)";
-          ctx.strokeRect(ox + x*scaleCell + .5, oy + y*scaleCell + .5, scaleCell-3, scaleCell-3);
-        }
-      }
-
-      ctx.fillStyle = "rgba(244,246,251,.70)";
-      ctx.font = "12px Montserrat, sans-serif";
-      ctx.fillText("Score", px + 12, py + 118);
-      ctx.font = "700 18px Montserrat, sans-serif";
-      ctx.fillText(String(GAME.score), px + 12, py + 144);
-    }
-
-    if(!t.alive){
-      ctx.fillStyle = "rgba(0,0,0,.58)";
-      ctx.fillRect(0,0,w,h);
-      ctx.fillStyle = "rgba(244,246,251,.95)";
-      ctx.font = "700 30px Montserrat, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("Game Over", w/2, h/2 - 10);
-      ctx.font = "13px Montserrat, sans-serif";
-      ctx.fillStyle = "rgba(244,246,251,.72)";
-      ctx.fillText("Press Start to try again", w/2, h/2 + 22);
-    }else if(!GAME.running){
-      ctx.fillStyle = "rgba(0,0,0,.42)";
-      ctx.fillRect(0,0,w,h);
-      ctx.fillStyle = "rgba(244,246,251,.92)";
-      ctx.font = "700 24px Montserrat, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("Press Start", w/2, h/2);
-      ctx.font = "12px Montserrat, sans-serif";
-      ctx.fillStyle = "rgba(244,246,251,.72)";
-      ctx.fillText("Arrows to move • Up/W rotate • Space drop", w/2, h/2 + 28);
-    }
-  }
-
-  function step(dt){
-    if(!GAME.running || !t.alive) return;
-
-    const rate = Math.max(0.10, t.fallRate - Math.min(0.50, Math.floor(GAME.score/800) * 0.06));
-    t.fallAcc += dt;
-
-    while(t.fallAcc >= rate){
-      t.fallAcc -= rate;
-
-      if(!collides(t.board, t.piece.m, t.x, t.y + 1)){
-        t.y += 1;
-        t.didTouchFloor = false;
-        t.lockAcc = 0;
-      }else{
-        const lockOn = !!el("tetrisLock")?.checked;
-        if(!lockOn){
-          lockNow();
-          sfx(300, 0.05, "sine", 0.03);
-          break;
-        }
-        t.didTouchFloor = true;
-      }
-    }
-
-    if(t.didTouchFloor){
-      t.lockAcc += dt;
-      if(t.lockAcc >= t.lockDelay){
-        lockNow();
-        sfx(300, 0.05, "sine", 0.03);
-      }
-    }
-
-    draw();
-  }
-
-  GAME.tetris = {
-    step,
-    draw,
-    move,
-    rotate,
-    softDrop,
-    hardDrop,
-    reset: ()=>{
-      t.board = Array.from({length:20}, ()=>Array.from({length:10}, ()=>0));
-      t.alive = true;
-      t.next = randPiece();
-      spawn();
-      draw();
-    }
-  };
-
-  GAME.running = false;
-  GAME.score = 0;
-  updateGameStats();
-  spawn();
-  if(drawOnly) draw();
+function stopSnake(){
+  snakeRunning=false
+  if(snakeInterval){clearInterval(snakeInterval);snakeInterval=null}
 }
-
-function setGameMode(m){
-  GAME.mode = m;
-  if(el("gameTitle")) el("gameTitle").textContent = m==="snake" ? "Snake" : "Tetris";
-  if(el("gameHint")){
-    el("gameHint").textContent = m==="snake"
-      ? "Arrow keys / WASD. Tap to turn. Space to restart."
-      : "Arrows to move. Up/W rotate. Space drops. Tap rotates (mobile).";
+function tickSnake(){
+  const head={x:(snake[0].x+dir.x+S_TILE)%S_TILE, y:(snake[0].y+dir.y+S_TILE)%S_TILE}
+  if(!gameCheats.snake?.noDie){
+    if(snake.some(s=>s.x===head.x&&s.y===head.y)){gameOverSnake();return}
   }
-  snakeSettingsUI(m==="snake");
-  resizeGameCanvas();
-  if(m==="snake") initSnake(true); else initTetris(true);
-  updateGameStats();
-}
-
-function startGame(){
-  if(GAME.mode==="snake"){
-    if(!GAME.snake) initSnake(true);
-    if(!GAME.snake.alive) initSnake(true);
-    GAME.running = true;
-    sfx(440, 0.05, "sine", 0.03);
+  snake.unshift(head)
+  if(head.x===food.x&&head.y===food.y){
+    snakeScore++
+    $('snakeScore').textContent=String(snakeScore)
+    spawnFood()
+    if(snakeScore>(gameCheats.snake?.highScore||0)){
+      gameCheats.snake.highScore=snakeScore
+      $('snakeBest').textContent=String(snakeScore)
+      saveSettings()
+    }
   }else{
-    if(!GAME.tetris) initTetris(true);
-    GAME.running = true;
-    sfx(440, 0.05, "sine", 0.03);
+    snake.pop()
   }
+  drawSnake()
 }
-
-function resetGame(){
-  GAME.running = false;
-  if(GAME.mode==="snake") initSnake(true);
-  else{
-    GAME.score = 0;
-    updateGameStats();
-    initTetris(true);
+function drawSnake(){
+  const W=snakeCanvas.width,H=snakeCanvas.height
+  snakeCtx.fillStyle='#050505'
+  snakeCtx.fillRect(0,0,W,H)
+  snakeCtx.strokeStyle='rgba(255,106,0,0.06)'
+  snakeCtx.lineWidth=0.5
+  const gs=W/S_TILE
+  for(let i=0;i<=S_TILE;i++){
+    snakeCtx.beginPath();snakeCtx.moveTo(i*gs,0);snakeCtx.lineTo(i*gs,H);snakeCtx.stroke()
+    snakeCtx.beginPath();snakeCtx.moveTo(0,i*gs);snakeCtx.lineTo(W,i*gs);snakeCtx.stroke()
   }
+  snake.forEach((seg,idx)=>{
+    const x=seg.x*gs,y=seg.y*gs
+    snakeCtx.fillStyle=idx===0?'#ff6a00':'rgba(255,177,0,'+(0.55-(idx/snake.length)*0.35)+')'
+    snakeCtx.fillRect(x+1,y+1,gs-2,gs-2)
+  })
+  snakeCtx.fillStyle='#ffb100'
+  snakeCtx.beginPath()
+  snakeCtx.arc(food.x*gs+gs/2,food.y*gs+gs/2,gs/2-3,0,Math.PI*2)
+  snakeCtx.fill()
+}
+function gameOverSnake(){
+  stopSnake()
+  drawSnake()
+  const W=snakeCanvas.width,H=snakeCanvas.height
+  snakeCtx.fillStyle='rgba(0,0,0,.75)'
+  snakeCtx.fillRect(0,0,W,H)
+  snakeCtx.fillStyle='#ff6a00'
+  snakeCtx.font='900 28px Inter'
+  snakeCtx.textAlign='center'
+  snakeCtx.fillText('GAME OVER',W/2,H/2-10)
+  snakeCtx.fillStyle='#ffb100'
+  snakeCtx.font='900 16px Inter'
+  snakeCtx.fillText('Score: '+snakeScore,W/2,H/2+18)
 }
 
-function gameLoop(t){
-  const dt = GAME.last ? Math.min(0.05, (t - GAME.last)/1000) : 0;
-  GAME.last = t;
-  if(GAME.mode==="snake" && GAME.snake) GAME.snake.step(dt);
-  if(GAME.mode==="tetris" && GAME.tetris) GAME.tetris.step(dt);
-  requestAnimationFrame(gameLoop);
+function resetTetris(){
+  tBoard=Array.from({length:TR},()=>Array(TC).fill(0))
+  tScore=0
+  tLines=0
+  tLevel=Math.max(1,gameCheats.tetris?.startLevel??1)
+  $('tScore').textContent='0'
+  $('tLines').textContent='0'
+  $('tLevel').textContent=String(tLevel)
+  $('tBest').textContent=String(gameCheats.tetris?.highScore||0)
+  tPiece=makePiece()
+  drawTetris()
 }
-
-function activateInvincible(){
-  APP.invincibleUntil = performance.now() + 10000;
-  toast("Invincible 10s");
-  sfx(880, 0.08, "triangle", 0.04);
+function makePiece(){
+  const t=Math.floor(Math.random()*7)+1
+  const s=T_SHAPES[t]
+  return{type:t,shape:s.map(r=>[...r]),x:Math.floor(TC/2)-Math.floor(s[0].length/2),y:0}
 }
-
-function clearObstacles(){
-  if(GAME.snake){
-    GAME.snake.obstacles = [];
-    GAME.snake.poison = null;
-    toast("Cleared obstacles");
-    if(GAME.snake.draw) GAME.snake.draw();
-  }
-}
-
-function addLength(){
-  if(GAME.snake){
-    GAME.snake.grow += 5;
-    toast("+5 length");
-  }
-}
-
-let timer = { mode:"focus", running:false, remaining: 1500, last:0, focus:25*60, brk:5*60 };
-
-function timerRender(){
-  const m = Math.floor(timer.remaining/60);
-  const s = Math.floor(timer.remaining%60);
-  if(el("timerDisplay")) el("timerDisplay").textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-  if(el("timerState")) el("timerState").textContent = timer.running ? (timer.mode==="focus" ? "Focusing" : "Break") : "Ready";
-}
-
-function timerSetFromInputs(){
-  const f = Number(el("focusMins")?.value ?? 25);
-  const b = Number(el("breakMins")?.value ?? 5);
-  timer.focus = (Number.isFinite(f) && f>0 && f<600) ? Math.round(f*60) : 1500;
-  timer.brk = (Number.isFinite(b) && b>0 && b<120) ? Math.round(b*60) : 300;
-  if(!timer.running){
-    timer.remaining = timer.mode==="focus" ? timer.focus : timer.brk;
-    timerRender();
-  }
-}
-
-function timerStart(){
-  timerSetFromInputs();
-  timer.running = true;
-  timer.last = performance.now();
-  sfx(520, 0.04, "triangle", 0.03);
-}
-
-function timerPause(){
-  timer.running = false;
-  sfx(260, 0.04, "triangle", 0.03);
-}
-
-function timerReset(){
-  timer.running = false;
-  timer.mode = "focus";
-  timer.remaining = timer.focus;
-  timerRender();
-}
-
-function timerTick(){
-  const now = performance.now();
-  if(timer.running){
-    const dt = (now - timer.last)/1000;
-    timer.last = now;
-    timer.remaining -= dt;
-    if(timer.remaining <= 0){
-      timer.mode = (timer.mode==="focus") ? "break" : "focus";
-      timer.remaining = timer.mode==="focus" ? timer.focus : timer.brk;
-      sfx(880, 0.10, "sine", 0.05);
-      toast(timer.mode==="focus" ? "Back to focus" : "Break time");
+function tCollide(){
+  for(let r=0;r<tPiece.shape.length;r++){
+    for(let c=0;c<tPiece.shape[r].length;c++){
+      if(!tPiece.shape[r][c]) continue
+      const nx=tPiece.x+c
+      const ny=tPiece.y+r
+      if(nx<0||nx>=TC||ny>=TR) return true
+      if(ny>=0 && tBoard[ny][nx]) return true
     }
-    timerRender();
   }
-  requestAnimationFrame(timerTick);
+  return false
 }
-
-function showTab(name){
-  qsa(".navbtn").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
-  const panels = ["notes","graph","games","timer","settings"];
-  for(const p of panels){
-    const sec = el(`tab-${p}`);
-    if(sec) sec.classList.toggle("hidden", p!==name);
-  }
-  if(el("panelTitle")) el("panelTitle").textContent = name.charAt(0).toUpperCase()+name.slice(1);
-  if(name==="graph") reloadGraph();
-  if(name==="games"){
-    resizeGameCanvas();
-    if(GAME.mode==="snake" && GAME.snake?.draw) GAME.snake.draw();
-    if(GAME.mode==="tetris" && GAME.tetris?.draw) GAME.tetris.draw();
+function tMove(dx,dy){
+  tPiece.x+=dx
+  tPiece.y+=dy
+  if(tCollide()){
+    tPiece.x-=dx
+    tPiece.y-=dy
+    if(dy>0) tLock()
   }
 }
-
-function openAuthModal(open){
-  const m = el("authModal");
-  if(m) m.classList.toggle("hidden", !open);
-  const msg = el("authMsg");
-  if(msg) msg.textContent = "—";
+function tRotate(){
+  const orig=tPiece.shape
+  tPiece.shape=tPiece.shape[0].map((_,ci)=>tPiece.shape.map(row=>row[ci]).reverse())
+  if(tCollide()) tPiece.shape=orig
 }
-
-async function signIn(){
-  const email = el("authEmail")?.value?.trim() || "";
-  const password = el("authPass")?.value || "";
-  if(el("authMsg")) el("authMsg").textContent = "Signing in...";
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-  if(error){
-    if(el("authMsg")) el("authMsg").textContent = error.message;
-    return;
-  }
-  if(data?.user){
-    if(el("authMsg")) el("authMsg").textContent = "Signed in";
-    openAuthModal(false);
-  }
+function tHardDrop(){
+  while(!tCollide()) tPiece.y++
+  tPiece.y--
+  tLock()
 }
-
-async function signUp(){
-  const email = el("authEmail")?.value?.trim() || "";
-  const password = el("authPass")?.value || "";
-  if(el("authMsg")) el("authMsg").textContent = "Signing up...";
-  const { data, error } = await sb.auth.signUp({ email, password });
-  if(error){
-    if(el("authMsg")) el("authMsg").textContent = error.message;
-    return;
-  }
-  if(data?.session){
-    if(el("authMsg")) el("authMsg").textContent = "Account created and signed in";
-    openAuthModal(false);
-  }else{
-    if(el("authMsg")) el("authMsg").textContent = "Account created. Check email to confirm (if enabled).";
-  }
-}
-
-async function logout(){
-  await sb.auth.signOut();
-  toast("Logged out");
-}
-
-function bindUI(){
-  qsa(".navbtn").forEach(b=> b.addEventListener("click", ()=> showTab(b.dataset.tab)));
-
-  el("btnOpenAuth")?.addEventListener("click", ()=> openAuthModal(true));
-  el("btnCloseAuth")?.addEventListener("click", ()=> openAuthModal(false));
-  el("btnSignIn")?.addEventListener("click", signIn);
-  el("btnSignUp")?.addEventListener("click", signUp);
-  el("btnLogout")?.addEventListener("click", logout);
-
-  el("btnNewNote")?.addEventListener("click", createNote);
-  el("btnSaveNow")?.addEventListener("click", saveNow);
-  el("btnDelete")?.addEventListener("click", deleteNote);
-  el("btnPrint")?.addEventListener("click", printActive);
-  el("btnLink")?.addEventListener("click", linkNoteFlow);
-
-  el("noteSearch")?.addEventListener("input", renderNotesList);
-  el("filterSchool")?.addEventListener("change", renderNotesList);
-  el("filterCategory")?.addEventListener("change", renderNotesList);
-
-  ["noteTitle","noteSchool","noteCategory","noteGrade","noteTags","noteContent"].forEach(id=>{
-    el(id)?.addEventListener("input", ()=>{
-      if(!APP.activeNote) return;
-      setSaveState("Typing...");
-      scheduleAutosave();
-    });
-  });
-
-  el("btnSaveSettings")?.addEventListener("click", saveSettings);
-
-  el("nerdUnlock")?.addEventListener("click", unlockNerd);
-  el("btnPlayPause")?.addEventListener("click", playPauseMusic);
-  el("btnStop")?.addEventListener("click", stopMusic);
-  el("musicVol")?.addEventListener("input", applyMusicVol);
-  el("trackSelect")?.addEventListener("change", (e)=> setTrack(e.target.value));
-
-  el("rememberUnlock")?.addEventListener("change", (e)=>{
-    const on = !!e.target.checked;
-    if(on) localStorage.setItem("studyos_nerd_unlocked","1");
-    else localStorage.removeItem("studyos_nerd_unlocked");
-  });
-
-  el("sfxEnabled")?.addEventListener("change", (e)=>{ APP.sfxOn = !!e.target.checked; });
-  el("snakeHard")?.addEventListener("change", ()=>{ if(GAME.mode==="snake") initSnake(true); });
-
-  el("cheatWrap")?.addEventListener("change", (e)=>{ if(GAME.snake) GAME.snake.cheats.wrap = !!e.target.checked; });
-  el("cheatSlow")?.addEventListener("change", (e)=>{ if(GAME.snake) GAME.snake.cheats.slow = !!e.target.checked; });
-  el("cheatMagnet")?.addEventListener("change", (e)=>{ if(GAME.snake) GAME.snake.cheats.magnet = !!e.target.checked; });
-
-  el("btnInvincible")?.addEventListener("click", activateInvincible);
-  el("btnClearObs")?.addEventListener("click", clearObstacles);
-  el("btnAdd5")?.addEventListener("click", addLength);
-
-  el("btnGameSnake")?.addEventListener("click", ()=> setGameMode("snake"));
-  el("btnGameTetris")?.addEventListener("click", ()=> setGameMode("tetris"));
-  el("btnGameStart")?.addEventListener("click", startGame);
-  el("btnGameReset")?.addEventListener("click", resetGame);
-
-  el("touchLeft")?.addEventListener("click", ()=> GAME.tetris?.move?.(-1));
-  el("touchRight")?.addEventListener("click", ()=> GAME.tetris?.move?.(1));
-  el("touchRotate")?.addEventListener("click", ()=> GAME.tetris?.rotate?.());
-  el("touchDown")?.addEventListener("click", ()=> GAME.tetris?.softDrop?.());
-  el("touchDrop")?.addEventListener("click", ()=> GAME.tetris?.hardDrop?.());
-
-  el("btnReloadGraph")?.addEventListener("click", reloadGraph);
-
-  el("btnTimerStart")?.addEventListener("click", timerStart);
-  el("btnTimerPause")?.addEventListener("click", timerPause);
-  el("btnTimerReset")?.addEventListener("click", timerReset);
-  el("focusMins")?.addEventListener("input", timerSetFromInputs);
-  el("breakMins")?.addEventListener("input", timerSetFromInputs);
-
-  const gc = el("gameCanvas");
-  if(gc){
-    let touch = null;
-
-    gc.addEventListener("pointerdown", (e)=>{
-      if(GAME.mode==="snake"){
-        if(!GAME.running) startGame();
-        return;
-      }
-      const r = gc.getBoundingClientRect();
-      touch = { x:e.clientX - r.left, y:e.clientY - r.top, t:performance.now() };
-      if(!GAME.running) startGame();
-    });
-
-    gc.addEventListener("pointerup", (e)=>{
-      if(GAME.mode==="snake") return;
-      if(!touch) return;
-      const r = gc.getBoundingClientRect();
-      const x = e.clientX - r.left;
-      const y = e.clientY - r.top;
-      const dx = x - touch.x;
-      const dy = y - touch.y;
-      const adx = Math.abs(dx);
-      const ady = Math.abs(dy);
-      const isTap = adx < 14 && ady < 14 && (performance.now() - touch.t) < 260;
-      if(isTap){
-        GAME.tetris?.rotate?.();
-        touch = null;
-        return;
-      }
-      if(adx > ady){
-        if(dx < 0) GAME.tetris?.move?.(-1);
-        else GAME.tetris?.move?.(1);
-      }else{
-        if(dy > 0){
-          if(ady > 80) GAME.tetris?.hardDrop?.();
-          else GAME.tetris?.softDrop?.();
+function tLock(){
+  for(let r=0;r<tPiece.shape.length;r++){
+    for(let c=0;c<tPiece.shape[r].length;c++){
+      if(!tPiece.shape[r][c]) continue
+      const ny=tPiece.y+r
+      if(ny<0){
+        if(gameCheats.tetris?.noGameOver){
+          resetTetris()
+          tRunning=true
+          requestAnimationFrame(tLoop)
+          return
         }
+        tGameOver()
+        return
       }
-      touch = null;
-    });
-  }
-
-  window.addEventListener("resize", ()=>{
-    resizeGameCanvas();
-    if(GAME.mode==="snake" && GAME.snake?.draw) GAME.snake.draw();
-    if(GAME.mode==="tetris" && GAME.tetris?.draw) GAME.tetris.draw();
-  });
-
-  window.addEventListener("keydown", (e)=>{
-    if(e.key === "`"){ quickMute(); return; }
-    if(e.key.toLowerCase() === "n" && !e.ctrlKey && !e.metaKey && !e.altKey){
-      if(document.activeElement && ["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName)) return;
-      createNote();
-      return;
+      tBoard[ny][tPiece.x+c]=tPiece.type
     }
-    if(e.key === "Escape"){ openAuthModal(false); return; }
+  }
+  clearLines()
+  tPiece=makePiece()
+  if(tCollide()){
+    if(gameCheats.tetris?.noGameOver){
+      resetTetris()
+      tRunning=true
+      requestAnimationFrame(tLoop)
+      return
+    }
+    tGameOver()
+  }
+}
+function clearLines(){
+  let cleared=0
+  for(let r=TR-1;r>=0;r--){
+    if(tBoard[r].every(v=>v!==0)){
+      tBoard.splice(r,1)
+      tBoard.unshift(Array(TC).fill(0))
+      cleared++
+      r++
+    }
+  }
+  if(cleared){
+    tScore+=[0,100,300,500,800][cleared]*tLevel
+    tLines+=cleared
+    tLevel=Math.max(tLevel,Math.floor(tLines/10)+1)
+    $('tScore').textContent=String(tScore)
+    $('tLines').textContent=String(tLines)
+    $('tLevel').textContent=String(tLevel)
+    if(tScore>(gameCheats.tetris?.highScore||0)){
+      gameCheats.tetris.highScore=tScore
+      $('tBest').textContent=String(tScore)
+      saveSettings()
+    }
+  }
+}
+function drawCell(c,r,col){
+  const x=c*TS,y=r*TS
+  tetrisCtx.fillStyle=col
+  tetrisCtx.fillRect(x+1,y+1,TS-2,TS-2)
+  tetrisCtx.fillStyle='rgba(255,255,255,.12)'
+  tetrisCtx.fillRect(x+2,y+2,TS-6,3)
+}
+function drawTetris(){
+  const W=tetrisCanvas.width,H=tetrisCanvas.height
+  tetrisCtx.fillStyle='#050505'
+  tetrisCtx.fillRect(0,0,W,H)
+  tetrisCtx.strokeStyle='rgba(255,106,0,0.06)'
+  tetrisCtx.lineWidth=0.5
+  for(let r=0;r<=TR;r++){tetrisCtx.beginPath();tetrisCtx.moveTo(0,r*TS);tetrisCtx.lineTo(W,r*TS);tetrisCtx.stroke()}
+  for(let c=0;c<=TC;c++){tetrisCtx.beginPath();tetrisCtx.moveTo(c*TS,0);tetrisCtx.lineTo(c*TS,H);tetrisCtx.stroke()}
 
-    if(GAME.mode==="snake"){
-      const k = e.key.toLowerCase();
-      if(k==="arrowup"||k==="w") snakeInput(0,-1);
-      if(k==="arrowdown"||k==="s") snakeInput(0,1);
-      if(k==="arrowleft"||k==="a") snakeInput(-1,0);
-      if(k==="arrowright"||k==="d") snakeInput(1,0);
-      if(k===" " && !GAME.running) startGame();
+  for(let r=0;r<TR;r++) for(let c=0;c<TC;c++) if(tBoard[r][c]) drawCell(c,r,T_COLORS[tBoard[r][c]])
+
+  if(!tPiece) return
+  for(let r=0;r<tPiece.shape.length;r++){
+    for(let c=0;c<tPiece.shape[r].length;c++){
+      if(!tPiece.shape[r][c]) continue
+      drawCell(tPiece.x+c,tPiece.y+r,T_COLORS[tPiece.type])
+    }
+  }
+}
+function startTetris(){
+  stopTetris()
+  resetTetris()
+  tRunning=true
+  tDrop=0
+  tLast=0
+  requestAnimationFrame(tLoop)
+}
+function stopTetris(){tRunning=false}
+function tLoop(time=0){
+  if(!tRunning) return
+  const dt=time-tLast
+  tLast=time
+  tDrop+=dt
+  const speed=Math.max(85,700-(tLevel-1)*60)
+  if(tDrop>=speed){
+    tMove(0,1)
+    tDrop=0
+  }
+  drawTetris()
+  requestAnimationFrame(tLoop)
+}
+function tGameOver(){
+  tRunning=false
+  drawTetris()
+  const W=tetrisCanvas.width,H=tetrisCanvas.height
+  tetrisCtx.fillStyle='rgba(0,0,0,.75)'
+  tetrisCtx.fillRect(0,0,W,H)
+  tetrisCtx.fillStyle='#ff6a00'
+  tetrisCtx.font='900 22px Inter'
+  tetrisCtx.textAlign='center'
+  tetrisCtx.fillText('GAME OVER',W/2,H/2-12)
+  tetrisCtx.fillStyle='#ffb100'
+  tetrisCtx.font='900 14px Inter'
+  tetrisCtx.fillText('Score: '+tScore,W/2,H/2+14)
+}
+
+function switchGame(mode){
+  const snake=mode==='snake'
+  $('tabSnake').classList.toggle('active',snake)
+  $('tabTetris').classList.toggle('active',!snake)
+  $('snakeCanvas').style.display=snake?'block':'none'
+  $('tetrisCanvas').style.display=snake?'none':'block'
+  $('snakeScoreBox').style.display=snake?'block':'none'
+  $('tetrisScoreBox').style.display=snake?'none':'block'
+  $('snakeCheats').style.display=snake?'block':'none'
+  $('tetrisCheats').style.display=snake?'none':'block'
+  $('gTitle').textContent=snake?'Snake Break':'Tetris Break'
+}
+
+function initAuth(){
+  let mode='signin'
+  const setTabs=()=>{
+    $('tabSignIn').classList.toggle('active',mode==='signin')
+    $('tabSignUp').classList.toggle('active',mode==='signup')
+    $('authGo').textContent=mode==='signin'?'Enter':'Create'
+    $('authErr').textContent=''
+  }
+  $('tabSignIn').onclick=()=>{mode='signin';setTabs()}
+  $('tabSignUp').onclick=()=>{mode='signup';setTabs()}
+  $('authGo').onclick=async ()=>{
+    const email=$('authEmail').value.trim()
+    const pass=$('authPass').value
+    if(!email||!pass){$('authErr').textContent='Enter email + password';return}
+    if(mode==='signup'){
+      const {error}=await supabase.auth.signUp({email:email,password:pass})
+      if(error){$('authErr').textContent=error.message;return}
+      toast('Check email','Confirm your account then sign in','ok')
     }else{
-      const k = e.key.toLowerCase();
-      if(k==="arrowleft"||k==="a") GAME.tetris?.move?.(-1);
-      if(k==="arrowright"||k==="d") GAME.tetris?.move?.(1);
-      if(k==="arrowdown"||k==="s") GAME.tetris?.softDrop?.();
-      if(k==="arrowup"||k==="w") GAME.tetris?.rotate?.();
-      if(k===" "){
-        if(!GAME.running) startGame();
-        GAME.tetris?.hardDrop?.();
+      const {error}=await supabase.auth.signInWithPassword({email:email,password:pass})
+      if(error){$('authErr').textContent=error.message;return}
+    }
+  }
+  $('authMagic').onclick=async ()=>{
+    const email=$('authEmail').value.trim()
+    if(!email){$('authErr').textContent='Enter email';return}
+    const {error}=await supabase.auth.signInWithOtp({email:email})
+    if(error){$('authErr').textContent=error.message;return}
+    toast('Magic link sent','Check your email','ok')
+  }
+  $('authReset').onclick=async ()=>{
+    const email=$('authEmail').value.trim()
+    if(!email){$('authErr').textContent='Enter email';return}
+    const {error}=await supabase.auth.resetPasswordForEmail(email)
+    if(error){$('authErr').textContent=error.message;return}
+    toast('Reset sent','Check your email','ok')
+  }
+  setTabs()
+}
+
+async function signOut(){
+  await supabase.auth.signOut()
+  location.reload()
+}
+
+function wireUI(){
+  $('btnNew').onclick=createNote
+  $('saveNow').onclick=saveNote
+  $('delNote').onclick=deleteNote
+
+  $('modeEdit').onclick=()=>setView('editor')
+  $('modePreview').onclick=()=>setView('preview')
+  $('modeGraph').onclick=()=>setView('graph')
+
+  $('toggleFull').onclick=toggleFullPreview
+  $('toggleSplit').onclick=()=>{
+    if(splitMode==='split') setSplit('editor')
+    else if(splitMode==='editor') setSplit('split')
+    else setSplit('split')
+  }
+
+  $('doPdf').onclick=openPdfModal
+  $('pdfClose').onclick=closePdfModal
+  $('pdfCancel').onclick=closePdfModal
+  $('pdfGo').onclick=exportPdf
+
+  $('openSettings').onclick=openSettings
+  $('setClose').onclick=closeSettings
+  $('setCancel').onclick=closeSettings
+  $('setSave').onclick=saveSettingsFromModal
+
+  $('search').oninput=renderList
+  $('sort').onchange=()=>{
+    uiPrefs.sort=$('sort').value
+    saveSettings()
+    renderList()
+  }
+
+  $('openPalette').onclick=openPalette
+  $('paletteBack').onclick=e=>{if(e.target.id==='paletteBack') closePalette()}
+  $('paletteQ').oninput=()=>renderPalette($('paletteQ').value)
+  $('paletteQ').onkeydown=e=>{
+    if(e.key==='Escape'){closePalette();return}
+    if(e.key==='Enter'){
+      const first=$('paletteList').querySelector('.pItem')
+      if(first) first.click()
+    }
+  }
+
+  $('schoolPill').onclick=()=>{
+    currentSchool=(currentSchool==='Salesianum')?'St Peter Cathedral':'Salesianum'
+    $('schoolText').textContent=currentSchool
+    saveSettings()
+    autosave()
+    updateCrumb()
+    toast('School',currentSchool,'ok')
+  }
+
+  $('title').oninput=()=>{autosave();updatePreview();updateCrumb();renderList()}
+  $('body').oninput=()=>{autosave();updatePreview();refreshLinksUI()}
+  $('grade').onchange=()=>{autosave();updateCrumb();renderList();refreshLinksUI()}
+
+  document.querySelectorAll('.tool').forEach(t=>{
+    t.onclick=()=>applyMd(t.getAttribute('data-md'))
+  })
+
+  $('linkSearch').oninput=searchLinkCandidates
+  $('closeDrop').onclick=()=>{$('cardDrop').style.display='none';$('linkSearch').value=''}
+  $('unlinkAll').onclick=unlinkAll
+  $('jumpPreview').onclick=()=>setView('preview')
+  $('jumpGraph').onclick=()=>setView('graph')
+  $('linkAllMentions').onclick=linkAllMentions
+  $('backToEdit').onclick=()=>setView('editor')
+
+  $('tStart').onclick=startTimer
+  $('tPause').onclick=pauseTimer
+  $('tReset').onclick=resetTimer
+  $('mFocus').onclick=()=>setTimer(timerPresets.focus||25)
+  $('mBreak').onclick=()=>setTimer(timerPresets.break||5)
+  $('mLong').onclick=()=>setTimer(timerPresets.long||15)
+  $('mBreakGame').onclick=()=>{setTimer(timerPresets.break||5);setView('games')}
+
+  $('btnGames').onclick=()=>setView('games')
+
+  $('tabSnake').onclick=()=>switchGame('snake')
+  $('tabTetris').onclick=()=>switchGame('tetris')
+  $('gStart').onclick=()=>{
+    const snake=$('snakeCanvas').style.display!=='none'
+    if(snake) startSnake()
+    else startTetris()
+  }
+  $('gClose').onclick=()=>{
+    stopSnake()
+    stopTetris()
+    setView('editor')
+  }
+
+  $('cSnakeNoDie').onchange=()=>{
+    gameCheats.snake.noDie=$('cSnakeNoDie').checked
+    saveSettings()
+    toast('Cheat','Snake No-Die '+(gameCheats.snake.noDie?'ON':'OFF'),'warn')
+  }
+  $('cSnakeSpeed').oninput=()=>{
+    const v=parseInt($('cSnakeSpeed').value,10)
+    gameCheats.snake.speed=v
+    $('cSnakeSpeedV').textContent=v+'ms'
+    saveSettings()
+    if(snakeRunning){
+      clearInterval(snakeInterval)
+      snakeInterval=setInterval(tickSnake,v)
+    }
+  }
+  $('cTNoOver').onchange=()=>{
+    gameCheats.tetris.noGameOver=$('cTNoOver').checked
+    saveSettings()
+    toast('Cheat','Tetris No Game Over '+(gameCheats.tetris.noGameOver?'ON':'OFF'),'warn')
+  }
+  $('cTLevel').onchange=()=>{
+    const v=clamp(parseInt($('cTLevel').value||1,10),1,20)
+    gameCheats.tetris.startLevel=v
+    $('cTLevel').value=v
+    saveSettings()
+    toast('Cheat','Tetris Start Level '+v,'warn')
+  }
+
+  $('gReset').onclick=()=>{buildGraph();renderGraph()}
+  $('gPhys').onclick=()=>{graphPhysics=!graphPhysics;toast('Graph','Physics '+(graphPhysics?'ON':'OFF'),'warn')}
+  $('gCenter').onclick=()=>{gView={x:0,y:0,scale:1};renderGraph()}
+
+  $('signOut').onclick=signOut
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      if($('paletteBack').style.display==='flex') closePalette()
+      if($('modalPdf').style.display==='flex') closePdfModal()
+      if($('modalSettings').style.display==='flex') closeSettings()
+      if(document.body.classList.contains('previewFull')) toggleFullPreview()
+      closeMobileSidebar()
+      return
+    }
+    const k=e.key.toLowerCase()
+    if((e.ctrlKey||e.metaKey) && k==='k'){e.preventDefault();openPalette();return}
+    if((e.ctrlKey||e.metaKey) && k==='s'){e.preventDefault();saveNote();return}
+
+    if($('viewGames').classList.contains('active')){
+      const snake=$('snakeCanvas').style.display!=='none'
+      if(snake && snakeRunning){
+        if((k==='arrowup'||k==='w') && dir.y===0) dir={x:0,y:-1}
+        else if((k==='arrowdown'||k==='s') && dir.y===0) dir={x:0,y:1}
+        else if((k==='arrowleft'||k==='a') && dir.x===0) dir={x:-1,y:0}
+        else if((k==='arrowright'||k==='d') && dir.x===0) dir={x:1,y:0}
+      }else if(!snake && tRunning){
+        if(e.key==='ArrowLeft') tMove(-1,0)
+        else if(e.key==='ArrowRight') tMove(1,0)
+        else if(e.key==='ArrowDown') tMove(0,1)
+        else if(e.key==='ArrowUp') tRotate()
+        else if(e.key===' '){tHardDrop();e.preventDefault()}
       }
     }
-  });
+  })
+
+  $('backdrop').onclick=closeMobileSidebar
+  $('mobileMenu').onclick=openMobileSidebar
+
+  window.addEventListener('resize',maybeMobileUI)
+  maybeMobileUI()
+
+  window.addEventListener('online',()=>{if(activeId) setStatus('saved')})
+  window.addEventListener('offline',()=>setStatus('offline'))
 }
 
 async function boot(){
-  bindUI();
-  setupNerdAudio();
-  timerRender();
-  timerTick();
-  requestAnimationFrame(gameLoop);
+  initAuth()
+  initSplitResize()
+  initGraph()
+  initGames()
+  wireUI()
 
-  const remembered = localStorage.getItem("studyos_nerd_unlocked")==="1";
-  if(remembered){
-    if(el("rememberUnlock")) el("rememberUnlock").checked = true;
-    APP.audioUnlocked = true;
-    if(el("nerdPanel")) el("nerdPanel").classList.remove("hidden");
-  }
-
-  const { data } = await sb.auth.getSession();
-  APP.user = data?.session?.user || null;
-  setAuthedUI();
-
-  if(APP.user){
-    await ensureSettingsRow();
-    await loadSettings();
-    await fetchNotes();
-    await fetchLinks();
+  const sess=await supabase.auth.getSession()
+  if(sess.data?.session){
+    user=sess.data.session.user
+    $('authBack').style.display='none'
+    $('userEmail').textContent=user.email||'Signed in'
+    $('avatar').textContent=((user.email||'U')[0]||'U').toUpperCase()
+    await ensureSettings()
+    await fetchNotes()
+    setSplit('split')
+    setStatus(navigator.onLine?'saved':'offline')
   }else{
-    setEditorEnabled(false);
-    renderNotesList();
+    $('authBack').style.display='flex'
   }
 
-  sb.auth.onAuthStateChange(async (_event, session)=>{
-    APP.user = session?.user || null;
-    setAuthedUI();
-    fillEditor(null);
-    renderNotesList();
-    if(APP.user){
-      await ensureSettingsRow();
-      await loadSettings();
-      await fetchNotes();
-      await fetchLinks();
+  supabase.auth.onAuthStateChange(async (ev,session)=>{
+    if(session){
+      user=session.user
+      $('authBack').style.display='none'
+      $('userEmail').textContent=user.email||'Signed in'
+      $('avatar').textContent=((user.email||'U')[0]||'U').toUpperCase()
+      await ensureSettings()
+      await fetchNotes()
+      setSplit('split')
+      setStatus(navigator.onLine?'saved':'offline')
+    }else{
+      $('authBack').style.display='flex'
     }
-  });
-
-  initGraph();
-  setGameMode("snake");
-  showTab("notes");
+  })
 }
 
-boot();
+boot()
 </script>
+
 </body>
 </html>
-
