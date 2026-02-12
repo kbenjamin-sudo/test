@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,33 +38,6 @@
   --r22:22px;
   --side:320px;
   --top:66px;
-
-  --tabBg:rgba(255,255,255,.04);
-  --tabHoverBg:rgba(255,255,255,.06);
-  --tabActiveBg:rgba(255,255,255,.08);
-  --tabText:rgba(238,242,255,.86);
-  --tabActiveText:rgba(238,242,255,.95);
-}
-
-body.skyTheme{
-  --bg:#eaf3ff;
-  --panel:rgba(255,255,255,.82);
-  --panel2:rgba(255,255,255,.78);
-  --card:rgba(255,255,255,.84);
-  --stroke:rgba(15,23,42,.10);
-  --stroke2:rgba(15,23,42,.16);
-  --text:#0b1220;
-  --muted:rgba(11,18,32,.60);
-  --muted2:rgba(11,18,32,.40);
-  --brand:#3b82f6;
-  --brand2:#60a5fa;
-  --shadow:0 16px 55px rgba(2,6,23,.18);
-  --shadow2:0 22px 80px rgba(2,6,23,.22);
-}
-body.skyTheme{
-  background:radial-gradient(1200px 700px at 20% -10%, rgba(59,130,246,.22), transparent 55%),
-             radial-gradient(900px 600px at 110% 15%, rgba(96,165,250,.18), transparent 60%),
-             linear-gradient(#eef6ff,#e8f1ff);
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -234,7 +206,7 @@ button,input,select,textarea{font-family:var(--font)}
   border-color:rgba(255,106,0,.55);
   box-shadow:0 0 0 4px rgba(255,106,0,.12);
 }
-.search::placeholder{color:var(--muted);font-weight:700}
+.search::placeholder{color:rgba(238,242,255,.35);font-weight:700}
 
 .side-filters{
   padding:0 18px 10px;
@@ -339,7 +311,7 @@ button,input,select,textarea{font-family:var(--font)}
   flex-shrink:0;
 }
 .note-snippet{
-  color:var(--muted);
+  color:rgba(238,242,255,.55);
   font-weight:650;
   font-size:11px;
   line-height:1.4;
@@ -351,7 +323,7 @@ button,input,select,textarea{font-family:var(--font)}
   display:flex;
   justify-content:space-between;
   align-items:center;
-  color:var(--muted);
+  color:rgba(238,242,255,.35);
   font-weight:800;
   font-size:10px;
 }
@@ -370,7 +342,7 @@ button,input,select,textarea{font-family:var(--font)}
   color:rgba(238,242,255,.7);
 }
 .badge.link{border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.08);color:rgba(152,255,200,.95)}
-.badge.draft{border-color:rgba(255,255,255,.10);background:rgba(255,255,255,.03);color:var(--muted)}
+.badge.draft{border-color:rgba(255,255,255,.10);background:rgba(255,255,255,.03);color:rgba(238,242,255,.45)}
 
 .side-footer{
   padding:12px 18px 14px;
@@ -466,7 +438,7 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
   overflow:hidden;
   text-overflow:ellipsis;
   max-width:170px;
-  color:var(--text);opacity:.82;
+  color:rgba(238,242,255,.8);
 }
 .userline .out{padding:8px 10px;border-radius:14px}
 
@@ -499,24 +471,21 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
 .tab{
   padding:9px 12px;
   border-radius:14px;
-  border:1px solid var(--stroke);
-  background:var(--tabBg);
-  color:var(--tabText);
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  color:rgba(238,242,255,.78);
   font-weight:900;
   font-size:12px;
   cursor:pointer;
   user-select:none;
-  transition:transform .12s, border-color .12s, background .12s, box-shadow .12s;
+  transition:transform .12s, border-color .12s, background .12s;
 }
-.tab:hover{
-  transform:translateY(-1px);
-  background:var(--tabHoverBg);
-}
+.tab:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.35);background:rgba(255,255,255,.06)}
 .tab.active{
-  background:var(--tabActiveBg);
-  color:var(--tabActiveText);
-  border-color:rgba(120,147,255,.45);
-  box-shadow:0 10px 30px rgba(120,147,255,.15);
+  background:linear-gradient(135deg, rgba(255,106,0,.22), rgba(255,177,0,.10));
+  border-color:rgba(255,106,0,.6);
+  color:rgba(255,245,240,.98);
+  box-shadow:0 18px 48px rgba(0,0,0,.35);
 }
 .notecrumb{
   display:flex;
@@ -534,7 +503,7 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
 }
 .notecrumb .sub{
   font-weight:800;
-  color:var(--muted);
+  color:rgba(238,242,255,.55);
   font-size:11px;
   display:flex;
   gap:10px;
@@ -622,9 +591,6 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
   display:none;
 }
 .view.active{display:block}
-#viewPreview{overflow:auto}
-#viewGames{overflow:auto}
-
 #viewPreview{overflow:auto;-webkit-overflow-scrolling:touch}
 
 .editor-shell{
@@ -678,7 +644,7 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
   font-size:11px;
 }
 .metapick input{width:260px}
-.metapick input::placeholder{color:var(--muted);font-weight:750}
+.metapick input::placeholder{color:rgba(238,242,255,.35);font-weight:750}
 .metapick input:focus,.metapick select:focus{
   border-color:rgba(255,106,0,.55);
   box-shadow:0 0 0 4px rgba(255,106,0,.10);
@@ -1050,7 +1016,7 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
   box-shadow:0 0 0 5px rgba(255,106,0,.10);
 }
 .paletteTop .hint{
-  color:var(--muted);
+  color:rgba(238,242,255,.55);
   font-weight:900;
   font-size:11px;
   white-space:nowrap;
@@ -1097,13 +1063,13 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
   margin-top:2px;
   font-weight:750;
   font-size:11px;
-  color:var(--muted);
+  color:rgba(238,242,255,.55);
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 .pK{
-  color:var(--muted);
+  color:rgba(238,242,255,.55);
   font-weight:950;
   font-size:11px;
   white-space:nowrap;
@@ -1143,7 +1109,7 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
 .authHead .s{
   font-weight:800;
   font-size:11px;
-  color:var(--muted);
+  color:rgba(238,242,255,.55);
   margin-top:2px;
 }
 .authTabs{
@@ -1200,7 +1166,7 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
   display:flex;
   justify-content:space-between;
   gap:12px;
-  color:var(--muted);
+  color:rgba(238,242,255,.55);
   font-weight:850;
   font-size:11px;
 }
@@ -1351,7 +1317,7 @@ cheatBox input[type="range"]{accent-color:var(--brand);width:160px}
   flex-wrap:wrap;
 }
 .smallHint{
-  color:var(--muted);
+  color:rgba(238,242,255,.55);
   font-weight:800;
   font-size:11px;
   line-height:1.6;
@@ -1365,99 +1331,9 @@ kbd{
   font-size:11px;
 }
 hr.sep{border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0}
-
-/* --- Mockup-match refresh (skyTheme) --- */
-body.skyTheme{
-  --bg: #eaf1ff;
-  --panel: #ffffff;
-  --panel2: #f6f8ff;
-  --text: #0f172a;
-  --muted: rgba(15,23,42,.62);
-  --border: rgba(15,23,42,.10);
-  --shadow: 0 18px 40px rgba(15,23,42,.10);
-  --shadow2: 0 10px 24px rgba(15,23,42,.08);
-  --accent: #3b82f6;
-  --accent2: #1d4ed8;
-  --accent3: #60a5fa;
-
-  --tabBg: rgba(255,255,255,.72);
-  --tabHoverBg: rgba(255,255,255,.92);
-  --tabActiveBg: linear-gradient(135deg, #2e7bff, #5bb6ff);
-  --tabText: rgba(15,23,42,.78);
-  --tabActiveText: #ffffff;
-}
-body.skyTheme .tabsBar{background:rgba(255,255,255,.72);border-color:rgba(15,23,42,.10);box-shadow:0 14px 40px rgba(15,23,42,.08);}
-body.skyTheme .topbar{background:rgba(255,255,255,.72);border-color:rgba(15,23,42,.10);box-shadow:0 14px 40px rgba(15,23,42,.08);}
-body.skyTheme .notecrumb .sub{color:var(--muted);}
-body.skyTheme .userline .name{color:var(--text);opacity:.82;}
-
-body.skyTheme::before{
-  content:"";
-  position:fixed;
-  inset:-40px;
-  background:
-    radial-gradient(900px 480px at 70% 15%, rgba(96,165,250,.35), transparent 60%),
-    radial-gradient(800px 520px at 25% 35%, rgba(59,130,246,.22), transparent 60%),
-    linear-gradient(180deg, rgba(255,255,255,.85), rgba(234,241,255,1));
-  z-index:-2;
-}
-body.skyTheme .app{
-  backdrop-filter: blur(8px);
-}
-body.skyTheme .sidebar{
-  background: linear-gradient(180deg, #2b6cb0, #1e4aa8);
-  border-right: 1px solid rgba(255,255,255,.18);
-  box-shadow: 14px 0 30px rgba(15,23,42,.10);
-  position: relative;
-  overflow: hidden;
-}
-body.skyTheme .sidebar::after{
-  content:"";
-  position:absolute;
-  inset:auto -40px -120px -40px;
-  height: 220px;
-  background:
-    radial-gradient(260px 120px at 20% 40%, rgba(255,255,255,.16), transparent 70%),
-    radial-gradient(320px 160px at 70% 50%, rgba(255,255,255,.10), transparent 70%);
-  transform: rotate(-6deg);
-}
-body.skyTheme .brand{
-  color:#fff;
-  letter-spacing:.2px;
-}
-body.skyTheme .navItem{
-  color: rgba(255,255,255,.86);
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.06);
-}
-body.skyTheme .navItem:hover{
-  background: rgba(255,255,255,.10);
-}
-body.skyTheme .navItem.active{
-  background: rgba(255,255,255,.16);
-  border-color: rgba(255,255,255,.22);
-}
-body.skyTheme .topbar{
-  background: rgba(255,255,255,.62);
-  border: 1px solid rgba(15,23,42,.08);
-  box-shadow: var(--shadow2);
-}
-body.skyTheme .card{
-  border-radius: 18px;
-  box-shadow: var(--shadow2);
-}
-body.skyTheme .btn.primary{
-  background: linear-gradient(180deg, var(--accent), var(--accent2));
-  box-shadow: 0 10px 22px rgba(29,78,216,.22);
-}
-body.skyTheme .btn.primary:hover{ filter: brightness(1.02); }
-body.skyTheme input, body.skyTheme textarea, body.skyTheme select{
-  background: rgba(255,255,255,.88);
-}
-
 </style>
 </head>
-<body class="skyTheme">
+<body>
 
 <div class="toastWrap" id="toastWrap"></div>
 
@@ -1514,10 +1390,6 @@ body.skyTheme input, body.skyTheme textarea, body.skyTheme select{
           <option value="0">Preview Full-screen: Off</option>
           <option value="1">Preview Full-screen: On</option>
         </select>
-        <select id="setTheme">
-          <option value="dark">Theme: Dark</option>
-          <option value="sky">Theme: Sky</option>
-        </select>
       </div>
       <div style="height:10px"></div>
       <div class="row">
@@ -1530,7 +1402,7 @@ body.skyTheme input, body.skyTheme textarea, body.skyTheme select{
 
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
         <div style="font-weight:950;color:rgba(238,242,255,.85)">Settings for nerds</div>
-        <div style="font-size:11px;color:var(--muted);font-weight:850">optional</div>
+        <div style="font-size:11px;color:rgba(238,242,255,.55);font-weight:850">optional</div>
       </div>
       <div style="height:10px"></div>
       <div class="row" id="nerdLockRow">
@@ -1907,7 +1779,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const SUPABASE_URL='https://cgmazcvmpcgistoimqlw.supabase.co'
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc'
-const supabase=createClient(SUPABASE_URL,SUPABASE_KEY,{global:{fetch:(url,options)=>fetch(url,{...(options||{}),keepalive:true})}})
+const supabase=createClient(SUPABASE_URL,SUPABASE_KEY)
 
 marked.setOptions({
   breaks:true,
@@ -1930,14 +1802,14 @@ let notes=[]
 let links=[]
 let activeId=null
 
-let uiPrefs={sort:'updated_desc',previewFull:false,sidebarHidden:false,theme:'sky',lastOpenNoteId:null}
+let uiPrefs={sort:'updated_desc',previewFull:false,sidebarHidden:false,lastOpenNoteId:null}
 let timerPresets={focus:25,break:5,long:15}
 let gameCheats={snake:{highScore:0,noDie:false,speed:70,boost:false,wallsKill:true,obstacles:28,evasive:true,poison:true,foodDist:9},tetris:{highScore:0,noGameOver:false,startLevel:1},runner:{best:0,noCrash:false,slow:false}}
 let currentSchool='Salesianum'
 let nerdUnlocked=false
 let nerdPrefs={musicMode:'off',sfxMode:'on'}
 
-let autosaveTimer=null
+let autosaveT=null
 let autosaveDirty=false
 let timerInterval=null
 let timeLeft=25*60
@@ -2065,49 +1937,20 @@ function escapeHtml(s){
 
 function setStatus(mode){
   const el=$('saveStatus')
-  if(!el) return
   const dot=el.querySelector('.dot')
-  const spans=el.querySelectorAll('span')
-  const txt=spans[spans.length-1]
-  const raw=(mode||'').toString().trim()
-  const m=raw.toLowerCase()
+  const txt=el.querySelectorAll('span')[1]
   el.classList.remove('is-saving','is-saved','is-error')
-  if(!raw){
-    if(dot) dot.className='dot'
-    if(txt) txt.textContent=''
-    return
+  if(mode==='saving'){
+    dot.className='dot warn'; txt.textContent='Saving…'; el.classList.add('is-saving')
+  }else if(mode==='saved'){
+    dot.className='dot ok'; txt.textContent='Saved '+fmtTime(Date.now()); el.classList.add('is-saved')
+  }else if(mode==='error'){
+    dot.className='dot bad'; txt.textContent='Save failed'; el.classList.add('is-error')
+  }else if(mode==='offline'){
+    dot.className='dot bad'; txt.textContent='Offline'; el.classList.add('is-error')
+  }else{
+    dot.className='dot warn'; txt.textContent='Not saved'
   }
-  if(m==='saving' || m.includes('saving')){
-    if(dot) dot.className='dot warn'
-    if(txt) txt.textContent='Saving…'
-    el.classList.add('is-saving')
-    return
-  }
-  if(m==='saved' || m.includes('saved')){
-    if(dot) dot.className='dot ok'
-    if(txt) txt.textContent='Saved '+fmtTime(Date.now())
-    el.classList.add('is-saved')
-    return
-  }
-  if(m==='offline' || m.includes('offline')){
-    if(dot) dot.className='dot bad'
-    if(txt) txt.textContent='Offline'
-    el.classList.add('is-error')
-    return
-  }
-  if(m==='error' || m.includes('error') || m.includes('failed')){
-    if(dot) dot.className='dot bad'
-    if(txt) txt.textContent='Not saved'
-    el.classList.add('is-error')
-    return
-  }
-  if(m==='dirty' || m.includes('edit')){
-    if(dot) dot.className='dot warn'
-    if(txt) txt.textContent='Editing…'
-    return
-  }
-  if(dot) dot.className='dot warn'
-  if(txt) txt.textContent=raw
 }
 
 async function ensureTables(){
@@ -2129,9 +1972,6 @@ function applySettingsRow(s){
   $('sort').value=uiPrefs.sort||'updated_desc'
   $('setSidebar').value=uiPrefs.sidebarHidden? '1':'0'
   $('setPreviewFull').value=uiPrefs.previewFull? '1':'0'
-  $('setTheme').value=uiPrefs.theme||'dark'
-
-  document.body.classList.toggle('skyTheme',(uiPrefs.theme||'dark')==='sky')
   $('setFocus').value=timerPresets.focus||25
   $('setBreak').value=timerPresets.break||5
   $('setLong').value=timerPresets.long||15
@@ -2271,7 +2111,7 @@ function renderList(){
   })
 
   if(total===0){
-    wrap.innerHTML='<div style="padding:22px 12px;color:var(--muted);font-weight:850;line-height:1.7">No notes found.<br><span style="color:rgba(255,220,200,.95)">Try another search</span> or press <span style="font-family:var(--mono)">Ctrl+K</span>.</div>'
+    wrap.innerHTML='<div style="padding:22px 12px;color:rgba(238,242,255,.55);font-weight:850;line-height:1.7">No notes found.<br><span style="color:rgba(255,220,200,.95)">Try another search</span> or press <span style="font-family:var(--mono)">Ctrl+K</span>.</div>'
   }else{
     wrap.innerHTML=html
     wrap.querySelectorAll('.note-card').forEach(c=>{
@@ -2289,7 +2129,7 @@ function setEmptyState(){
   $('grade').value=''
   $('pTitle').textContent='Untitled'
   $('pMeta').innerHTML=''
-  $('pBody').innerHTML='<div style="color:var(--muted);font-weight:850;line-height:1.7">Create your first note using <span style="font-family:var(--mono)">New Note</span>.</div>'
+  $('pBody').innerHTML='<div style="color:rgba(238,242,255,.55);font-weight:850;line-height:1.7">Create your first note using <span style="font-family:var(--mono)">New Note</span>.</div>'
   hideLinkCards()
 }
 
@@ -2350,33 +2190,21 @@ async function createNote(){
 }
 
 function loadNote(id){
-  const n = notes.find(x=>x.id===id)
+  const n=notes.find(x=>x.id===id)
   if(!n) return
-  activeId = id
-  uiPrefs.lastOpenNoteId = id
+  activeId=id
+  uiPrefs.lastOpenNoteId=id
   saveSettingsDebounced()
 
-  $('title').value = n.title || ''
-  $('body').value = n.content || ''
-  $('grade').value = n.grade || ''
-
-  const d = loadDraft()
-  const noteMs = n.updated_at ? Date.parse(n.updated_at) : 0
-  if(d && d.updated_at_ms && d.updated_at_ms > (noteMs || 0) + 1000){
-    $('title').value = (d.title ?? $('title').value)
-    $('body').value = (d.content ?? $('body').value)
-    $('grade').value = (d.grade ?? $('grade').value)
-    autosaveDirty = true
-    setStatus('dirty')
-  }else{
-    autosaveDirty = false
-    setStatus('saved')
-  }
+  $('title').value=n.title||''
+  $('body').value=n.content||''
+  $('grade').value=n.grade||''
 
   updateCrumb()
   renderList()
   updatePreview()
   refreshLinksUI()
+  setStatus('saved')
 }
 
 function updateCrumb(){
@@ -2390,84 +2218,52 @@ function updateCrumb(){
   $('crumbSub').innerHTML=chips.join('')
 }
 
-function draftKey(){
-  return user && activeId ? `studyos_draft_${user.id}_${activeId}` : null
-}
-
-function saveDraft(){
-  const k = draftKey()
-  if(!k) return
-  const payload = { id: activeId, title: $('title').value, content: $('body').value, grade: $('grade').value, updated_at_ms: Date.now() }
-  try{ localStorage.setItem(k, JSON.stringify(payload)) }catch(e){}
-}
-
-function loadDraft(){
-  const k = draftKey()
-  if(!k) return null
-  try{
-    const raw = localStorage.getItem(k)
-    return raw ? JSON.parse(raw) : null
-  }catch(e){ return null }
-}
-
-function clearDraft(){
-  const k = draftKey()
-  if(!k) return
-  try{ localStorage.removeItem(k) }catch(e){}
-}
-
 function autosave(){
   if(!activeId) return
-  autosaveDirty = true
-  saveDraft()
-  setStatus('dirty')
-  if(autosaveTimer) clearTimeout(autosaveTimer)
-  autosaveTimer = setTimeout(async ()=>{
-    const ok = await saveNote({ silent:true })
-    if(ok){
-      autosaveDirty = false
-      clearDraft()
-      setStatus('saved')
-    }else{
-      autosaveDirty = true
-      setStatus('error')
-    }
-  }, 700)
+  if(!navigator.onLine){setStatus('offline');return}
+  autosaveDirty=true
+  setStatus('saving')
+  clearTimeout(autosaveT)
+  autosaveT=setTimeout(async ()=>{
+    if(!autosaveDirty) return
+    autosaveDirty=false
+    await saveNote()
+  },750)
 }
 
-async function saveNote({ silent=false } = {}){
-  if(!user || !activeId) return false
-  saveDraft()
-  const title = $('title').value.trim() || 'Untitled'
-  const content = $('body').value || ''
-  const grade = $('grade').value || ''
-  const updated_at = new Date().toISOString()
-  const payload = { id: activeId, user_id: user.id, title, content, grade, updated_at }
-  if(!silent) setStatus('saving')
-  try{
-    const { error } = await supabase.from('notes').upsert(payload, { onConflict: 'id' })
-    if(error) throw error
-    let n = notes.find(x=>x.id===activeId)
-    if(!n){
-      n = { id: activeId, title, content, grade, updated_at }
-      notes.unshift(n)
-    }else{
-      n.title = title
-      n.content = content
-      n.grade = grade
-      n.updated_at = updated_at
-    }
-    clearDraft()
-    renderList()
-    refreshLinksUI()
-    if(!silent) setStatus('saved')
-    return true
-  }catch(e){
-    if(!silent) setStatus('error')
-    return false
+async function saveNote(){
+  if(!activeId) return
+  if(!user){ toast('Not signed in','Please sign in','bad'); return }
+  if(!navigator.onLine){setStatus('offline');return}
+  const n=notes.find(x=>x.id===activeId)
+  if(!n) return
+
+  setStatus('saving')
+  const title=$('title').value
+  const content=$('body').value
+  const grade=$('grade').value||''
+  const updated_at=nowIso()
+
+  const r=await supabase.from('notes').update({title,content,grade,school:currentSchool,updated_at}).eq('id',activeId).eq('user_id',user.id)
+  if(r.error){
+    setStatus('error')
+    toast('Save failed',r.error.message,'bad')
+    console.error(r.error)
+    return
   }
-}
 
+  n.title=title
+  n.content=content
+  n.grade=grade
+  n.school=currentSchool
+  n.updated_at=updated_at
+
+  setStatus('saved')
+  updateCrumb()
+  renderList()
+  updatePreview()
+  refreshLinksUI()
+}
 
 async function deleteNote(){
   if(!activeId) return
@@ -2608,13 +2404,13 @@ function showLinkDrop(list){
   $('cardDrop').style.display='block'
   const wrap=$('dropList')
   if(!list.length){
-    wrap.innerHTML='<div style="padding:10px;color:var(--muted);font-weight:850">No matches</div>'
+    wrap.innerHTML='<div style="padding:10px;color:rgba(238,242,255,.55);font-weight:850">No matches</div>'
     return
   }
   wrap.innerHTML=list.map(n=>{
     const t=(n.title&&n.title.trim()?n.title:'Untitled')
     const g=n.grade?(' · '+gradeLabels[n.grade]):''
-    return '<div class="pillnote" style="width:100%;justify-content:space-between" data-pick="'+n.id+'"><span>'+escapeHtml(t)+'</span><span style="color:var(--muted);font-weight:950;font-size:11px">'+escapeHtml(g)+'</span></div>'
+    return '<div class="pillnote" style="width:100%;justify-content:space-between" data-pick="'+n.id+'"><span>'+escapeHtml(t)+'</span><span style="color:rgba(238,242,255,.45);font-weight:950;font-size:11px">'+escapeHtml(g)+'</span></div>'
   }).join('')
   wrap.querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>linkNote(p.getAttribute('data-pick')))
 }
@@ -2810,8 +2606,6 @@ function closeSettings(){ $('modalSettings').style.display='none' }
 function saveSettingsFromModal(){
   uiPrefs.sidebarHidden=$('setSidebar').value==='1'
   uiPrefs.previewFull=$('setPreviewFull').value==='1'
-  uiPrefs.theme=$('setTheme').value||'dark'
-  document.body.classList.toggle('skyTheme',uiPrefs.theme==='sky')
   timerPresets.focus=clamp(parseInt($('setFocus').value||25,10),1,180)
   timerPresets.break=clamp(parseInt($('setBreak').value||5,10),1,60)
   timerPresets.long=clamp(parseInt($('setLong').value||15,10),1,120)
@@ -4189,14 +3983,11 @@ function wireUI(){
   window.addEventListener('resize',maybeMobileUI)
   maybeMobileUI()
 
-  window.addEventListener('online',()=>{if(activeId) setStatus('Saved')})
+  window.addEventListener('online',()=>{if(activeId) setStatus('saved')})
   window.addEventListener('offline',()=>setStatus('offline'))
 
   document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState!=='visible'){
-      if(activeId){saveDraft(); if(autosaveDirty) saveNote({silent:true})}
-      saveSettingsNow();audio.pause();return
-    }
+    if(document.visibilityState!=='visible'){audio.pause();return}
     if(nerdPrefs.musicMode && nerdPrefs.musicMode!=='off') applyMusicMode()
   })
 }
@@ -4255,4 +4046,3 @@ boot()
 
 </body>
 </html>
-
