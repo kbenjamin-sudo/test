@@ -1,3871 +1,1992 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>StudyOS</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
 <style>
 :root{
-  --bg:#07080a;
-  --panel:#0e1116;
-  --panel2:#10151d;
-  --card:#0c0f14;
-  --stroke:rgba(255,255,255,.10);
-  --stroke2:rgba(255,255,255,.14);
-  --text:#eef2ff;
-  --muted:rgba(238,242,255,.55);
-  --muted2:rgba(238,242,255,.35);
-  --brand:#ff6a00;
-  --brand2:#ffb100;
-  --ok:#22c55e;
-  --bad:#ff3b3b;
-  --warn:#ffb100;
-  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
-  --font:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  --shadow:0 16px 55px rgba(0,0,0,.55);
-  --shadow2:0 22px 80px rgba(0,0,0,.75);
-  --r12:12px;
-  --r14:14px;
-  --r16:16px;
-  --r18:18px;
-  --r22:22px;
-  --side:320px;
-  --top:66px;
+  --bg:#0b0b0e;
+  --panel:#111118;
+  --panel2:#151521;
+  --text:#f4f4f7;
+  --muted:#b7b7c7;
+  --accent:#ff7a18;
+  --accent2:#ffb55a;
+  --bad:#ff4d4d;
+  --good:#44d07a;
+  --shadow: 0 12px 35px rgba(0,0,0,.45);
+  --radius:16px;
 }
-
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box}
 html,body{height:100%}
 body{
-  background:radial-gradient(1200px 700px at 20% -10%, rgba(255,106,0,.14), transparent 55%),
-             radial-gradient(900px 600px at 110% 15%, rgba(255,177,0,.12), transparent 60%),
-             linear-gradient(#07080a,#07080a);
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background: radial-gradient(1200px 800px at 20% 0%, rgba(255,122,24,.20), transparent 55%),
+              radial-gradient(1000px 700px at 85% 10%, rgba(255,181,90,.12), transparent 60%),
+              var(--bg);
   color:var(--text);
-  font-family:var(--font);
   overflow:hidden;
 }
-
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
 a{color:inherit}
-button,input,select,textarea{font-family:var(--font)}
-::selection{background:rgba(255,106,0,.35)}
-::-webkit-scrollbar{width:10px;height:10px}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:999px;border:2px solid rgba(0,0,0,0)}
-::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.18)}
-::-webkit-scrollbar-track{background:transparent}
+.hidden{display:none!important}
 
-.app{
-  height:100%;
-  display:grid;
-  grid-template-columns: var(--side) 1fr;
-}
-
-.sidebar{
-  position:relative;
-  background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));
-  border-right:1px solid var(--stroke);
-  overflow:hidden;
-}
-
-.side-inner{
-  height:100%;
+#app{
+  height:100dvh;
+  height:100vh;
   display:flex;
   flex-direction:column;
 }
-
-.brand{
-  padding:18px 18px 14px;
-  border-bottom:1px solid var(--stroke);
-  background:linear-gradient(180deg, rgba(255,106,0,.08), rgba(255,255,255,0));
-}
-
-.brand-top{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.logo{
-  width:42px;height:42px;
-  border-radius:14px;
-  background:linear-gradient(135deg,var(--brand),var(--brand2));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:900;
-  color:#fff;
-  box-shadow:0 0 0 1px rgba(255,255,255,.14) inset, 0 14px 40px rgba(255,106,0,.18);
-  user-select:none;
-}
-
-.brand-name{
-  display:flex;
-  flex-direction:column;
-  gap:2px;
-  min-width:0;
-}
-.brand-name .t{
-  font-weight:900;
-  letter-spacing:-.5px;
-  font-size:18px;
-  white-space:nowrap;
-}
-.brand-name .s{
-  font-weight:700;
-  color:var(--muted);
-  font-size:11px;
-}
-
-.school-pill{
-  margin-top:10px;
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:7px 10px;
-  border-radius:999px;
-  border:1px solid rgba(255,106,0,.35);
-  background:rgba(255,106,0,.10);
-  color:rgba(255,220,200,.92);
-  font-weight:800;
-  font-size:11px;
-  cursor:pointer;
-  user-select:none;
-  width:max-content;
-  transition:transform .15s, background .15s, border-color .15s;
-}
-.school-pill:hover{transform:translateY(-1px);background:rgba(255,106,0,.16);border-color:rgba(255,106,0,.55)}
-.school-pill span{opacity:.95}
-
-.side-actions{
-  margin-top:12px;
-  display:flex;
-  gap:10px;
-}
-
-.btn{
-  border:1px solid var(--stroke2);
-  background:rgba(255,255,255,.04);
-  color:var(--text);
-  padding:10px 12px;
-  border-radius:14px;
-  cursor:pointer;
-  font-weight:800;
-  font-size:12px;
-  transition:transform .15s, border-color .15s, background .15s, box-shadow .15s;
-  user-select:none;
-}
-.btn:hover{
-  transform:translateY(-1px);
-  background:rgba(255,255,255,.06);
-  border-color:rgba(255,106,0,.45);
-  box-shadow:0 14px 38px rgba(0,0,0,.35);
-}
-.btn:active{transform:translateY(0)}
-.btn.primary{
-  background:linear-gradient(135deg,var(--brand),var(--brand2));
-  border-color:transparent;
-  color:#111;
-}
-.btn.primary:hover{
-  border-color:transparent;
-  box-shadow:0 18px 55px rgba(255,106,0,.16);
-}
-.btn.ghost{
-  background:transparent;
-  border-color:rgba(255,255,255,.12);
-}
-.btn.danger{
-  border-color:rgba(255,59,59,.35);
-  color:rgba(255,180,180,.95);
-}
-.btn.danger:hover{
-  border-color:rgba(255,59,59,.7);
-  background:rgba(255,59,59,.10);
-}
-
-.search-wrap{
-  padding:12px 18px 10px;
-}
-.search{
-  width:100%;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.20);
-  color:var(--text);
-  padding:12px 12px;
-  font-weight:750;
-  font-size:12px;
-  transition:border-color .15s, box-shadow .15s;
-}
-.search:focus{
-  border-color:rgba(255,106,0,.55);
-  box-shadow:0 0 0 4px rgba(255,106,0,.12);
-}
-.search::placeholder{color:rgba(238,242,255,.35);font-weight:700}
-
-.side-filters{
-  padding:0 18px 10px;
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-.side-filters select{
-  flex:1;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  color:var(--text);
-  padding:10px 10px;
-  font-weight:850;
-  font-size:11px;
-  cursor:pointer;
-}
-.side-filters .kbtn{
-  width:48px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-weight:950;
-}
-
-.note-list{
-  flex:1;
-  overflow:auto;
-  padding:10px 12px 14px;
-}
-
-.group{
-  margin:10px 6px 14px;
-}
-.group-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:9px 10px;
-  color:rgba(238,242,255,.65);
-  font-weight:900;
-  font-size:10px;
-  letter-spacing:1.15px;
-  text-transform:uppercase;
-  user-select:none;
-}
-.group-head .count{
-  font-size:10px;
-  padding:3px 8px;
-  border-radius:999px;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.10);
-  color:rgba(238,242,255,.75);
-  font-weight:950;
-  letter-spacing:.4px;
-}
-
-.note-card{
-  margin:8px 6px;
-  padding:12px 12px;
-  border-radius:16px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.10);
-  cursor:pointer;
-  transition:transform .13s, border-color .13s, background .13s, box-shadow .13s;
-}
-.note-card:hover{
-  transform:translateY(-1px);
-  border-color:rgba(255,106,0,.35);
-  background:rgba(255,255,255,.055);
-  box-shadow:0 18px 45px rgba(0,0,0,.35);
-}
-.note-card.active{
-  border-color:rgba(255,106,0,.75);
-  background:linear-gradient(180deg, rgba(255,106,0,.14), rgba(255,255,255,.04));
-  box-shadow:0 25px 65px rgba(0,0,0,.45);
-}
-.note-title{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:6px;
-}
-.note-title .t{
-  font-weight:900;
-  font-size:13px;
-  letter-spacing:-.2px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.note-title .tag{
-  font-size:10px;
-  padding:4px 9px;
-  border-radius:999px;
-  border:1px solid rgba(255,177,0,.30);
-  color:rgba(255,212,150,.95);
-  background:rgba(255,177,0,.08);
-  font-weight:950;
-  flex-shrink:0;
-}
-.note-snippet{
-  color:rgba(238,242,255,.55);
-  font-weight:650;
-  font-size:11px;
-  line-height:1.4;
-  height:30px;
-  overflow:hidden;
-}
-.note-meta{
-  margin-top:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  color:rgba(238,242,255,.35);
-  font-weight:800;
-  font-size:10px;
-}
-.badges{
-  display:flex;
-  gap:6px;
-  align-items:center;
-}
-.badge{
-  font-size:9px;
-  font-weight:950;
-  padding:3px 7px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.05);
-  color:rgba(238,242,255,.7);
-}
-.badge.link{border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.08);color:rgba(152,255,200,.95)}
-.badge.draft{border-color:rgba(255,255,255,.10);background:rgba(255,255,255,.03);color:rgba(238,242,255,.45)}
-
-.side-footer{
-  padding:12px 18px 14px;
-  border-top:1px solid var(--stroke);
-  background:linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.03));
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.timerbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  background:rgba(0,0,0,.22);
-  border:1px solid rgba(255,255,255,.12);
-  padding:10px 12px;
-  border-radius:16px;
-}
-.timerbar .time{
-  font-family:var(--mono);
-  font-size:18px;
-  font-weight:950;
-  letter-spacing:1px;
-  background:linear-gradient(135deg,var(--brand),var(--brand2));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-.timerbar .tbtns{display:flex;gap:8px}
-.timerbar .tbtn{
-  width:38px;height:34px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:950;
-  color:rgba(238,242,255,.9);
-  transition:transform .12s, border-color .12s, background .12s;
-}
-.timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);background:rgba(255,255,255,.06)}
-.timer-modes{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-.pill{
-  padding:7px 10px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  color:rgba(238,242,255,.75);
-  font-weight:900;
-  font-size:10px;
-  cursor:pointer;
-  user-select:none;
-  transition:transform .12s,border-color .12s,background .12s;
-}
-.pill:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);background:rgba(255,255,255,.06)}
-
-.userline{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  color:rgba(238,242,255,.65);
-  font-weight:800;
-  font-size:11px;
-}
-.userline .left{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0;
-}
-.avatar{
-  width:34px;height:34px;
-  border-radius:12px;
-  background:linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
-  border:1px solid rgba(255,255,255,.12);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:950;
-  color:rgba(238,242,255,.92);
-  user-select:none;
-}
-.userline .email{
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:170px;
-  color:rgba(238,242,255,.8);
-}
-.userline .out{padding:8px 10px;border-radius:14px}
-
-.main{
-  position:relative;
-  overflow:hidden;
-}
-
 .topbar{
-  height:var(--top);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 18px;
-  border-bottom:1px solid var(--stroke);
-  background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0));
-}
-
-.top-left{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-width:0;
-}
-.mode-tabs{
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-.tab{
-  padding:9px 12px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  color:rgba(238,242,255,.78);
-  font-weight:900;
-  font-size:12px;
-  cursor:pointer;
-  user-select:none;
-  transition:transform .12s, border-color .12s, background .12s;
-}
-.tab:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.35);background:rgba(255,255,255,.06)}
-.tab.active{
-  background:linear-gradient(135deg, rgba(255,106,0,.22), rgba(255,177,0,.10));
-  border-color:rgba(255,106,0,.6);
-  color:rgba(255,245,240,.98);
-  box-shadow:0 18px 48px rgba(0,0,0,.35);
-}
-.notecrumb{
-  display:flex;
-  flex-direction:column;
-  gap:2px;
-  min-width:0;
-}
-.notecrumb .title{
-  font-weight:950;
-  letter-spacing:-.4px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:520px;
-}
-.notecrumb .sub{
-  font-weight:800;
-  color:rgba(238,242,255,.55);
-  font-size:11px;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.chip{
-  padding:3px 8px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.04);
-  color:rgba(238,242,255,.7);
-  font-weight:900;
-  font-size:10px;
-}
-
-.top-right{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-}
-.status{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 10px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.03);
-  font-weight:900;
-  font-size:11px;
-  color:rgba(238,242,255,.75);
-  user-select:none;
-  transition:border-color .3s;
-}
-.status.is-saving{border-color:rgba(255,177,0,.4)}
-.status.is-saved{border-color:rgba(34,197,94,.35)}
-.status.is-error{border-color:rgba(255,59,59,.4)}
-.dot{width:8px;height:8px;border-radius:50%;transition:all .3s}
-.dot.ok{background:var(--ok);box-shadow:0 0 16px rgba(34,197,94,.35)}
-.dot.warn{background:var(--warn);box-shadow:0 0 16px rgba(255,177,0,.35);animation:dotPulse 1.1s ease infinite}
-.dot.bad{background:var(--bad);box-shadow:0 0 16px rgba(255,59,59,.35)}
-@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
-
-.iconbtn{
-  width:44px;height:40px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:950;
-  font-size:13px;
-  transition:transform .12s, border-color .12s, background .12s;
-  user-select:none;
-}
-.iconbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.35);background:rgba(255,255,255,.06)}
-.iconbtn.primary{
-  background:linear-gradient(135deg,var(--brand),var(--brand2));
-  border-color:transparent;
-  color:#131313;
-}
-.iconbtn.primary:hover{border-color:transparent;box-shadow:0 18px 55px rgba(255,106,0,.18)}
-.iconbtn.danger{border-color:rgba(255,59,59,.35);color:rgba(255,180,180,.95)}
-.iconbtn.danger:hover{border-color:rgba(255,59,59,.7);background:rgba(255,59,59,.10)}
-.iconbtn.wide{
-  width:auto;
-  padding:0 12px;
-  gap:10px;
-}
-.iconbtn.wide span{font-weight:950;font-size:12px}
-
-.content{
-  height:calc(100% - var(--top));
-  position:relative;
-  overflow:hidden;
-}
-
-.view{
-  position:absolute;
-  inset:0;
-  display:none;
-}
-.view.active{display:block}
-
-.editor-shell{
-  height:100%;
-  display:grid;
-  grid-template-rows: 64px 1fr;
-}
-
-.toolbar{
-  padding:12px 18px;
-  border-bottom:1px solid var(--stroke);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
-}
-.lefttools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.tool{
-  padding:8px 10px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  cursor:pointer;
-  font-weight:950;
-  font-size:11px;
-  color:rgba(238,242,255,.84);
-  transition:transform .12s, border-color .12s, background .12s;
-  user-select:none;
-}
-.tool:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.35);background:rgba(255,255,255,.06)}
-.tool.active{
-  background:linear-gradient(135deg, rgba(255,106,0,.18), rgba(255,177,0,.08));
-  border-color:rgba(255,106,0,.55);
-}
-
-.metapick{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-}
-.metapick select,.metapick input{
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  color:var(--text);
-  padding:10px 10px;
-  font-weight:850;
-  font-size:11px;
-}
-.metapick input{width:260px}
-.metapick input::placeholder{color:rgba(238,242,255,.35);font-weight:750}
-.metapick input:focus,.metapick select:focus{
-  border-color:rgba(255,106,0,.55);
-  box-shadow:0 0 0 4px rgba(255,106,0,.10);
-}
-
-.split{
-  height:100%;
-  display:grid;
-  grid-template-columns: 1fr 12px 1fr;
-  overflow:hidden;
-}
-.split.singleEditor{grid-template-columns: 1fr}
-.split.singlePreview{grid-template-columns: 1fr}
-
-.pane{
-  height:100%;
-  overflow:auto;
-  padding:18px 18px 22px;
-}
-
-.divider{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:col-resize;
-  user-select:none;
-}
-.divider::before{
-  content:'';
-  width:6px;
-  height:55%;
-  border-radius:999px;
-  background:rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.12);
-  transition:background .12s,border-color .12s;
-}
-.divider:hover::before{background:rgba(255,106,0,.16);border-color:rgba(255,106,0,.35)}
-
-.titleInput{
-  width:100%;
-  border:none;
-  outline:none;
-  background:transparent;
-  color:var(--text);
-  font-weight:950;
-  letter-spacing:-.9px;
-  font-size:38px;
-  padding:8px 0 12px;
-}
-.titleInput::placeholder{color:rgba(238,242,255,.18)}
-
-.bodyInput{
-  width:100%;
-  min-height:calc(100% - 70px);
-  border:1px solid rgba(255,255,255,.10);
-  outline:none;
-  background:rgba(0,0,0,.18);
-  color:rgba(238,242,255,.92);
-  border-radius:18px;
-  padding:16px 16px;
-  font-family:var(--mono);
-  font-size:14px;
-  line-height:1.75;
-  resize:none;
-  transition:border-color .12s, box-shadow .12s;
-}
-.bodyInput:focus{
-  border-color:rgba(255,106,0,.55);
-  box-shadow:0 0 0 5px rgba(255,106,0,.10);
-}
-.bodyInput::placeholder{color:rgba(238,242,255,.25)}
-
-.rightpane{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-.card{
-  border-radius:18px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.04);
-  padding:14px;
-}
-.cardhead{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom:10px;
-}
-.cardhead .h{
-  font-weight:950;
-  font-size:11px;
-  letter-spacing:1.1px;
-  text-transform:uppercase;
-  color:rgba(238,242,255,.65);
-}
-.cardhead .act{
-  display:flex;
-  gap:8px;
-}
-.linkbtn{
-  font-weight:950;
-  font-size:11px;
-  color:rgba(255,200,160,.92);
-  cursor:pointer;
-  user-select:none;
-}
-.linkbtn:hover{color:rgba(255,220,200,.98)}
-.pills{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-.pillnote{
-  padding:8px 10px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.18);
-  color:rgba(238,242,255,.82);
-  font-weight:900;
-  font-size:11px;
-  cursor:pointer;
-  user-select:none;
-  display:flex;
-  gap:8px;
-  align-items:center;
-  transition:transform .12s,border-color .12s,background .12s;
-}
-.pillnote:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.35);background:rgba(255,255,255,.06)}
-.pillnote .x{
-  width:18px;height:18px;
-  border-radius:999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  font-weight:950;
-  font-size:12px;
-}
-.pillnote:hover .x{border-color:rgba(255,59,59,.35);background:rgba(255,59,59,.10);color:rgba(255,200,200,.95)}
-
-.preview{
-  max-width:980px;
-  margin:0 auto;
-  padding:22px 24px 40px;
-}
-.preview h1{
-  font-size:52px;
-  font-weight:950;
-  letter-spacing:-1.25px;
-  margin-bottom:10px;
-  background:linear-gradient(135deg, rgba(255,240,230,.98), rgba(255,210,170,.88));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-.preview .metaRow{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-bottom:20px;
-}
-.preview .metaRow .chip{font-size:11px;padding:6px 10px}
-.preview .body{
-  font-size:16px;
-  line-height:1.95;
-  color:rgba(238,242,255,.92);
-}
-.preview .body h2{margin-top:2.2em;margin-bottom:.7em;font-size:28px;color:rgba(255,210,170,.92);font-weight:950;letter-spacing:-.5px}
-.preview .body h3{margin-top:1.8em;margin-bottom:.6em;font-size:22px;color:rgba(255,177,0,.92);font-weight:950}
-.preview .body p{margin:1em 0}
-.preview .body a{color:rgba(255,190,150,.95);font-weight:900;text-decoration:none;border-bottom:2px solid transparent}
-.preview .body a:hover{border-bottom-color:rgba(255,190,150,.65)}
-.preview .body code{
-  font-family:var(--mono);
-  font-size:.9em;
-  padding:2px 7px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(0,0,0,.22);
-  color:rgba(255,220,170,.95);
-}
-.preview .body pre{
-  margin:1.2em 0;
-  border-radius:18px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(0,0,0,.22);
-  overflow:auto;
-  padding:14px;
-}
-.preview .body pre code{background:transparent;border:none;padding:0;color:rgba(238,242,255,.92)}
-.preview .body blockquote{
-  margin:1.2em 0;
-  padding:14px 16px;
-  border-left:4px solid rgba(255,106,0,.85);
-  background:rgba(255,255,255,.04);
-  border-radius:0 18px 18px 0;
-  color:rgba(238,242,255,.72);
-  font-style:italic;
-}
-.preview .body ul,.preview .body ol{margin:1em 0 1em 1.4em}
-.preview .body li{margin:.35em 0}
-
-.graphWrap{
-  height:100%;
-  position:relative;
-  overflow:hidden;
-  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
-}
-#graph{
-  width:100%;
-  height:100%;
-  display:block;
-}
-.graphUI{
-  position:absolute;
-  top:14px;right:14px;
-  display:flex;
-  gap:10px;
-}
-.graphUI .iconbtn{height:42px}
-.graphHint{
-  position:absolute;
-  left:14px;bottom:14px;
-  padding:10px 12px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(0,0,0,.25);
-  color:rgba(238,242,255,.70);
-  font-weight:850;
-  font-size:11px;
-}
-
-.modalBack{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.72);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:3000;
-  backdrop-filter:blur(10px);
-}
-.modal{
-  width:92%;
-  max-width:720px;
-  border-radius:22px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(14,17,22,.92);
-  box-shadow:var(--shadow2);
-  overflow:hidden;
-}
-.modalTop{
-  padding:16px 18px;
-  border-bottom:1px solid rgba(255,255,255,.10);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-}
-.modalTop .h{
-  font-weight:950;
-  font-size:14px;
-  letter-spacing:-.25px;
-}
-.modalBody{
-  padding:16px 18px 18px;
-}
-.modalBody p{
-  color:rgba(238,242,255,.62);
-  font-weight:700;
-  font-size:12px;
-  line-height:1.7;
-  margin-bottom:14px;
-}
-.row{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.row input,.row select{
-  flex:1;
-  min-width:190px;
-  padding:12px 12px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.22);
-  color:var(--text);
-  font-weight:850;
-  font-size:12px;
-}
-.row input:focus,.row select:focus{
-  border-color:rgba(255,106,0,.55);
-  box-shadow:0 0 0 5px rgba(255,106,0,.10);
-}
-.modalActions{
-  padding:14px 18px 18px;
-  display:flex;
-  gap:10px;
-  justify-content:flex-end;
-}
-.modalActions .btn{border-radius:16px}
-
-.toastWrap{
-  position:fixed;
-  right:14px;
-  bottom:14px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  z-index:4000;
-  pointer-events:none;
-}
-.toast{
-  pointer-events:none;
-  width:320px;
-  border-radius:18px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(14,17,22,.88);
-  backdrop-filter:blur(10px);
-  box-shadow:var(--shadow);
-  padding:12px 12px;
-}
-.toast .t1{font-weight:950;font-size:12px;margin-bottom:3px}
-.toast .t2{font-weight:750;font-size:11px;color:rgba(238,242,255,.62);line-height:1.5}
-.toast.ok{border-color:rgba(34,197,94,.28)}
-.toast.warn{border-color:rgba(255,177,0,.28)}
-.toast.bad{border-color:rgba(255,59,59,.32)}
-
-.paletteBack{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.62);
-  display:none;
-  align-items:flex-start;
-  justify-content:center;
-  padding-top:95px;
-  z-index:3500;
-  backdrop-filter:blur(10px);
-}
-.palette{
-  width:92%;
-  max-width:760px;
-  border-radius:22px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(14,17,22,.92);
-  box-shadow:var(--shadow2);
-  overflow:hidden;
-}
-.paletteTop{
-  padding:14px 14px;
-  border-bottom:1px solid rgba(255,255,255,.10);
-  display:flex;
-  gap:12px;
-  align-items:center;
-}
-.paletteTop input{
-  flex:1;
-  padding:12px 12px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.22);
-  color:var(--text);
-  font-weight:900;
-}
-.paletteTop input:focus{
-  border-color:rgba(255,106,0,.55);
-  box-shadow:0 0 0 5px rgba(255,106,0,.10);
-}
-.paletteTop .hint{
-  color:rgba(238,242,255,.55);
-  font-weight:900;
-  font-size:11px;
-  white-space:nowrap;
-}
-.paletteList{
-  max-height:430px;
-  overflow:auto;
-}
-.pItem{
   padding:12px 14px;
   display:flex;
+  gap:12px;
   align-items:center;
   justify-content:space-between;
-  gap:12px;
-  cursor:pointer;
-  border-top:1px solid rgba(255,255,255,.06);
-  transition:background .12s;
 }
-.pItem:hover{background:rgba(255,255,255,.05)}
-.pItem .l{
-  display:flex;
-  gap:12px;
-  align-items:center;
-  min-width:0;
+.brand{display:flex;align-items:center;gap:10px}
+.logo{
+  width:38px;height:38px;border-radius:14px;
+  background: linear-gradient(135deg, rgba(255,122,24,1), rgba(255,181,90,1));
+  box-shadow: 0 12px 25px rgba(255,122,24,.18);
 }
-.pIco{
-  width:34px;height:34px;
-  border-radius:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid rgba(255,106,0,.25);
-  background:rgba(255,106,0,.10);
-}
-.pTxt{min-width:0}
-.pA{
-  font-weight:950;
-  font-size:12px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.pB{
-  margin-top:2px;
-  font-weight:750;
-  font-size:11px;
-  color:rgba(238,242,255,.55);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.pK{
-  color:rgba(238,242,255,.55);
-  font-weight:950;
-  font-size:11px;
-  white-space:nowrap;
-}
+.brand h1{margin:0;font-size:16px;letter-spacing:.4px}
+.mini{font-size:12px;color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center}
 
-.authBack{
-  position:fixed;
-  inset:0;
-  background:radial-gradient(900px 650px at 20% 10%, rgba(255,106,0,.14), transparent 60%),
-             radial-gradient(700px 520px at 90% 25%, rgba(255,177,0,.12), transparent 65%),
-             rgba(0,0,0,.82);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:5000;
+.pill{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:999px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.09);
 }
-.authCard{
-  width:92%;
-  max-width:460px;
-  border-radius:26px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(14,17,22,.90);
-  box-shadow:var(--shadow2);
-  padding:22px;
-}
-.authHead{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:16px;
-}
-.authHead .t{
-  font-weight:950;
-  font-size:18px;
-  letter-spacing:-.4px;
-}
-.authHead .s{
-  font-weight:800;
-  font-size:11px;
-  color:rgba(238,242,255,.55);
-  margin-top:2px;
-}
-.authTabs{
-  display:flex;
-  gap:10px;
-  margin:10px 0 14px;
-}
-.atab{
-  flex:1;
-  text-align:center;
-  padding:10px 10px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  font-weight:950;
-  font-size:12px;
-  cursor:pointer;
-  user-select:none;
-}
-.atab.active{
-  border-color:rgba(255,106,0,.55);
-  background:linear-gradient(135deg, rgba(255,106,0,.18), rgba(255,177,0,.08));
-}
-.authCard input{
-  width:100%;
-  padding:12px 12px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.22);
-  color:var(--text);
-  font-weight:850;
-  margin-bottom:10px;
-  outline:none;
-}
-.authCard input:focus{
-  border-color:rgba(255,106,0,.55);
-  box-shadow:0 0 0 5px rgba(255,106,0,.10);
-}
-.authRow{
-  display:flex;
-  gap:10px;
-  margin-top:6px;
-}
-.authRow .btn{flex:1}
-.authErr{
-  margin-top:10px;
-  font-weight:850;
-  font-size:12px;
-  color:rgba(255,170,170,.95);
-  min-height:16px;
-}
-.authSmall{
-  margin-top:10px;
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  color:rgba(238,242,255,.55);
-  font-weight:850;
-  font-size:11px;
-}
-.authSmall span{cursor:pointer;user-select:none}
-.authSmall span:hover{color:rgba(255,220,200,.95)}
-
-body.previewFull .sidebar{display:none}
-body.previewFull .topbar{display:none}
-body.previewFull .app{grid-template-columns:1fr}
-body.previewFull .content{height:100%}
-body.previewFull .preview{max-width:none;padding:44px 70px}
-body.previewFull .preview h1{font-size:60px}
-
-@media (max-width:1080px){
-  .app{grid-template-columns: 300px 1fr}
-  .notecrumb .title{max-width:360px}
-}
-@media (max-width:900px){
-  .app{grid-template-columns: 1fr}
-  .sidebar{
-    position:fixed;
-    left:-340px;top:0;bottom:0;
-    width:320px;
-    z-index:2500;
-    transition:left .18s ease;
-  }
-  .sidebar.open{left:0}
-  .backdrop{
-    position:fixed;
-    inset:0;
-    display:none;
-    background:rgba(0,0,0,.6);
-    z-index:2400;
-  }
-  .backdrop.show{display:block}
-  .topbar{padding:0 12px}
-  .notecrumb .title{max-width:240px}
-  .metapick input{width:190px}
-}
-.backdrop{display:none}
-
-.gamesWrap{
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-}
-.gameCard{
-  width:min(980px,96vw);
-  border-radius:24px;
-  border:1px solid rgba(255,106,0,.35);
-  background:rgba(14,17,22,.88);
-  box-shadow:var(--shadow2);
-  padding:16px;
-}
-.gameTop{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-  padding:6px 8px 12px;
-}
-.gTabs{display:flex;gap:10px;flex-wrap:wrap}
-.gTab{
-  padding:10px 12px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  cursor:pointer;
-  font-weight:950;
-  font-size:12px;
-  user-select:none;
-}
-.gTab.active{
-  border-color:rgba(255,106,0,.55);
-  background:linear-gradient(135deg, rgba(255,106,0,.18), rgba(255,177,0,.08));
-}
-.gameTitle{
-  font-weight:950;
-  font-size:14px;
-  color:rgba(255,220,200,.95);
-}
-.gameBody{
-  display:grid;
-  grid-template-columns: 1.15fr .85fr;
-  gap:12px;
-}
-@media (max-width:900px){
-  .gameBody{grid-template-columns: 1fr}
-}
-.canvasWrap{
-  border-radius:20px;
+.btn{
   border:1px solid rgba(255,255,255,.10);
-  background:rgba(0,0,0,.22);
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  padding:10px 12px;border-radius:12px;
+}
+.btn:hover{border-color: rgba(255,255,255,.18)}
+.btn.primary{
+  background: linear-gradient(135deg, rgba(255,122,24,1), rgba(255,181,90,1));
+  color:#151018;border:0;
+}
+.btn.danger{
+  background: rgba(255,77,77,.12);
+  border-color: rgba(255,77,77,.25);
+  color:#ffd2d2;
+}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+
+.layout{
+  flex:1;min-height:0;
+  display:flex;gap:12px;
+  padding:0 12px 12px;
+}
+.sidebar{
+  width:270px;min-width:240px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--radius);
+  box-shadow: var(--shadow);
   padding:12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:flex;flex-direction:column;gap:10px;
 }
-canvas{display:block;border-radius:16px;border:1px solid rgba(255,106,0,.25);background:#050505;box-shadow:0 0 40px rgba(255,106,0,.10)}
-.gameSide{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.scoreBox{
-  border-radius:20px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.04);
-  padding:14px;
-}
-.scoreBox .r{display:flex;justify-content:space-between;gap:10px;margin:7px 0;font-weight:900}
-.scoreBox .r span{color:rgba(255,210,170,.95)}
-.cheatBox{
-  border-radius:20px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.04);
-  padding:14px;
-}
-.cheatBox .h{font-weight:950;font-size:12px;color:rgba(255,220,200,.95);margin-bottom:10px}
-.cheatBox label{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  font-weight:850;
-  font-size:12px;
-  color:rgba(238,242,255,.80);
-  margin:10px 0;
-}
-.cheatBox input[type="checkbox"]{accent-color:var(--brand)}
-.cheatBox input[type="range"]{accent-color:var(--brand);width:160px}
-.cheatBox input[type="number"]{
-  width:84px;
-  padding:10px 10px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.22);
+.navbtn{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  width:100%;
+  padding:12px 12px;border-radius:14px;
+  background:transparent;border:1px solid transparent;
   color:var(--text);
-  font-weight:950;
+}
+.navbtn:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
+.navbtn.active{background:rgba(255,122,24,.14);border-color:rgba(255,122,24,.28)}
+.badge{
+  font-size:12px;padding:3px 8px;border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.08);
+  color:var(--muted);
+}
+.kbd{
+  font-size:12px;padding:2px 6px;border-radius:8px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);
+  color:var(--muted);
+}
+
+.card{
+  flex:1;min-width:0;min-height:0;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--radius);
+  box-shadow: var(--shadow);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.cardhead{
+  padding:12px 12px 10px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.cardhead h2{margin:0;font-size:14px;letter-spacing:.3px}
+.content{flex:1;min-height:0;overflow:auto;padding:12px}
+.hr{height:1px;background:rgba(255,255,255,.07);margin:12px 0}
+.inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.splitbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+
+.grid2{
+  display:grid;
+  grid-template-columns: 360px 1fr;
+  gap:12px;
+  min-height:0;
+}
+@media (max-width: 980px){
+  body{overflow:auto}
+  #app{height:auto;min-height:100dvh}
+  .layout{flex-direction:column}
+  .sidebar{width:auto}
+  .grid2{grid-template-columns:1fr}
+}
+
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-size:12px;color:var(--muted)}
+input[type="text"],input[type="email"],input[type="password"],select,textarea{
+  width:100%;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.10);
+  color:var(--text);
+  border-radius:12px;
+  padding:10px 10px;
   outline:none;
 }
-.gameBtns{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.smallHint{
-  color:rgba(238,242,255,.55);
-  font-weight:800;
-  font-size:11px;
-  line-height:1.6;
-}
-kbd{
-  font-family:var(--mono);
-  padding:3px 7px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.22);
-  font-size:11px;
-}
-hr.sep{border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0}
-
-/* --- v4: Chromebook + iPad scroll/touch fixes --- */
-:root{ --vh: 100dvh; }
-html, body{ height:100%; }
-body{
-  min-height: var(--vh);
-  -webkit-text-size-adjust:100%;
-  overscroll-behavior: none;
-}
-.app{
-  min-height: var(--vh);
-}
-.sidebar, .main{
-  min-height: 0; /* allow inner overflow areas to scroll */
-}
-.note-list, .modal-body, .sheet, .game-area{
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
-}
-@media (pointer: coarse){
-  button, .btn, select, input{
-    min-height:44px;
-  }
-}
-@media (max-width: 900px){
-  .app{
-    grid-template-columns: 1fr !important;
-  }
-  .sidebar{
-    position: sticky;
-    top: 0;
-    z-index: 30;
-  }
+textarea{resize:none;min-height:240px;line-height:1.4}
+input:focus,select:focus,textarea:focus{
+  border-color: rgba(255,122,24,.45);
+  box-shadow: 0 0 0 3px rgba(255,122,24,.18);
 }
 
+.list{display:flex;flex-direction:column;gap:8px}
+.noteitem{
+  text-align:left;width:100%;
+  padding:10px 10px;border-radius:14px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+}
+.noteitem:hover{border-color:rgba(255,255,255,.14)}
+.noteitem.active{background:rgba(255,122,24,.14);border-color:rgba(255,122,24,.28)}
+.noteitem b{display:block;font-size:13px}
+.noteitem small{display:block;color:var(--muted);margin-top:2px;font-size:12px}
+
+.canvasWrap{
+  width:100%;
+  height:520px;
+  border-radius:18px;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.10);
+  overflow:hidden;
+}
+.canvasWrap canvas{width:100%;height:100%}
+
+.gameRow{display:grid;grid-template-columns: 1fr 330px;gap:12px}
+@media (max-width: 980px){.gameRow{grid-template-columns:1fr}}
+.gameCard{
+  background:rgba(0,0,0,.30);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;
+  padding:12px;
+}
+.gameCard h3{margin:0 0 8px;font-size:14px}
+.smallbtn{
+  padding:8px 10px;border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+}
+.smallbtn.primary{
+  background:rgba(255,122,24,.18);
+  border-color:rgba(255,122,24,.28);
+}
+.switch{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 10px;border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;background:rgba(255,255,255,.03);
+}
+.switch b{font-size:13px}
+.switch small{color:var(--muted)}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  padding:10px 12px;
+  border-radius:14px;
+  background:rgba(0,0,0,.72);
+  border:1px solid rgba(255,255,255,.10);
+  color:var(--text);
+  box-shadow: var(--shadow);
+  max-width:min(640px, calc(100% - 24px));
+  display:none;
+}
+.toast.show{display:block}
 </style>
 </head>
 <body>
-
-<div class="toastWrap" id="toastWrap"></div>
-
-<div class="paletteBack" id="paletteBack">
-  <div class="palette">
-    <div class="paletteTop">
-      <input id="paletteQ" placeholder="Search notes or type a command...">
-      <div class="hint">Enter · Esc · Ctrl+K</div>
-    </div>
-    <div class="paletteList" id="paletteList"></div>
-  </div>
-</div>
-
-<div class="modalBack" id="modalPdf">
-  <div class="modal">
-    <div class="modalTop">
-      <div class="h">Export PDF</div>
-      <div class="iconbtn" id="pdfClose">✕</div>
-    </div>
-    <div class="modalBody">
-      <p>Exports a styled PDF of the current note. Optionally include linked notes as an appendix.</p>
-      <div class="row">
-        <select id="pdfIncludeLinks">
-          <option value="1">Include linked notes</option>
-          <option value="0">Only this note</option>
-        </select>
-        <select id="pdfIncludeDates">
-          <option value="1">Include dates</option>
-          <option value="0">No dates</option>
-        </select>
-      </div>
-    </div>
-    <div class="modalActions">
-      <button class="btn ghost" id="pdfCancel">Cancel</button>
-      <button class="btn primary" id="pdfGo">Export</button>
-    </div>
-  </div>
-</div>
-
-<div class="modalBack" id="modalSettings">
-  <div class="modal">
-    <div class="modalTop">
-      <div class="h">Settings</div>
-      <div class="iconbtn" id="setClose">✕</div>
-    </div>
-    <div class="modalBody">
-      <p>These sync across devices.</p>
-      <div class="row">
-        <select id="setSidebar">
-          <option value="0">Sidebar: Normal</option>
-          <option value="1">Sidebar: Hidden (mobile style)</option>
-        </select>
-        <select id="setPreviewFull">
-          <option value="0">Preview Full-screen: Off</option>
-          <option value="1">Preview Full-screen: On</option>
-        </select>
-      </div>
-      <div style="height:10px"></div>
-      <div class="row">
-        <input id="setFocus" type="number" min="1" max="180" placeholder="Focus minutes">
-        <input id="setBreak" type="number" min="1" max="60" placeholder="Break minutes">
-        <input id="setLong" type="number" min="1" max="120" placeholder="Long break minutes">
-      </div>
-
-      <hr class="sep">
-
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <div style="font-weight:950;color:rgba(238,242,255,.85)">Audio</div>
-        <div style="font-size:11px;color:rgba(238,242,255,.55);font-weight:850">optional</div>
-      </div>
-      <div style="height:10px"></div>
-      <div class="row" id="nerdLockRow">
-        <input id="nerdPass" type="password" inputmode="numeric" placeholder="Password">
-        <button class="btn" id="nerdUnlock">Unlock</button>
-      </div>
-
-      <div id="nerdBox" style="display:none;margin-top:10px">
-        <p style="margin-bottom:10px">Private background audio (off by default). Quick mute: <span style="font-family:var(--mono)">Alt</span>+<span style="font-family:var(--mono)">M</span> or <span style="font-family:var(--mono)">`</span>.</p>
-        <div class="row">
-          <select id="musicMode"><option value="off">Music: Off</option><option value="a">A — autumn! · one way (instrumental)</option><option value="j1">J — free jaydes · pluggnb type (instrumental)</option><option value="j2">J — jaydes · convenience (instrumental)</option><option value="k">K — Kyle Richh x Sdot Go · Drive me crazy (instrumental)</option><option value="m">M — Me vs Me (instrumental)</option></select>
-          <select id="sfxMode">
-            <option value="on">Game SFX: On</option>
-            <option value="off">Game SFX: Off</option>
-          </select>
-        </div>
-      </div>
-
-    </div>
-    <div class="modalActions">
-      <button class="btn ghost" id="setCancel">Cancel</button>
-      <button class="btn primary" id="setSave">Save</button>
-    </div>
-  </div>
-</div>
-
-<div class="authBack" id="authBack">
-  <div class="authCard">
-    <div class="authHead">
-      <div class="logo">S</div>
+<div id="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
       <div>
-        <div class="t">StudyOS</div>
-        <div class="s">Everything saves. Everywhere.</div>
+        <h1>StudyOS</h1>
+        <div class="mini" id="statusLine">Offline demo</div>
       </div>
     </div>
-    <div class="authTabs">
-      <div class="atab active" id="tabSignIn">Sign In</div>
-      <div class="atab" id="tabSignUp">Sign Up</div>
+    <div class="row">
+      <div class="pill">
+        <small id="authText">Not signed in</small>
+      </div>
+      <button class="btn" id="btnOpenAuth">Sign in</button>
+      <button class="btn ghost hidden" id="btnLogout">Log out</button>
     </div>
-    <input id="authEmail" type="email" placeholder="Email">
-    <input id="authPass" type="password" placeholder="Password">
-    <div class="authRow">
-      <button class="btn primary" id="authGo">Enter</button>
-      <button class="btn ghost" id="authMagic">Magic Link</button>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <button class="navbtn active" data-tab="notes"><span>Notes</span><span class="badge" id="notesCount">0</span></button>
+      <button class="navbtn" data-tab="graph"><span>Graph</span><span class="badge">links</span></button>
+      <button class="navbtn" data-tab="games"><span>Games</span><span class="badge">2</span></button>
+      <button class="navbtn" data-tab="timer"><span>Timer</span><span class="badge">focus</span></button>
+      <button class="navbtn" data-tab="settings"><span>Settings</span><span class="badge">prefs</span></button>
+      <div class="hr"></div>
+      <div class="mini">Quick mute: <span class="kbd">`</span></div>
+      <div class="mini">Quick new note: <span class="kbd">N</span></div>
     </div>
-    <div class="authSmall">
-      <span id="authReset">Forgot password?</span>
-      <span id="authTip">Ctrl+K inside app</span>
+
+    <div class="card">
+      <div class="cardhead">
+        <h2 id="panelTitle">Notes</h2>
+        <div class="inline">
+          <span class="mini" id="saveState">—</span>
+          <button class="btn primary" id="btnNewNote">New</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <section id="tab-notes">
+          <div class="grid2">
+            <div>
+              <div class="field">
+                <label>Search</label>
+                <input id="noteSearch" type="text" placeholder="Find a note...">
+              </div>
+
+              <div class="inline" style="margin-top:10px">
+                <div class="field" style="flex:1;min-width:160px">
+                  <label>School</label>
+                  <select id="filterSchool">
+                    <option value="">All</option>
+                    <option>Salesianum</option>
+                    <option>St Peter</option>
+                    <option>McKean</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="field" style="flex:1;min-width:160px">
+                  <label>Category</label>
+                  <select id="filterCategory">
+                    <option value="">All</option>
+                    <option>Math</option>
+                    <option>English</option>
+                    <option>Science</option>
+                    <option>History</option>
+                    <option>Language</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="hr"></div>
+              <div class="list" id="notesList"></div>
+            </div>
+
+            <div>
+              <div class="inline">
+                <button class="btn" id="btnSaveNow">Save</button>
+                <button class="btn" id="btnPrint">Print/PDF</button>
+                <button class="btn" id="btnLink">Link</button>
+                <button class="btn danger" id="btnDelete">Delete</button>
+              </div>
+
+              <div class="hr"></div>
+
+              <div class="inline">
+                <div class="field" style="flex:1;min-width:240px">
+                  <label>Title</label>
+                  <input id="noteTitle" type="text" placeholder="Title">
+                </div>
+                <div class="field" style="min-width:170px">
+                  <label>School</label>
+                  <select id="noteSchool">
+                    <option>Salesianum</option>
+                    <option>St Peter</option>
+                    <option>McKean</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="inline" style="margin-top:10px">
+                <div class="field" style="min-width:170px">
+                  <label>Category</label>
+                  <select id="noteCategory">
+                    <option>Math</option>
+                    <option>English</option>
+                    <option>Science</option>
+                    <option>History</option>
+                    <option>Language</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="field" style="min-width:170px">
+                  <label>Grade</label>
+                  <select id="noteGrade">
+                    <option value="">—</option>
+                    <option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option>
+                  </select>
+                </div>
+                <div class="field" style="flex:1;min-width:240px">
+                  <label>Tags (comma separated)</label>
+                  <input id="noteTags" type="text" placeholder="algebra, test, unit 2">
+                </div>
+              </div>
+
+              <div class="field" style="margin-top:10px">
+                <label>Content</label>
+                <textarea id="noteContent" placeholder="Write here..."></textarea>
+              </div>
+
+              <div class="mini" style="margin-top:8px" id="noteMeta">—</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="tab-graph" class="hidden">
+          <div class="splitbar">
+            <div class="mini">Drag nodes. Scroll to zoom. Click a node to open.</div>
+            <button class="btn" id="btnReloadGraph">Reload</button>
+          </div>
+          <div class="hr"></div>
+          <div class="canvasWrap"><canvas id="graphCanvas" width="1200" height="700"></canvas></div>
+        </section>
+
+        <section id="tab-games" class="hidden">
+          <div class="gameRow">
+            <div class="gameCard">
+              <div class="inline" style="justify-content:space-between">
+                <h3 id="gameTitle">Snake: Hard Mode</h3>
+                <div class="inline">
+                  <button class="smallbtn" id="btnGameSnake">Snake</button>
+                  <button class="smallbtn" id="btnGameBeat">BeatJump</button>
+                </div>
+              </div>
+              <div class="hr"></div>
+              <div class="canvasWrap" style="height:520px"><canvas id="gameCanvas" width="900" height="650"></canvas></div>
+              <div class="hr"></div>
+              <div class="inline" style="justify-content:space-between">
+                <div class="mini" id="gameHint">Arrow keys / WASD. Tap to turn. Space to restart.</div>
+                <div class="inline">
+                  <button class="smallbtn primary" id="btnGameStart">Start</button>
+                  <button class="smallbtn" id="btnGameReset">Reset</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="gameCard">
+              <h3>Game settings</h3>
+              <div class="switch">
+                <div><b>Sound effects</b><small>Small beeps only</small></div>
+                <input id="sfxEnabled" type="checkbox" checked>
+              </div>
+              <div class="switch" style="margin-top:10px">
+                <div><b>Hard mode</b><small>Faster + obstacles</small></div>
+                <input id="snakeHard" type="checkbox" checked>
+              </div>
+
+              <div class="hr"></div>
+              <h3>Snake cheats</h3>
+
+              <div class="switch">
+                <div><b>Wrap walls</b><small>Teleport through edges</small></div>
+                <input id="cheatWrap" type="checkbox">
+              </div>
+              <div class="switch" style="margin-top:10px">
+                <div><b>Slow time</b><small>Chill speed</small></div>
+                <input id="cheatSlow" type="checkbox">
+              </div>
+              <div class="switch" style="margin-top:10px">
+                <div><b>Magnet food</b><small>Food drifts to you</small></div>
+                <input id="cheatMagnet" type="checkbox">
+              </div>
+              <div class="switch" style="margin-top:10px">
+                <div><b>Invincible (10s)</b><small>Press to activate</small></div>
+                <button class="smallbtn" id="btnInvincible">Activate</button>
+              </div>
+
+              <div class="inline" style="margin-top:10px">
+                <button class="smallbtn" id="btnAdd5">+5 length</button>
+                <button class="smallbtn" id="btnClearObs">Clear obstacles</button>
+              </div>
+
+              <div class="hr"></div>
+              <div class="mini" id="gameStats">—</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="tab-timer" class="hidden">
+          <div class="inline" style="justify-content:space-between">
+            <div>
+              <div style="font-size:40px;font-weight:700" id="timerDisplay">25:00</div>
+              <div class="mini" id="timerState">Ready</div>
+            </div>
+            <div class="inline">
+              <button class="btn primary" id="btnTimerStart">Start</button>
+              <button class="btn" id="btnTimerPause">Pause</button>
+              <button class="btn" id="btnTimerReset">Reset</button>
+            </div>
+          </div>
+          <div class="hr"></div>
+          <div class="inline">
+            <div class="field" style="min-width:180px">
+              <label>Focus minutes</label>
+              <input id="focusMins" type="text" value="25">
+            </div>
+            <div class="field" style="min-width:180px">
+              <label>Break minutes</label>
+              <input id="breakMins" type="text" value="5">
+            </div>
+          </div>
+        </section>
+
+        <section id="tab-settings" class="hidden">
+          <div class="grid2" style="grid-template-columns: 1fr 1fr">
+            <div>
+              <h3 style="margin:0 0 8px">Defaults</h3>
+              <div class="field">
+                <label>Default school</label>
+                <select id="defaultSchool">
+                  <option>Salesianum</option>
+                  <option>St Peter</option>
+                  <option>McKean</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="field" style="margin-top:10px">
+                <label>Default category</label>
+                <select id="defaultCategory">
+                  <option>Math</option>
+                  <option>English</option>
+                  <option>Science</option>
+                  <option>History</option>
+                  <option>Language</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="hr"></div>
+              <div class="mini" id="settingsSaveState">—</div>
+              <button class="btn" id="btnSaveSettings">Save settings</button>
+            </div>
+
+            <div>
+              <h3 style="margin:0 0 8px">Settings for nerds</h3>
+              <div class="mini" style="margin-bottom:10px">Password required (local only). Audio will not autoplay.</div>
+
+              <div class="inline">
+                <input id="nerdPass" type="password" placeholder="Password">
+                <button class="btn primary" id="nerdUnlock">Unlock</button>
+              </div>
+
+              <div id="nerdPanel" class="hidden" style="margin-top:12px">
+                <div class="switch">
+                  <div><b>Remember unlock</b><small>On this device only</small></div>
+                  <input id="rememberUnlock" type="checkbox">
+                </div>
+
+                <div class="hr"></div>
+
+                <div class="field">
+                  <label>Track</label>
+                  <select id="trackSelect"></select>
+                </div>
+
+                <div class="inline" style="margin-top:10px">
+                  <button class="btn primary" id="btnPlayPause">Play</button>
+                  <button class="btn" id="btnStop">Stop</button>
+                </div>
+
+                <div class="field" style="margin-top:10px">
+                  <label>Volume</label>
+                  <input id="musicVol" type="text" value="0.25">
+                </div>
+
+                <div class="mini" style="margin-top:10px">Quick mute key: <span class="kbd">`</span></div>
+                <audio id="bgAudio" preload="none" class="hidden"></audio>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
     </div>
-    <div class="authErr" id="authErr"></div>
   </div>
 </div>
 
-<div class="backdrop" id="backdrop"></div>
+<div class="toast" id="toast"></div>
 
-<div class="app">
-  <aside class="sidebar" id="sidebar">
-    <div class="side-inner">
-      <div class="brand">
-        <div class="brand-top">
-          <div class="logo">S</div>
-          <div class="brand-name">
-            <div class="t">StudyOS</div>
-            <div class="s">notes · links · graph · games</div>
-          </div>
-        </div>
-
-        <div class="side-actions">
-          <button class="btn primary" id="btnNew">New Note</button>
-          <button class="btn" id="btnGames">Games</button>
-        </div>
-
-        <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
-          <select id="schoolSelect" class="search" style="padding:10px 10px;border-radius:14px;max-width:100%;font-weight:900">
-            <option value="Salesianum">School: Salesianum</option>
-            <option value="St Peter Cathedral">School: St Peter Cathedral</option>
-            <option value="Charter">School: Charter</option>
-            <option value="Public">School: Public</option>
-            <option value="Other">School: Other</option>
-          </select>
-        </div>
-
+<div id="authModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50">
+  <div style="width:min(520px,100%);background:rgba(15,15,22,.96);border:1px solid rgba(255,255,255,.10);border-radius:18px;box-shadow:var(--shadow);padding:14px">
+    <div class="inline" style="justify-content:space-between">
+      <div>
+        <div style="font-weight:700">Account</div>
+        <div class="mini">Supabase email + password</div>
       </div>
-
-      <div class="search-wrap">
-        <input class="search" id="search" placeholder="Search titles + content (Ctrl+K)">
-      </div>
-
-      <div class="side-filters">
-        <select id="sort">
-          <option value="updated_desc">Sort: Updated</option>
-          <option value="title_asc">Sort: Title</option>
-          <option value="grade_asc">Sort: Grade</option>
-        </select>
-        <button class="btn kbtn" id="openPalette">⌘</button>
-      </div>
-
-      <div class="note-list" id="noteList"></div>
-
-      <div class="side-footer">
-        <div class="timerbar">
-          <div class="time" id="timerText">25:00</div>
-          <div class="tbtns">
-            <div class="tbtn" id="tStart">▶</div>
-            <div class="tbtn" id="tPause">⏸</div>
-            <div class="tbtn" id="tReset">↺</div>
-          </div>
-        </div>
-        <div class="timer-modes">
-          <div class="pill" id="mFocus">Focus</div>
-          <div class="pill" id="mBreak">Break</div>
-          <div class="pill" id="mLong">Long</div>
-          <div class="pill" id="mBreakGame">Break+Game</div>
-        </div>
-        <div class="userline">
-          <div class="left">
-            <div class="avatar" id="avatar">U</div>
-            <div class="email" id="userEmail">Signed out</div>
-          </div>
-          <button class="btn ghost out" id="signOut">Sign out</button>
-        </div>
-      </div>
+      <button class="btn" id="btnCloseAuth">Close</button>
     </div>
-  </aside>
-
-  <main class="main">
-    <div class="topbar">
-      <div class="top-left">
-        <div class="mode-tabs">
-          <div class="tab active" id="modeEdit">Edit</div>
-          <div class="tab" id="modePreview">Preview</div>
-          <div class="tab" id="modeGraph">Graph</div>
-        </div>
-        <div class="notecrumb">
-          <div class="title" id="crumbTitle">No note selected</div>
-          <div class="sub" id="crumbSub"></div>
-        </div>
+    <div class="hr"></div>
+    <div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field" style="grid-column:1/-1">
+        <label>Email</label>
+        <input id="authEmail" type="email" placeholder="you@example.com">
       </div>
-
-      <div class="top-right">
-        <div class="status" id="saveStatus"><span class="dot warn"></span><span>Not saved</span></div>
-        <div class="iconbtn wide" id="toggleSplit"><span>Split</span></div>
-        <div class="iconbtn wide" id="toggleFull"><span>Full</span></div>
-        <div class="iconbtn wide" id="doPdf"><span>PDF</span></div>
-        <div class="iconbtn" id="openSettings">⚙</div>
-        <div class="iconbtn primary" id="saveNow">Save</div>
-        <div class="iconbtn danger" id="delNote">🗑</div>
-        <div class="iconbtn" id="mobileMenu" style="display:none">☰</div>
+      <div class="field" style="grid-column:1/-1">
+        <label>Password</label>
+        <input id="authPass" type="password" placeholder="••••••••">
       </div>
+      <button class="btn primary" id="btnSignIn">Sign in</button>
+      <button class="btn" id="btnSignUp">Sign up</button>
     </div>
-
-    <div class="content">
-      <section class="view active" id="viewEditor">
-        <div class="editor-shell">
-          <div class="toolbar">
-            <div class="lefttools">
-              <div class="tool" data-md="bold">B</div>
-              <div class="tool" data-md="italic">I</div>
-              <div class="tool" data-md="h1">H1</div>
-              <div class="tool" data-md="h2">H2</div>
-              <div class="tool" data-md="ul">• List</div>
-              <div class="tool" data-md="ol">1. List</div>
-              <div class="tool" data-md="quote">Quote</div>
-              <div class="tool" data-md="code">Code</div>
-              <div class="tool" data-md="link">Link</div>
-            </div>
-            <div class="metapick">
-              <select id="grade">
-                <option value="">Grade: (none)</option>
-                <option value="8th">8th</option>
-                <option value="9th">9th</option>
-                <option value="10th">10th</option>
-                <option value="11th">11th</option>
-                <option value="12th">12th</option>
-              </select>
-              <input id="linkSearch" placeholder="Link notes by title...">
-            </div>
-          </div>
-
-          <div class="split" id="split">
-            <div class="pane" id="paneLeft">
-              <input class="titleInput" id="title" placeholder="Untitled">
-              <textarea class="bodyInput" id="body" placeholder="Write in Markdown..."></textarea>
-            </div>
-
-            <div class="divider" id="divider"></div>
-
-            <div class="pane" id="paneRight">
-              <div class="rightpane">
-                <div class="card" id="cardLinks" style="display:none">
-                  <div class="cardhead">
-                    <div class="h">Linked notes</div>
-                    <div class="act">
-                      <div class="linkbtn" id="unlinkAll">Unlink all</div>
-                      <div class="linkbtn" id="jumpPreview">Preview</div>
-                    </div>
-                  </div>
-                  <div class="pills" id="linksPills"></div>
-                </div>
-
-                <div class="card" id="cardBack" style="display:none">
-                  <div class="cardhead">
-                    <div class="h">Backlinks</div>
-                    <div class="act">
-                      <div class="linkbtn" id="jumpGraph">Graph</div>
-                    </div>
-                  </div>
-                  <div class="pills" id="backPills"></div>
-                </div>
-
-                <div class="card" id="cardMentions" style="display:none">
-                  <div class="cardhead">
-                    <div class="h">Unlinked mentions</div>
-                    <div class="act">
-                      <div class="linkbtn" id="linkAllMentions">Link all</div>
-                    </div>
-                  </div>
-                  <div class="pills" id="menPills"></div>
-                </div>
-
-                <div class="card">
-                  <div class="cardhead">
-                    <div class="h">Shortcuts</div>
-                    <div class="act"></div>
-                  </div>
-                  <div class="smallHint">
-                    <div><kbd>Ctrl</kbd> + <kbd>S</kbd> save</div>
-                    <div><kbd>Ctrl</kbd> + <kbd>K</kbd> command palette</div>
-                    <div><kbd>Esc</kbd> exit full-screen preview / close dialogs</div>
-                  </div>
-                </div>
-
-                <div class="card" id="cardDrop" style="display:none">
-                  <div class="cardhead">
-                    <div class="h">Link results</div>
-                    <div class="act"><div class="linkbtn" id="closeDrop">Close</div></div>
-                  </div>
-                  <div id="dropList"></div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <section class="view" id="viewPreview">
-        <div class="preview">
-          <h1 id="pTitle">Untitled</h1>
-          <div class="metaRow" id="pMeta"></div>
-          <div class="body" id="pBody"></div>
-          <div class="card" id="pLinksCard" style="margin-top:20px;display:none">
-            <div class="cardhead">
-              <div class="h">Linked notes</div>
-              <div class="act"><div class="linkbtn" id="backToEdit">Back</div></div>
-            </div>
-            <div class="pills" id="pLinks"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="view" id="viewGraph">
-        <div class="graphWrap">
-          <canvas id="graph"></canvas>
-          <div class="graphUI">
-            <div class="iconbtn wide" id="gReset"><span>Reset</span></div>
-            <div class="iconbtn wide" id="gPhys"><span>Physics</span></div>
-            <div class="iconbtn wide" id="gCenter"><span>Center</span></div>
-          </div>
-          <div class="graphHint">Drag to pan · Scroll to zoom · Click a node to open</div>
-        </div>
-      </section>
-
-      <section class="view" id="viewGames">
-        <div class="gamesWrap">
-          <div class="gameCard">
-            <div class="gameTop">
-              <div class="gameTitle" id="gTitle">Break Games</div>
-              <div class="gTabs">
-                <div class="gTab active" id="tabSnake">Snake+</div>
-                <div class="gTab" id="tabTetris">Tetris</div>
-                <div class="gTab" id="tabRunner">Pulse Runner</div>
-              </div>
-              <div class="gameBtns">
-                <button class="btn primary" id="gStart">Start</button>
-                <button class="btn" id="gClose">Back</button>
-              </div>
-            </div>
-
-            <div class="gameBody">
-              <div class="canvasWrap">
-                <canvas id="snakeCanvas" width="420" height="420"></canvas>
-                <canvas id="tetrisCanvas" width="240" height="480" style="display:none"></canvas>
-                <canvas id="runnerCanvas" width="560" height="260" style="display:none"></canvas>
-              </div>
-
-              <div class="gameSide">
-                <div class="scoreBox" id="snakeScoreBox">
-                  <div class="r">Score <span id="snakeScore">0</span></div>
-                  <div class="r">Best <span id="snakeBest">0</span></div>
-                  <div class="smallHint">Move: <kbd>WASD</kbd> / <kbd>Arrows</kbd> · Boost: <kbd>Shift</kbd></div>
-                </div>
-
-                <div class="scoreBox" id="tetrisScoreBox" style="display:none">
-                  <div class="r">Score <span id="tScore">0</span></div>
-                  <div class="r">Best <span id="tBest">0</span></div>
-                  <div class="r">Level <span id="tLevel">1</span></div>
-                  <div class="r">Lines <span id="tLines">0</span></div>
-                  <div class="smallHint">Rotate <kbd>↑</kbd> · Drop <kbd>Space</kbd></div>
-                </div>
-
-                <div class="scoreBox" id="runnerScoreBox" style="display:none">
-                  <div class="r">Distance <span id="rDist">0</span></div>
-                  <div class="r">Best <span id="rBest">0</span></div>
-                  <div class="smallHint">Jump: <kbd>Space</kbd> / <kbd>↑</kbd> · Dash: <kbd>Shift</kbd></div>
-                </div>
-
-                <div class="cheatBox">
-                  <div class="h">Game tweaks (saved)</div>
-
-                  <div id="snakeCheats"><label>Snake No-Die <input type="checkbox" id="cSnakeNoDie"></label><label>Ghost (ignore self-hit) <input type="checkbox" id="cSnakeGhost"></label><label>Wrap walls <input type="checkbox" id="cSnakeWrap"></label><label>No Obstacles <input type="checkbox" id="cSnakeNoObs"></label><label>No Poison <input type="checkbox" id="cSnakeNoPoison"></label><label>Base Speed <input type="range" id="cSnakeSpeed" min="55" max="140" step="5"></label><label>Snake Boost <input type="checkbox" id="cSnakeBoost"></label><div class="smallHint">Speed: <span id="cSnakeSpeedV" style="color:rgba(255,210,170,.95);font-weight:950"></span> · Gets faster as you score</div></div>
-              </div>
-
-                  <div id="tetrisCheats" style="display:none">
-                    <label>No Game Over <input type="checkbox" id="cTNoOver"></label>
-                    <label>Start Level <input type="number" id="cTLevel" min="1" max="20"></label>
-                  </div>
-
-                  <div id="runnerCheats" style="display:none">
-                    <label>No Crash <input type="checkbox" id="cRNoCrash"></label>
-                    <label>Slow Obstacles <input type="checkbox" id="cRSlow"></label>
-                  </div>
-
-                </div>
-
-                <div class="card">
-                  <div class="cardhead">
-                    <div class="h">Tip</div>
-                  </div>
-                  <div class="smallHint">Use <kbd>Break+Game</kbd> to instantly swap into games while your break timer runs.</div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </section>
-
-    </div>
-  </main>
+    <div class="mini" style="margin-top:10px" id="authMsg">—</div>
+  </div>
 </div>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-const SUPABASE_URL='https://cgmazcvmpcgistoimqlw.supabase.co'
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc'
-const supabase=createClient(SUPABASE_URL,SUPABASE_KEY)
+const SUPABASE_URL = "https://cgmazcvmpcgistoimqlw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc";
 
-marked.setOptions({
-  breaks:true,
-  highlight:(code,lang)=>{
-    try{
-      if(lang && hljs.getLanguage(lang)) return hljs.highlight(code,{language:lang}).value
-      return hljs.highlightAuto(code).value
-    }catch(e){
-      return code
-    }
-  }
-})
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
 
-const $=id=>document.getElementById(id)
-const gradeLabels={ '':'', '8th':'8th', '9th':'9th', '10th':'10th', '11th':'11th', '12th':'12th' }
-const gradeOrder={ '':99, '8th':0, '9th':1, '10th':2, '11th':3, '12th':4 }
+const el = (id) => document.getElementById(id);
+const qsa = (s, r=document) => Array.from(r.querySelectorAll(s));
 
-let user=null
-let notes=[]
-let links=[]
-let activeId=null
-
-let uiPrefs={sort:'updated_desc',previewFull:false,sidebarHidden:false,lastOpenNoteId:null}
-let timerPresets={focus:25,break:5,long:15}
-let gameCheats={snake:{highScore:0,noDie:false,ghost:false,wrap:false,noObstacles:false,noPoison:false,speed:95,boost:false},tetris:{highScore:0,noGameOver:false,startLevel:1},runner:{best:0,noCrash:false,slow:false}}
-let currentSchool='Salesianum'
-let nerdPrefs={musicMode:'off',sfxMode:'on'}
-
-let autosaveT=null
-let autosaveDirty=false
-let timerInterval=null
-let timeLeft=25*60
-
-let splitMode='split'
-let splitSizes=[50,50]
-let draggingDivider=false
-
-let graphCanvas=null
-let graphCtx=null
-let graphNodes=[]
-let graphEdges=[]
-let graphPhysics=true
-let gView={x:0,y:0,scale:1}
-let gPan=false
-let gPanStart=null
-let gDragNode=null
-let gAnim=null
-
-let snakeCanvas=null
-let snakeCtx=null
-let snake=[]
-let food=null
-let sPoison=null
-let sObstacles=[]
-let dir={x:0,y:0}
-let snakeScore=0
-let snakeRunning=false
-let snakeInterval=null
-const S_TILE=21
-
-let tetrisCanvas=null
-let tetrisCtx=null
-let tBoard=null
-let tPiece=null
-let tScore=0
-let tLines=0
-let tLevel=1
-let tRunning=false
-let tDrop=0
-let tLast=0
-const TC=12,TR=24,TS=20
-const T_COLORS=[null,'#ff6a00','#ffb100','#ff7e2b','#ff3b3b','#ff9a00','#ffcc00','#ff5500']
-const T_SHAPES=[null,[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]]]
-
-let runnerCanvas=null
-let runnerCtx=null
-let rRunning=false
-let rAnim=0
-let rLast=0
-let rDist=0
-let rSpeed=220
-let rPlayer={x:70,y:0,v:0,ground:210,rad:16,canDash:true,dashing:false}
-let rObstacles=[]
-let rSpawn=0
-
-const audio = new Audio()
-audio.loop=true
-audio.preload='auto'
-audio.volume=0.35
-const MUSIC_URLS={
-  a:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/autumn!%20-%20one%20way%20(instrumental).mp3',
-  j1:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/free%20jaydes%20%20pluggnb%20type%20beat%20self%20(1).mp3',
-  j2:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes%20%20convenience%20(fixed%20instrumental)%20(1).mp3',
-  k:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/Kyle%20Richh%20x%20Sdot%20Go%20-%20Drive%20me%20crazyOblivious%20(official%20instrumental)%20(1).mp3',
-  m:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/Me%20vs%20Me%20(Instrumental)%20-%20Jaeychino%20and%20SlimeGetEm%20(1).mp3'
+let toastTimer = null;
+function toast(msg){
+  const t = el("toast");
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove("show"), 2200);
 }
 
-const sfx = (()=> {
-  const ctx = new (window.AudioContext||window.webkitAudioContext)()
-  const tone=(f=440,d=0.05,g=0.15)=>{
-    if(nerdPrefs.sfxMode!=='on') return
-    const o=ctx.createOscillator()
-    const a=ctx.createGain()
-    o.type='sine'
-    o.frequency.value=f
-    a.gain.value=g
-    o.connect(a);a.connect(ctx.destination)
-    o.start()
-    o.stop(ctx.currentTime+d)
-  }
-  return {ctx,tone,unlock:()=>{try{if(ctx.state!=='running') ctx.resume()}catch(e){}}}
-})()
-
-function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
-function orderedPair(a,b){return a<b?[a,b]:[b,a]}
-function nowIso(){return new Date().toISOString()}
-
-function toast(title,body,type='ok'){
-  const wrap=$('toastWrap')
-  const el=document.createElement('div')
-  el.className='toast '+(type==='ok'?'ok':type==='warn'?'warn':'bad')
-  el.innerHTML='<div class="t1"></div><div class="t2"></div>'
-  el.querySelector('.t1').textContent=title
-  el.querySelector('.t2').textContent=body
-  wrap.appendChild(el)
-  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(6px)'},2400)
-  setTimeout(()=>{el.remove()},2900)
-}
-
-function fmtTime(d){try{return new Date(d).toLocaleString(undefined,{hour:'numeric',minute:'2-digit'})}catch(e){return ''}}
-function fmtShort(d){try{return new Date(d).toLocaleString(undefined,{month:'short',day:'numeric'})}catch(e){return ''}}
-function relTime(iso){
-  if(!iso) return ''
-  const t=new Date(iso).getTime()
-  const diff=Math.max(0,Date.now()-t)
-  const m=Math.floor(diff/60000)
-  if(m<1) return 'just now'
-  if(m<60) return m+'m ago'
-  const h=Math.floor(m/60)
-  if(h<24) return h+'h ago'
-  const d=Math.floor(h/24)
-  if(d<7) return d+'d ago'
-  return fmtShort(iso)
-}
 function escapeHtml(s){
-  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
+  return String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
 }
 
-function setStatus(mode){
-  const el=$('saveStatus')
-  const dot=el.querySelector('.dot')
-  const txt=el.querySelectorAll('span')[1]
-  el.classList.remove('is-saving','is-saved','is-error')
-  if(mode==='saving'){
-    dot.className='dot warn'; txt.textContent='Saving…'; el.classList.add('is-saving')
-  }else if(mode==='saved'){
-    dot.className='dot ok'; txt.textContent='Saved '+fmtTime(Date.now()); el.classList.add('is-saved')
-  }else if(mode==='error'){
-    dot.className='dot bad'; txt.textContent='Save failed'; el.classList.add('is-error')
-  }else if(mode==='offline'){
-    dot.className='dot bad'; txt.textContent='Offline'; el.classList.add('is-error')
+function fmtTime(ts){
+  try{
+    const d = new Date(ts);
+    return d.toLocaleString([], { month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+  }catch(_){ return ""; }
+}
+
+function setStatus(line){
+  const s = el("statusLine");
+  if(s) s.textContent = line;
+}
+
+function setSaveState(t){
+  const s = el("saveState");
+  if(s) s.textContent = t;
+}
+
+const APP = {
+  user: null,
+  notes: [],
+  activeNote: null,
+  links: [],
+  saveDebounce: null,
+  settings: { defaults: { school:"Salesianum", category:"Math" }, nerd: { track:0, vol:0.25, remember:false } },
+  sfxOn: true,
+  audioUnlocked: false,
+  invincibleUntil: 0
+};
+
+function requireUser(){
+  if(!APP.user){
+    toast("Sign in to save.");
+    return false;
+  }
+  return true;
+}
+
+function setAuthedUI(){
+  const authText = el("authText");
+  const btnOpenAuth = el("btnOpenAuth");
+  const btnLogout = el("btnLogout");
+  if(APP.user){
+    if(authText) authText.textContent = APP.user.email || "Signed in";
+    if(btnOpenAuth) btnOpenAuth.classList.add("hidden");
+    if(btnLogout) btnLogout.classList.remove("hidden");
+    setStatus("Online");
   }else{
-    dot.className='dot warn'; txt.textContent='Not saved'
+    if(authText) authText.textContent = "Not signed in";
+    if(btnOpenAuth) btnOpenAuth.classList.remove("hidden");
+    if(btnLogout) btnLogout.classList.add("hidden");
+    setStatus("Offline demo");
   }
 }
 
-async function ensureTables(){
-  const t1=await supabase.from('notes').select('id').limit(1)
-  if(t1.error) throw new Error(t1.error.message)
-  const t2=await supabase.from('note_links').select('note_a').limit(1)
-  if(t2.error) throw new Error(t2.error.message)
-  const t3=await supabase.from('user_settings').select('user_id').limit(1)
-  if(t3.error) throw new Error(t3.error.message)
+async function ensureSettingsRow(){
+  if(!APP.user) return;
+  const payload = {
+    user_id: APP.user.id,
+    current_school: APP.settings.defaults.school,
+    ui: { defaults: { school: APP.settings.defaults.school, category: APP.settings.defaults.category } },
+    timer: {},
+    game: {},
+    nerd: { track: APP.settings.nerd.track, vol: APP.settings.nerd.vol }
+  };
+  await sb.from("user_settings").upsert(payload, { onConflict: "user_id" });
 }
 
-function applySettingsRow(s){
-  currentSchool=s.current_school||currentSchool
-  uiPrefs=s.ui||uiPrefs
-  timerPresets=s.timer||timerPresets
-  gameCheats=s.game||gameCheats
-  nerdPrefs=s.nerd||nerdPrefs
+async function loadSettings(){
+  if(!APP.user) return;
+  const { data } = await sb.from("user_settings").select("*").eq("user_id", APP.user.id).maybeSingle();
+  if(!data) return;
 
-  $('sort').value=uiPrefs.sort||'updated_desc'
-  $('setSidebar').value=uiPrefs.sidebarHidden? '1':'0'
-  $('setPreviewFull').value=uiPrefs.previewFull? '1':'0'
-  $('setFocus').value=timerPresets.focus||25
-  $('setBreak').value=timerPresets.break||5
-  $('setLong').value=timerPresets.long||15
+  const defaults = (data.ui && data.ui.defaults) ? data.ui.defaults : null;
+  APP.settings.defaults.school = defaults?.school || data.current_school || "Salesianum";
+  APP.settings.defaults.category = defaults?.category || "Math";
 
-  $('schoolSelect').value=currentSchool
-  if(uiPrefs.previewFull) document.body.classList.add('previewFull')
-  else document.body.classList.remove('previewFull')
+  const nerd = data.nerd || {};
+  APP.settings.nerd.track = Number.isFinite(nerd.track) ? nerd.track : 0;
+  APP.settings.nerd.vol = Number.isFinite(nerd.vol) ? nerd.vol : 0.25;
 
-  if(nerdUnlocked){
-    $('nerdBox').style.display='block'
-    $('nerdLockRow').style.display='none'
-  }else{
-    $('nerdBox').style.display='none'
-    $('nerdLockRow').style.display='flex'
+  const ds = el("defaultSchool");
+  const dc = el("defaultCategory");
+  if(ds) ds.value = APP.settings.defaults.school;
+  if(dc) dc.value = APP.settings.defaults.category;
+
+  const ns = el("noteSchool");
+  const nc = el("noteCategory");
+  if(ns) ns.value = APP.settings.defaults.school;
+  if(nc) nc.value = APP.settings.defaults.category;
+
+  const v = el("musicVol");
+  if(v) v.value = String(APP.settings.nerd.vol);
+}
+
+async function saveSettings(){
+  if(!requireUser()) return;
+  APP.settings.defaults.school = el("defaultSchool")?.value || "Salesianum";
+  APP.settings.defaults.category = el("defaultCategory")?.value || "Math";
+
+  const payload = {
+    user_id: APP.user.id,
+    current_school: APP.settings.defaults.school,
+    ui: { defaults: { school: APP.settings.defaults.school, category: APP.settings.defaults.category } },
+    nerd: { track: APP.settings.nerd.track, vol: APP.settings.nerd.vol }
+  };
+  const { error } = await sb.from("user_settings").upsert(payload, { onConflict: "user_id" });
+  const s = el("settingsSaveState");
+  if(error){
+    if(s) s.textContent = "Save failed";
+    toast("Settings save failed");
+    return;
   }
-  $('musicMode').value=nerdPrefs.musicMode||'off'
-  $('sfxMode').value=nerdPrefs.sfxMode||'on'
-
-  syncCheatUI()
-  updateTimerDisplay()
+  if(s) s.textContent = "Saved";
+  toast("Saved settings");
 }
 
-let settingsT=null
-function saveSettingsDebounced(){
-  if(!user) return
-  clearTimeout(settingsT)
-  settingsT=setTimeout(async ()=>{
-    const payload={user_id:user.id,current_school:currentSchool,ui:uiPrefs,timer:timerPresets,game:gameCheats,nerd:nerdPrefs}
-    const {error}=await supabase.from('user_settings').upsert(payload,{onConflict:'user_id'})
-    if(error) console.warn('saveSettings error:',error.message)
-  },260)
-}
-
-async function ensureSettings(){
-  const {data,error}=await supabase.from('user_settings').select('*').eq('user_id',user.id).maybeSingle()
-  if(error) throw new Error(error.message)
-  if(!data){
-    const ins=await supabase.from('user_settings').insert({user_id:user.id,current_school:currentSchool,ui:uiPrefs,timer:timerPresets,game:gameCheats,nerd:nerdPrefs}).select().single()
-    if(ins.error) throw new Error(ins.error.message)
-    applySettingsRow(ins.data)
-  }else{
-    applySettingsRow(data)
+function setEditorEnabled(on){
+  const ids = ["btnSaveNow","btnPrint","btnLink","btnDelete","noteTitle","noteSchool","noteCategory","noteGrade","noteTags","noteContent"];
+  for(const id of ids){
+    const x = el(id);
+    if(x) x.disabled = !on;
   }
 }
 
-async function fetchLinks(){
-  const {data,error}=await supabase.from('note_links').select('note_a,note_b').eq('user_id',user.id)
-  if(error){ console.warn('fetchLinks error:',error.message); links=[]; return }
-  links=data||[]
+function fillEditor(note){
+  APP.activeNote = note;
+
+  if(el("noteTitle")) el("noteTitle").value = note?.title ?? "";
+  if(el("noteSchool")) el("noteSchool").value = note?.school || APP.settings.defaults.school;
+  if(el("noteCategory")) el("noteCategory").value = note?.category || APP.settings.defaults.category;
+  if(el("noteGrade")) el("noteGrade").value = note?.grade ?? "";
+  if(el("noteTags")) el("noteTags").value = (note?.tags || []).join(", ");
+  if(el("noteContent")) el("noteContent").value = note?.content ?? "";
+
+  const meta = el("noteMeta");
+  if(meta){
+    const parts = [];
+    if(note?.created_at) parts.push("Created " + fmtTime(note.created_at));
+    if(note?.updated_at) parts.push("Updated " + fmtTime(note.updated_at));
+    meta.textContent = parts.length ? parts.join(" • ") : "—";
+  }
+
+  setEditorEnabled(!!note);
+  renderNotesList();
 }
 
-function rebuildLinkedOnClient(){
-  const map={}
-  notes.forEach(n=>map[n.id]=[])
-  links.forEach(l=>{
-    if(map[l.note_a]) map[l.note_a].push(l.note_b)
-    if(map[l.note_b]) map[l.note_b].push(l.note_a)
-  })
-  notes=notes.map(n=>({...n,linked_notes:map[n.id]||[]}))
+function editorToPayload(){
+  const title = el("noteTitle")?.value ?? "";
+  const school = el("noteSchool")?.value ?? APP.settings.defaults.school;
+  const category = el("noteCategory")?.value ?? APP.settings.defaults.category;
+  const grade = el("noteGrade")?.value ?? "";
+  const tagsRaw = el("noteTags")?.value ?? "";
+  const tags = tagsRaw.split(",").map(s=>s.trim()).filter(Boolean).slice(0, 30);
+  const content = el("noteContent")?.value ?? "";
+  return { title, school, category, grade, tags, content };
+}
+
+function renderNotesList(){
+  const list = el("notesList");
+  if(!list) return;
+  list.innerHTML = "";
+
+  const q = (el("noteSearch")?.value || "").trim().toLowerCase();
+  const fs = el("filterSchool")?.value || "";
+  const fc = el("filterCategory")?.value || "";
+
+  const filtered = APP.notes.filter(n=>{
+    const t = (n.title || "").toLowerCase();
+    const c = (n.content || "").toLowerCase();
+    const okQ = !q || t.includes(q) || c.includes(q);
+    const okS = !fs || (n.school || "") === fs;
+    const okC = !fc || (n.category || "") === fc;
+    return okQ && okS && okC;
+  }).sort((a,b)=> new Date(b.updated_at) - new Date(a.updated_at));
+
+  if(el("notesCount")) el("notesCount").textContent = String(filtered.length);
+
+  if(filtered.length === 0){
+    const div = document.createElement("div");
+    div.className = "mini";
+    div.textContent = APP.user ? "No notes yet. Hit New." : "Sign in to save notes.";
+    list.appendChild(div);
+    return;
+  }
+
+  for(const n of filtered){
+    const b = document.createElement("button");
+    b.className = "noteitem" + (APP.activeNote && APP.activeNote.id === n.id ? " active" : "");
+    const title = (n.title || "").trim() || "(untitled)";
+    const meta = `${n.school || ""}${n.category ? " • " + n.category : ""}${n.grade ? " • grade " + n.grade : ""}`;
+    b.innerHTML = `<b>${escapeHtml(title)}</b><small>${escapeHtml(meta)} • ${escapeHtml(fmtTime(n.updated_at))}</small>`;
+    b.addEventListener("click", ()=> openNote(n.id));
+    list.appendChild(b);
+  }
 }
 
 async function fetchNotes(){
-  const {data,error}=await supabase.from('notes').select('*').eq('user_id',user.id).order('updated_at',{ascending:false})
+  if(!APP.user){
+    APP.notes = [];
+    fillEditor(null);
+    renderNotesList();
+    return;
+  }
+  setSaveState("Loading...");
+  const { data, error } = await sb.from("notes")
+    .select("id,title,content,school,category,grade,tags,created_at,updated_at")
+    .order("updated_at", { ascending:false })
+    .limit(250);
+
   if(error){
-    console.error('fetchNotes error:',error)
-    toast('Could not load notes',error.message,'bad')
-    return
+    setSaveState("Load failed");
+    toast("Notes load failed");
+    return;
   }
-  notes=(data||[]).map(n=>({...n,linked_notes:[]}))
-  await fetchLinks()
-  rebuildLinkedOnClient()
-  renderList()
-  const last=uiPrefs.lastOpenNoteId
-  if(last && notes.some(n=>n.id===last)) loadNote(last)
-  else if(notes.length) loadNote(notes[0].id)
-  else setEmptyState()
+  APP.notes = data || [];
+  setSaveState("Ready");
+  renderNotesList();
+  if(!APP.activeNote && APP.notes.length) await openNote(APP.notes[0].id);
+  if(!APP.notes.length) fillEditor(null);
 }
 
-function sortNotes(arr){
-  const mode=uiPrefs.sort||'updated_desc'
-  const copy=[...arr]
-  if(mode==='title_asc'){
-    copy.sort((a,b)=>((a.title||'').toLowerCase()).localeCompare((b.title||'').toLowerCase()))
-  }else if(mode==='grade_asc'){
-    copy.sort((a,b)=>(gradeOrder[a.grade||'']-gradeOrder[b.grade||''])||(((b.updated_at||'')>(a.updated_at||''))?1:-1))
-  }else{
-    copy.sort((a,b)=>((b.updated_at||'')>(a.updated_at||''))?1:-1)
+async function openNote(id){
+  if(!APP.user){
+    toast("Sign in to open notes.");
+    return;
   }
-  return copy
-}
-
-function noteSnippet(n){
-  const s=(n.content||'').replace(/\\s+/g,' ').trim()
-  if(!s) return 'No content yet.'
-  return s.length>90? s.slice(0,90)+'…' : s
-}
-
-function renderList(){
-  const q=($('search').value||'').trim().toLowerCase()
-  const sorted=sortNotes(notes)
-  const groups={}
-  sorted.forEach(n=>{
-    const title=(n.title||'').toLowerCase()
-    const body=(n.content||'').toLowerCase()
-    if(q && !(title.includes(q)||body.includes(q))) return
-    const g=n.grade||''
-    if(!groups[g]) groups[g]=[]
-    groups[g].push(n)
-  })
-
-  const order=['8th','9th','10th','11th','12th','']
-  const wrap=$('noteList')
-  let html=''
-  let total=0
-  order.forEach(g=>{
-    const arr=groups[g]||[]
-    if(!arr.length) return
-    total+=arr.length
-    const head=g?('Grade '+gradeLabels[g]):'Ungraded'
-    html+='<div class="group"><div class="group-head"><div>'+head+'</div><div class="count">'+arr.length+'</div></div>'
-    arr.forEach(n=>{
-      const t=(n.title&&n.title.trim()?n.title:'Untitled')
-      const tag=n.grade?('<div class="tag">'+gradeLabels[n.grade]+'</div>'):''
-      const linked=(n.linked_notes||[]).length>0
-      const draft=(!n.title && !n.content)
-      const badges=[]
-      if(linked) badges.push('<div class="badge link">LINK</div>')
-      if(draft) badges.push('<div class="badge draft">DRAFT</div>')
-      const isActive=n.id===activeId
-      html+='<div class="note-card '+(isActive?'active':'')+'" data-id="'+n.id+'">'
-      html+='<div class="note-title"><div class="t">'+escapeHtml(t)+'</div>'+tag+'</div>'
-      html+='<div class="note-snippet">'+escapeHtml(noteSnippet(n))+'</div>'
-      html+='<div class="note-meta"><div>'+escapeHtml(relTime(n.updated_at||n.created_at))+'</div><div class="badges">'+badges.join('')+'</div></div>'
-      html+='</div>'
-    })
-    html+='</div>'
-  })
-
-  if(total===0){
-    wrap.innerHTML='<div style="padding:22px 12px;color:rgba(238,242,255,.55);font-weight:850;line-height:1.7">No notes found.<br><span style="color:rgba(255,220,200,.95)">Try another search</span> or press <span style="font-family:var(--mono)">Ctrl+K</span>.</div>'
-  }else{
-    wrap.innerHTML=html
-    wrap.querySelectorAll('.note-card').forEach(c=>{
-      c.onclick=()=>loadNote(c.getAttribute('data-id'))
-    })
+  setSaveState("Loading note...");
+  const { data, error } = await sb.from("notes").select("*").eq("id", id).single();
+  if(error){
+    setSaveState("Open failed");
+    toast("Open failed");
+    return;
   }
-}
-
-function setEmptyState(){
-  activeId=null
-  $('crumbTitle').textContent='No notes yet'
-  $('crumbSub').innerHTML=''
-  $('title').value=''
-  $('body').value=''
-  $('grade').value=''
-  $('pTitle').textContent='Untitled'
-  $('pMeta').innerHTML=''
-  $('pBody').innerHTML='<div style="color:rgba(238,242,255,.55);font-weight:850;line-height:1.7">Create your first note using <span style="font-family:var(--mono)">New Note</span>.</div>'
-  hideLinkCards()
-}
-
-function setView(v){
-  $('viewEditor').classList.toggle('active',v==='editor')
-  $('viewPreview').classList.toggle('active',v==='preview')
-  $('viewGraph').classList.toggle('active',v==='graph')
-  $('viewGames').classList.toggle('active',v==='games')
-
-  $('modeEdit').classList.toggle('active',v==='editor')
-  $('modePreview').classList.toggle('active',v==='preview')
-  $('modeGraph').classList.toggle('active',v==='graph')
-
-  if(v==='preview') updatePreview()
-  if(v==='graph') drawGraph()
-}
-
-function setSplit(mode){
-  splitMode=mode
-  const split=$('split')
-  split.classList.remove('singleEditor','singlePreview')
-  $('divider').style.display='flex'
-  $('paneRight').style.display='block'
-  $('paneLeft').style.display='block'
-
-  if(mode==='editor'){
-    split.classList.add('singleEditor')
-    $('paneRight').style.display='none'
-    $('divider').style.display='none'
-  }else if(mode==='preview'){
-    split.classList.add('singlePreview')
-    $('paneLeft').style.display='none'
-    $('divider').style.display='none'
-    setView('preview')
-  }else{
-    applySplitSizes()
-  }
-  $('toggleSplit').classList.toggle('active',mode==='split')
-}
-
-function applySplitSizes(){
-  const split=$('split')
-  const a=clamp(splitSizes[0],20,80)
-  const b=100-a
-  split.style.gridTemplateColumns=a+'% 12px '+b+'%'
+  fillEditor(data);
+  setSaveState("Ready");
 }
 
 async function createNote(){
-  if(!user){ toast('Not signed in','Please sign in','bad'); return }
-  const r=await supabase.from('notes').insert({user_id:user.id,title:'',content:'',grade:'',school:currentSchool}).select().single()
-  if(r.error){toast('Create failed',r.error.message,'bad');return}
-  notes.unshift({...r.data,linked_notes:[]})
-  uiPrefs.lastOpenNoteId=r.data.id
-  saveSettingsDebounced()
-  renderList()
-  loadNote(r.data.id)
-  toast('New note','Created','ok')
-}
-
-function loadNote(id){
-  const n=notes.find(x=>x.id===id)
-  if(!n) return
-  activeId=id
-  uiPrefs.lastOpenNoteId=id
-  saveSettingsDebounced()
-
-  $('title').value=n.title||''
-  $('body').value=n.content||''
-  $('grade').value=n.grade||''
-
-  updateCrumb()
-  renderList()
-  updatePreview()
-  refreshLinksUI()
-  setStatus('saved')
-}
-
-function updateCrumb(){
-  const n=notes.find(x=>x.id===activeId)
-  const title=(n?.title&&n.title.trim()?n.title:'Untitled')
-  $('crumbTitle').textContent=title
-  const chips=[]
-  if(n?.grade) chips.push('<span class="chip">Grade '+escapeHtml(gradeLabels[n.grade]||n.grade)+'</span>')
-  chips.push('<span class="chip">'+escapeHtml(currentSchool)+'</span>')
-  if(n?.updated_at) chips.push('<span class="chip">'+escapeHtml(relTime(n.updated_at))+'</span>')
-  $('crumbSub').innerHTML=chips.join('')
-}
-
-function autosave(){
-  if(!activeId) return
-  if(!navigator.onLine){setStatus('offline');return}
-  autosaveDirty=true
-  setStatus('saving')
-  clearTimeout(autosaveT)
-  autosaveT=setTimeout(async ()=>{
-    if(!autosaveDirty) return
-    autosaveDirty=false
-    await saveNote()
-  },750)
-}
-
-async function saveNote(){
-  if(!activeId) return
-  if(!user){ toast('Not signed in','Please sign in','bad'); return }
-  if(!navigator.onLine){setStatus('offline');return}
-  const n=notes.find(x=>x.id===activeId)
-  if(!n) return
-
-  setStatus('saving')
-  const title=$('title').value
-  const content=$('body').value
-  const grade=$('grade').value||''
-  const updated_at=nowIso()
-
-  const r=await supabase.from('notes').update({title,content,grade,school:currentSchool,updated_at}).eq('id',activeId).eq('user_id',user.id)
-  if(r.error){
-    setStatus('error')
-    toast('Save failed',r.error.message,'bad')
-    console.error(r.error)
-    return
+  if(!requireUser()) return;
+  setSaveState("Creating...");
+  const payload = {
+    user_id: APP.user.id,
+    title:"",
+    content:"",
+    school: APP.settings.defaults.school,
+    category: APP.settings.defaults.category,
+    grade:"",
+    tags:[]
+  };
+  const { data, error } = await sb.from("notes").insert(payload).select("*").single();
+  if(error){
+    setSaveState("Create failed");
+    toast("Create failed");
+    return;
   }
-
-  n.title=title
-  n.content=content
-  n.grade=grade
-  n.school=currentSchool
-  n.updated_at=updated_at
-
-  setStatus('saved')
-  updateCrumb()
-  renderList()
-  updatePreview()
-  refreshLinksUI()
+  APP.notes.unshift(data);
+  fillEditor(data);
+  setSaveState("Ready");
+  toast("New note");
 }
 
 async function deleteNote(){
-  if(!activeId) return
-  const n=notes.find(x=>x.id===activeId)
-  const t=(n?.title&&n.title.trim()?n.title:'Untitled')
-  if(!confirm('Delete \"'+t+'\"?')) return
-  await supabase.from('note_links').delete().eq('user_id',user.id).or('note_a.eq.'+activeId+',note_b.eq.'+activeId)
-  const r=await supabase.from('notes').delete().eq('id',activeId).eq('user_id',user.id)
-  if(r.error){toast('Delete failed',r.error.message,'bad');return}
-  notes=notes.filter(x=>x.id!==activeId)
-  links=links.filter(l=>l.note_a!==activeId && l.note_b!==activeId)
-  rebuildLinkedOnClient()
-  renderList()
-  toast('Deleted',t,'warn')
-  if(notes.length) loadNote(notes[0].id)
-  else setEmptyState()
-}
-
-function updatePreview(){
-  const n=notes.find(x=>x.id===activeId)
-  const title=( $('title').value || (n?.title||'') || 'Untitled' ).trim() || 'Untitled'
-  $('pTitle').textContent=title
-  const meta=[]
-  const g=$('grade').value||n?.grade||''
-  if(g) meta.push('<span class="chip">Grade '+escapeHtml(gradeLabels[g]||g)+'</span>')
-  meta.push('<span class="chip">'+escapeHtml(currentSchool)+'</span>')
-  if(n?.updated_at) meta.push('<span class="chip">Updated '+escapeHtml(new Date(n.updated_at).toLocaleString())+'</span>')
-  $('pMeta').innerHTML=meta.join('')
-  const md=$('body').value||n?.content||''
-  $('pBody').innerHTML=marked.parse(md)
-  $('pBody').querySelectorAll('pre code').forEach(b=>{try{hljs.highlightElement(b)}catch(e){}})
-  updatePreviewLinks()
-}
-
-function updatePreviewLinks(){
-  const n=notes.find(x=>x.id===activeId)
-  const ids=(n?.linked_notes||[])
-  if(ids.length){
-    $('pLinksCard').style.display='block'
-    $('pLinks').innerHTML=ids.map(id=>{
-      const ln=notes.find(x=>x.id===id)
-      if(!ln) return ''
-      const t=(ln.title&&ln.title.trim()?ln.title:'Untitled')
-      return '<div class="pillnote" data-open="'+id+'">'+escapeHtml(t)+'</div>'
-    }).join('')
-    $('pLinks').querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>loadNote(p.getAttribute('data-open')))
-  }else{
-    $('pLinksCard').style.display='none'
+  if(!requireUser()) return;
+  if(!APP.activeNote) return;
+  const id = APP.activeNote.id;
+  setSaveState("Deleting...");
+  const { error } = await sb.from("notes").delete().eq("id", id);
+  if(error){
+    setSaveState("Delete failed");
+    toast("Delete failed");
+    return;
   }
+  APP.notes = APP.notes.filter(n=>n.id !== id);
+  fillEditor(null);
+  renderNotesList();
+  setSaveState("Ready");
+  toast("Deleted");
 }
 
-function getBacklinks(id){
-  const res=[]
-  notes.forEach(n=>{
-    if(n.id===id) return
-    if((n.linked_notes||[]).includes(id)) res.push(n.id)
-  })
-  return res
-}
-
-function getUnlinkedMentions(){
-  const cur=notes.find(x=>x.id===activeId)
-  if(!cur) return []
-  const content=($('body').value||'').toLowerCase()
-  const linked=new Set(cur.linked_notes||[])
-  const out=[]
-  notes.forEach(o=>{
-    if(o.id===activeId) return
-    const t=(o.title||'').trim()
-    if(!t) return
-    if(t.length<4) return
-    if(linked.has(o.id)) return
-    if(content.includes(t.toLowerCase())) out.push(o.id)
-  })
-  return out.slice(0,18)
-}
-
-function hideLinkCards(){
-  $('cardLinks').style.display='none'
-  $('cardBack').style.display='none'
-  $('cardMentions').style.display='none'
-  $('cardDrop').style.display='none'
-}
-
-function refreshLinksUI(){
-  const cur=notes.find(x=>x.id===activeId)
-  if(!cur){hideLinkCards();return}
-  const linked=cur.linked_notes||[]
-  if(linked.length){
-    $('cardLinks').style.display='block'
-    $('linksPills').innerHTML=linked.map(id=>{
-      const ln=notes.find(x=>x.id===id)
-      if(!ln) return ''
-      const t=(ln.title&&ln.title.trim()?ln.title:'Untitled')
-      return '<div class="pillnote" data-open="'+id+'" data-id="'+id+'">'+escapeHtml(t)+'<div class="x" data-x="'+id+'">×</div></div>'
-    }).join('')
-    $('linksPills').querySelectorAll('.pillnote').forEach(p=>{
-      p.onclick=e=>{
-        const xid=e.target?.getAttribute?.('data-x')
-        if(xid){unlinkNote(xid);return}
-        loadNote(p.getAttribute('data-open'))
-      }
-    })
-  }else{
-    $('cardLinks').style.display='none'
+async function saveNow(){
+  if(!requireUser()) return;
+  if(!APP.activeNote) return;
+  const id = APP.activeNote.id;
+  setSaveState("Saving...");
+  const patch = editorToPayload();
+  const { data, error } = await sb.from("notes").update(patch).eq("id", id).select("*").single();
+  if(error){
+    setSaveState("Save failed");
+    toast("Save failed");
+    return;
   }
+  APP.activeNote = data;
+  const idx = APP.notes.findIndex(n=>n.id===id);
+  if(idx>=0) APP.notes[idx]=data;
+  fillEditor(data);
+  setSaveState("Saved");
+}
 
-  const bl=getBacklinks(activeId)
-  if(bl.length){
-    $('cardBack').style.display='block'
-    $('backPills').innerHTML=bl.map(id=>{
-      const ln=notes.find(x=>x.id===id)
-      if(!ln) return ''
-      const t=(ln.title&&ln.title.trim()?ln.title:'Untitled')
-      return '<div class="pillnote" data-open="'+id+'">'+escapeHtml(t)+'</div>'
-    }).join('')
-    $('backPills').querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>loadNote(p.getAttribute('data-open')))
-  }else{
-    $('cardBack').style.display='none'
+function scheduleAutosave(){
+  clearTimeout(APP.saveDebounce);
+  APP.saveDebounce = setTimeout(()=>saveNow(), 600);
+}
+
+function printActive(){
+  if(!APP.activeNote){
+    toast("Open a note first");
+    return;
   }
-
-  const men=getUnlinkedMentions()
-  if(men.length){
-    $('cardMentions').style.display='block'
-    $('menPills').innerHTML=men.map(id=>{
-      const ln=notes.find(x=>x.id===id)
-      if(!ln) return ''
-      const t=(ln.title&&ln.title.trim()?ln.title:'Untitled')
-      return '<div class="pillnote" data-link="'+id+'">'+escapeHtml(t)+'</div>'
-    }).join('')
-    $('menPills').querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>linkNote(p.getAttribute('data-link')))
-  }else{
-    $('cardMentions').style.display='none'
+  const note = { ...APP.activeNote, ...editorToPayload() };
+  const w = window.open("", "_blank", "noopener,noreferrer");
+  if(!w){
+    toast("Popup blocked");
+    return;
   }
+  const safeTitle = escapeHtml(note.title || "Note");
+  const safeMeta = escapeHtml(`${note.school || ""}${note.category ? " • "+note.category : ""}${note.grade ? " • grade "+note.grade : ""}`);
+  const safeTags = escapeHtml((note.tags || []).join(", "));
+  const safeContent = escapeHtml(note.content || "").replace(/\n/g, "<br>");
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${safeTitle}</title><style>body{font-family:system-ui,Segoe UI,Arial;margin:24px;line-height:1.4}h1{margin:0 0 6px}small{color:#555}hr{border:0;border-top:1px solid #ddd;margin:14px 0}.tags{color:#555;font-size:12px;margin-top:6px}</style></head><body><h1>${safeTitle}</h1><small>${safeMeta}</small><div class="tags">${safeTags}</div><hr><div>${safeContent}</div></body></html>`);
+  w.document.close();
+  w.focus();
+  w.print();
 }
 
-function showLinkDrop(list){
-  $('cardDrop').style.display='block'
-  const wrap=$('dropList')
-  if(!list.length){
-    wrap.innerHTML='<div style="padding:10px;color:rgba(238,242,255,.55);font-weight:850">No matches</div>'
-    return
+async function fetchLinks(){
+  if(!APP.user){
+    APP.links=[];
+    return;
   }
-  wrap.innerHTML=list.map(n=>{
-    const t=(n.title&&n.title.trim()?n.title:'Untitled')
-    const g=n.grade?(' · '+gradeLabels[n.grade]):''
-    return '<div class="pillnote" style="width:100%;justify-content:space-between" data-pick="'+n.id+'"><span>'+escapeHtml(t)+'</span><span style="color:rgba(238,242,255,.45);font-weight:950;font-size:11px">'+escapeHtml(g)+'</span></div>'
-  }).join('')
-  wrap.querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>linkNote(p.getAttribute('data-pick')))
+  const { data } = await sb.from("note_links").select("note_a,note_b,created_at").limit(1000);
+  APP.links = data || [];
 }
 
-function searchLinkCandidates(){
-  if(!activeId) return
-  const cur=notes.find(x=>x.id===activeId)
-  if(!cur) return
-  const q=($('linkSearch').value||'').trim().toLowerCase()
-  if(!q){$('cardDrop').style.display='none';return}
-  const already=new Set(cur.linked_notes||[])
-  const list=notes.filter(n=>n.id!==activeId)
-    .filter(n=>!already.has(n.id))
-    .filter(n=>((n.title||'').toLowerCase().includes(q)))
-    .slice(0,8)
-  showLinkDrop(list)
-}
-
-async function linkNote(lid){
-  if(!activeId || !lid || activeId===lid) return
-  const [a,b]=orderedPair(activeId,lid)
-  const {error}=await supabase.from('note_links').upsert({user_id:user.id,note_a:a,note_b:b},{onConflict:'user_id,note_a,note_b'})
-  if(error){toast('Link failed',error.message,'bad');return}
-  $('linkSearch').value=''
-  $('cardDrop').style.display='none'
-  await fetchLinks()
-  rebuildLinkedOnClient()
-  refreshLinksUI()
-  renderList()
-  toast('Linked','Notes connected','ok')
-}
-
-async function unlinkNote(lid){
-  if(!activeId || !lid) return
-  const [a,b]=orderedPair(activeId,lid)
-  const {error}=await supabase.from('note_links').delete().eq('user_id',user.id).eq('note_a',a).eq('note_b',b)
-  if(error){toast('Unlink failed',error.message,'bad');return}
-  await fetchLinks()
-  rebuildLinkedOnClient()
-  refreshLinksUI()
-  renderList()
-  toast('Unlinked','Connection removed','warn')
-}
-
-async function unlinkAll(){
-  if(!activeId) return
-  if(!confirm('Unlink all?')) return
-  await supabase.from('note_links').delete().eq('user_id',user.id).or('note_a.eq.'+activeId+',note_b.eq.'+activeId)
-  await fetchLinks()
-  rebuildLinkedOnClient()
-  refreshLinksUI()
-  renderList()
-  toast('Unlinked','All connections removed','warn')
-}
-
-async function linkAllMentions(){
-  const ids=getUnlinkedMentions()
-  for(const id of ids) await linkNote(id)
-}
-
-function applyMd(action){
-  const ta=$('body')
-  const start=ta.selectionStart
-  const end=ta.selectionEnd
-  const sel=ta.value.slice(start,end)
-  const before=ta.value.slice(0,start)
-  const after=ta.value.slice(end)
-  let rep=''
-  if(action==='bold') rep='**'+(sel||'bold')+'**'
-  if(action==='italic') rep='*'+(sel||'italic')+'*'
-  if(action==='h1') rep='# '+(sel||'Heading')
-  if(action==='h2') rep='## '+(sel||'Heading')
-  if(action==='ul') rep='- '+(sel||'Item')
-  if(action==='ol') rep='1. '+(sel||'Item')
-  if(action==='quote') rep='> '+(sel||'Quote')
-  if(action==='code') rep='```\\n'+(sel||'code')+'\\n```'
-  if(action==='link') rep='['+(sel||'text')+'](https://)'
-  ta.value=before+rep+after
-  const pos=before.length+rep.length
-  ta.setSelectionRange(pos,pos)
-  ta.focus()
-  autosave()
-  updatePreview()
-  refreshLinksUI()
-}
-
-function openPdfModal(){ $('modalPdf').style.display='flex' }
-function closePdfModal(){ $('modalPdf').style.display='none' }
-
-async function exportPdf(){
-  if(!activeId) return
-  const n=notes.find(x=>x.id===activeId)
-  if(!n) return
-  const includeLinks=$('pdfIncludeLinks').value==='1'
-  const includeDates=$('pdfIncludeDates').value==='1'
-
-  const wrap=document.createElement('div')
-  wrap.style.width='820px'
-  wrap.style.padding='34px'
-  wrap.style.background='#ffffff'
-  wrap.style.color='#111111'
-  wrap.style.fontFamily='Inter,Arial,sans-serif'
-  wrap.style.lineHeight='1.7'
-
-  const h=document.createElement('div')
-  h.style.fontSize='34px'
-  h.style.fontWeight='900'
-  h.style.marginBottom='10px'
-  h.textContent=(n.title&&n.title.trim()?n.title:'Untitled')
-  wrap.appendChild(h)
-
-  const meta=document.createElement('div')
-  meta.style.display='flex'
-  meta.style.flexWrap='wrap'
-  meta.style.gap='8px'
-  meta.style.marginBottom='18px'
-  const chip=(txt)=>{
-    const s=document.createElement('span')
-    s.textContent=txt
-    s.style.fontSize='12px'
-    s.style.fontWeight='800'
-    s.style.padding='6px 10px'
-    s.style.borderRadius='999px'
-    s.style.border='1px solid #e7e7e7'
-    s.style.background='#fafafa'
-    return s
+async function linkNoteFlow(){
+  if(!requireUser()) return;
+  if(!APP.activeNote){
+    toast("Open a note first");
+    return;
   }
-  if(n.grade) meta.appendChild(chip('Grade: '+(gradeLabels[n.grade]||n.grade)))
-  meta.appendChild(chip('School: '+(n.school||currentSchool)))
-  if(includeDates && n.created_at) meta.appendChild(chip('Created: '+new Date(n.created_at).toLocaleDateString()))
-  if(includeDates && n.updated_at) meta.appendChild(chip('Updated: '+new Date(n.updated_at).toLocaleString()))
-  wrap.appendChild(meta)
-
-  const body=document.createElement('div')
-  body.innerHTML=marked.parse(n.content||'')
-  body.querySelectorAll('pre').forEach(p=>{
-    p.style.background='#0f1117'
-    p.style.color='#f5f5f5'
-    p.style.padding='14px'
-    p.style.borderRadius='12px'
-    p.style.overflowX='auto'
-  })
-  body.querySelectorAll('code').forEach(c=>{
-    c.style.fontFamily='JetBrains Mono,Consolas,monospace'
-    c.style.fontSize='12px'
-  })
-  wrap.appendChild(body)
-
-  if(includeLinks && (n.linked_notes||[]).length){
-    const tt=document.createElement('div')
-    tt.style.marginTop='22px'
-    tt.style.fontWeight='900'
-    tt.style.fontSize='16px'
-    tt.textContent='Linked Notes'
-    wrap.appendChild(tt)
-    const ul=document.createElement('ul')
-    ul.style.marginTop='8px'
-    ul.style.paddingLeft='18px'
-    ;(n.linked_notes||[]).forEach(id=>{
-      const ln=notes.find(x=>x.id===id)
-      if(!ln) return
-      const li=document.createElement('li')
-      li.textContent=(ln.title&&ln.title.trim()?ln.title:'Untitled')
-      li.style.fontWeight='750'
-      li.style.margin='6px 0'
-      ul.appendChild(li)
-    })
-    wrap.appendChild(ul)
+  const others = APP.notes.filter(n=>n.id!==APP.activeNote.id);
+  if(!others.length){
+    toast("Need at least 2 notes");
+    return;
   }
-
-  const {jsPDF}=window.jspdf
-  const doc=new jsPDF('p','pt','a4')
-  toast('Exporting','Rendering PDF…','warn')
-  try{
-    await doc.html(wrap,{
-      x:24,
-      y:24,
-      width:547,
-      windowWidth:820,
-      html2canvas:{scale:1.35,backgroundColor:'#ffffff',useCORS:true}
-    })
-    doc.save(((n.title&&n.title.trim()?n.title:'note')+'.pdf').replace(/[\\/:*?"<>|]+/g,'_'))
-    closePdfModal()
-    toast('Exported','PDF saved','ok')
-  }catch(e){
-    console.error(e)
-    toast('PDF failed','Try again after reloading the page','bad')
+  const pick = prompt("Type part of the note title to link to:");
+  if(!pick) return;
+  const p = pick.trim().toLowerCase();
+  const found = others.find(n=> (n.title||"").toLowerCase().includes(p));
+  if(!found){
+    toast("No match");
+    return;
   }
+  const payload = { user_id: APP.user.id, note_a: APP.activeNote.id, note_b: found.id };
+  const { error } = await sb.from("note_links").insert(payload);
+  if(error){
+    toast("Link failed");
+    return;
+  }
+  await fetchLinks();
+  toast("Linked");
 }
 
-function openSettings(){ $('modalSettings').style.display='flex' }
-function closeSettings(){ $('modalSettings').style.display='none' }
-function saveSettingsFromModal(){
-  uiPrefs.sidebarHidden=$('setSidebar').value==='1'
-  uiPrefs.previewFull=$('setPreviewFull').value==='1'
-  timerPresets.focus=clamp(parseInt($('setFocus').value||25,10),1,180)
-  timerPresets.break=clamp(parseInt($('setBreak').value||5,10),1,60)
-  timerPresets.long=clamp(parseInt($('setLong').value||15,10),1,120)
-  nerdPrefs.musicMode=$('musicMode').value
-  nerdPrefs.sfxMode=$('sfxMode').value
-
-  if(uiPrefs.previewFull) document.body.classList.add('previewFull')
-  else document.body.classList.remove('previewFull')
-
-  applyMusicMode()
-  syncCheatUI()
-  updateTimerDisplay()
-  saveSettingsDebounced()
-  closeSettings()
-  toast('Saved','Settings synced','ok')
-}
-
-function toggleFullPreview(){
-  uiPrefs.previewFull=!uiPrefs.previewFull
-  if(uiPrefs.previewFull) document.body.classList.add('previewFull')
-  else document.body.classList.remove('previewFull')
-  saveSettingsDebounced()
-}
-
-function openPalette(){
-  $('paletteBack').style.display='flex'
-  $('paletteQ').value=''
-  renderPalette('')
-  setTimeout(()=>$('paletteQ').focus(),0)
-}
-function closePalette(){ $('paletteBack').style.display='none' }
-
-function renderPalette(q){
-  const query=(q||'').toLowerCase().trim()
-  const items=[]
-  const add=(ico,a,b,k,fn)=>items.push({ico,a,b,k,fn})
-
-  add('✏','New note','Create a new note','Enter',()=>createNote())
-  add('📝','Edit','Go to editor','Enter',()=>setView('editor'))
-  add('👁','Preview','Go to preview','Enter',()=>setView('preview'))
-  add('🕸','Graph','Open graph view','Enter',()=>setView('graph'))
-  add('🎮','Games','Open break games','Enter',()=>setView('games'))
-  add('⛶','Toggle full preview','Full-screen preview','Enter',()=>toggleFullPreview())
-  add('📄','Export PDF','Export current note','Enter',()=>openPdfModal())
-  add('⚙','Settings','Open settings','Enter',()=>openSettings())
-  if(activeId) add('💾','Save now','Force save','Enter',()=>saveNote())
-
-  const noteHits=notes
-    .map(n=>({id:n.id,title:(n.title&&n.title.trim()?n.title:'Untitled'),body:(n.content||'')}))
-    .filter(n=>{
-      if(!query) return false
-      return n.title.toLowerCase().includes(query) || n.body.toLowerCase().includes(query)
-    })
-    .slice(0,10)
-  noteHits.forEach(n=>add('📌',n.title,'Open note','Enter',()=>loadNote(n.id)))
-
-  const filtered=items.filter(it=>{
-    if(!query) return true
-    return it.a.toLowerCase().includes(query) || it.b.toLowerCase().includes(query)
-  })
-
-  const list=$('paletteList')
-  list.innerHTML=filtered.map((it,i)=>{
-    return '<div class="pItem" data-i="'+i+'"><div class="l"><div class="pIco">'+it.ico+'</div><div class="pTxt"><div class="pA">'+escapeHtml(it.a)+'</div><div class="pB">'+escapeHtml(it.b)+'</div></div></div><div class="pK">'+escapeHtml(it.k)+'</div></div>'
-  }).join('')
-
-  list.querySelectorAll('.pItem').forEach(row=>{
-    row.onclick=()=>{
-      const idx=parseInt(row.getAttribute('data-i'),10)
-      closePalette()
-      filtered[idx].fn()
-    }
-  })
-}
-
-function setTimer(min){
-  pauseTimer()
-  timeLeft=min*60
-  updateTimerDisplay()
-}
-function updateTimerDisplay(){
-  const m=Math.floor(timeLeft/60).toString().padStart(2,'0')
-  const s=(timeLeft%60).toString().padStart(2,'0')
-  $('timerText').textContent=m+':'+s
-}
-function startTimer(){
-  if(timerInterval) return
-  timerInterval=setInterval(()=>{
-    if(timeLeft>0){timeLeft--;updateTimerDisplay()}
-    else{
-      pauseTimer()
-      toast('Timer',"Time's up",'ok')
-      try{sfx.unlock();sfx.tone(880,0.08,0.12)}catch(e){}
-    }
-  },1000)
-}
-function pauseTimer(){clearInterval(timerInterval);timerInterval=null}
-function resetTimer(){pauseTimer();setTimer(timerPresets.focus||25)}
-
-function openMobileSidebar(){
-  $('sidebar').classList.add('open')
-  $('backdrop').classList.add('show')
-}
-function closeMobileSidebar(){
-  $('sidebar').classList.remove('open')
-  $('backdrop').classList.remove('show')
-}
-
-function maybeMobileUI(){
-  const isMobile=window.innerWidth<=900
-  $('mobileMenu').style.display=isMobile?'flex':'none'
-}
-
-function initSplitResize(){
-  const div=$('divider')
-  div.addEventListener('mousedown',e=>{
-    draggingDivider=true
-    document.body.style.cursor='col-resize'
-  })
-  window.addEventListener('mouseup',e=>{
-    if(!draggingDivider) return
-    draggingDivider=false
-    document.body.style.cursor=''
-  })
-  window.addEventListener('mousemove',e=>{
-    if(!draggingDivider) return
-    const split=$('split')
-    const rect=split.getBoundingClientRect()
-    const x=e.clientX-rect.left
-    const pct=clamp((x/rect.width)*100,20,80)
-    splitSizes=[pct,100-pct]
-    applySplitSizes()
-  })
-}
+let graph = null;
 
 function initGraph(){
-  graphCanvas=$('graph')
-  graphCtx=graphCanvas.getContext('2d')
-  resizeGraph()
-  window.addEventListener('resize',()=>{resizeGraph();renderGraph()})
-  graphCanvas.addEventListener('mousedown',gDown)
-  graphCanvas.addEventListener('mousemove',gMove)
-  graphCanvas.addEventListener('mouseup',gUp)
-  graphCanvas.addEventListener('wheel',gWheel,{passive:false})
-}
+  const canvas = el("graphCanvas");
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const state = { canvas, ctx, nodes:[], edges:[], dragging:null, pan:{x:40,y:40}, zoom:1, last:performance.now() };
 
-function resizeGraph(){
-  const r=graphCanvas.getBoundingClientRect()
-  graphCanvas.width=Math.floor(r.width*devicePixelRatio)
-  graphCanvas.height=Math.floor(r.height*devicePixelRatio)
-  graphCtx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)
-}
+  function resize(){
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
 
-function buildGraph(){
-  const W=graphCanvas.getBoundingClientRect().width
-  const H=graphCanvas.getBoundingClientRect().height
-  const N=notes.length||1
-  graphNodes=notes.map((n,i)=>{
-    const a=(i/N)*Math.PI*2
-    const rad=Math.min(W,H)*0.25
-    return{
+  function rebuild(){
+    const nodes = APP.notes.map((n,i)=>({
       id:n.id,
-      label:(n.title&&n.title.trim()?n.title:'Untitled'),
-      x:Math.cos(a)*rad,
-      y:Math.sin(a)*rad,
-      vx:0,vy:0,
-      hue: (i*37)%360
+      title:(n.title||"(untitled)").slice(0,24),
+      x: 260 + Math.cos(i)*140,
+      y: 220 + Math.sin(i)*140,
+      vx:0, vy:0
+    }));
+    const idx = new Map(nodes.map((n,i)=>[n.id,i]));
+    const edges = [];
+    for(const e of APP.links){
+      const ia = idx.get(e.note_a);
+      const ib = idx.get(e.note_b);
+      if(ia==null||ib==null) continue;
+      edges.push([ia,ib]);
     }
-  })
-  graphEdges=links.map(l=>({a:l.note_a,b:l.note_b}))
-  gView={x:0,y:0,scale:1}
-}
-
-function screenToWorld(sx,sy){
-  const r=graphCanvas.getBoundingClientRect()
-  const cx=r.width/2, cy=r.height/2
-  return { x:(sx - cx - gView.x)/gView.scale, y:(sy - cy - gView.y)/gView.scale }
-}
-function hitNode(wx,wy){
-  for(const n of graphNodes){
-    const dx=n.x-wx
-    const dy=n.y-wy
-    if(Math.sqrt(dx*dx+dy*dy) < 22) return n
+    state.nodes = nodes;
+    state.edges = edges;
   }
-  return null
-}
 
-function renderGraph(){
-  const r=graphCanvas.getBoundingClientRect()
-  const W=r.width,H=r.height
-  graphCtx.clearRect(0,0,W,H)
+  function screenToWorld(mx,my){
+    return { x: (mx - state.pan.x)/state.zoom, y: (my - state.pan.y)/state.zoom };
+  }
 
-  graphCtx.save()
-  graphCtx.translate(W/2+gView.x, H/2+gView.y)
-  graphCtx.scale(gView.scale,gView.scale)
+  function pickNode(mx,my){
+    const p = screenToWorld(mx,my);
+    let best=null, bestD=1e9;
+    for(const n of state.nodes){
+      const dx=p.x-n.x, dy=p.y-n.y;
+      const d=dx*dx+dy*dy;
+      if(d<bestD && d<18*18){ best=n; bestD=d; }
+    }
+    return best;
+  }
 
-  graphCtx.lineWidth=2/gView.scale
-  graphEdges.forEach(e=>{
-    const a=graphNodes.find(n=>n.id===e.a)
-    const b=graphNodes.find(n=>n.id===e.b)
-    if(!a||!b) return
-    graphCtx.strokeStyle='rgba(255,106,0,.18)'
-    graphCtx.beginPath()
-    graphCtx.moveTo(a.x,a.y)
-    graphCtx.lineTo(b.x,b.y)
-    graphCtx.stroke()
-  })
+  function draw(){
+    const rect = canvas.getBoundingClientRect();
+    ctx.clearRect(0,0,rect.width,rect.height);
+    ctx.save();
+    ctx.translate(state.pan.x, state.pan.y);
+    ctx.scale(state.zoom, state.zoom);
 
-  graphNodes.forEach(n=>{
-    const isActive=n.id===activeId
-    const isLinked=graphEdges.some(e=>(e.a===activeId && e.b===n.id)||(e.b===activeId && e.a===n.id))
-    const r=22
-    graphCtx.fillStyle=isActive?'#ff6a00':(isLinked?'#22c55e':'hsla('+n.hue+',95%,60%,0.22)')
-    graphCtx.beginPath()
-    graphCtx.arc(n.x,n.y,r,0,Math.PI*2)
-    graphCtx.fill()
-
-    graphCtx.lineWidth=2/gView.scale
-    graphCtx.strokeStyle='rgba(0,0,0,.35)'
-    graphCtx.stroke()
-
-    if(isActive||isLinked){
-      graphCtx.shadowBlur=24/gView.scale
-      graphCtx.shadowColor=isActive?'rgba(255,106,0,.55)':'rgba(34,197,94,.45)'
-      graphCtx.beginPath()
-      graphCtx.arc(n.x,n.y,r,0,Math.PI*2)
-      graphCtx.strokeStyle='rgba(255,255,255,.22)'
-      graphCtx.stroke()
-      graphCtx.shadowBlur=0
+    ctx.lineWidth = 2/state.zoom;
+    ctx.strokeStyle = "rgba(255,255,255,.20)";
+    for(const [ia,ib] of state.edges){
+      const a=state.nodes[ia], b=state.nodes[ib];
+      ctx.beginPath();
+      ctx.moveTo(a.x,a.y);
+      ctx.lineTo(b.x,b.y);
+      ctx.stroke();
     }
 
-    graphCtx.fillStyle='rgba(238,242,255,.92)'
-    graphCtx.font=(900/gView.scale)+'px Inter'
-    graphCtx.textAlign='center'
-    const label=n.label.length>18?n.label.slice(0,18)+'…':n.label
-    graphCtx.fillText(label,n.x,n.y+46)
-  })
-
-  graphCtx.restore()
-}
-
-function stepGraph(){
-  if(!graphPhysics){renderGraph();gAnim=requestAnimationFrame(stepGraph);return}
-  const nodes=graphNodes
-  const edges=graphEdges
-  for(const n of nodes){
-    let fx=0,fy=0
-    for(const o of nodes){
-      if(o===n) continue
-      const dx=n.x-o.x
-      const dy=n.y-o.y
-      const d=Math.sqrt(dx*dx+dy*dy)||1
-      const f=1150/(d*d)
-      fx+=(dx/d)*f
-      fy+=(dy/d)*f
+    for(const n of state.nodes){
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(255,122,24,.20)";
+      ctx.strokeStyle = "rgba(255,122,24,.55)";
+      ctx.arc(n.x,n.y, 16, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "rgba(244,244,247,.92)";
+      ctx.font = `${12/state.zoom}px system-ui`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillText(n.title, n.x, n.y+18);
     }
-    for(const e of edges){
-      if(e.a!==n.id && e.b!==n.id) continue
-      const oid=(e.a===n.id?e.b:e.a)
-      const o=nodes.find(x=>x.id===oid)
-      if(!o) continue
-      fx+=(o.x-n.x)*0.012
-      fy+=(o.y-n.y)*0.012
+
+    ctx.restore();
+  }
+
+  function tick(){
+    const now = performance.now();
+    const dt = Math.min(0.03, (now - state.last)/1000);
+    state.last = now;
+
+    const cx = 520, cy = 320;
+    for(const n of state.nodes){
+      n.vx += (cx - n.x)*0.012;
+      n.vy += (cy - n.y)*0.012;
     }
-    n.vx=(n.vx+fx)*0.88
-    n.vy=(n.vy+fy)*0.88
-  }
-  for(const n of nodes){
-    n.x+=n.vx
-    n.y+=n.vy
-  }
-  renderGraph()
-  gAnim=requestAnimationFrame(stepGraph)
-}
 
-function drawGraph(){
-  if(!graphCanvas) return
-  buildGraph()
-  renderGraph()
-  if(gAnim) cancelAnimationFrame(gAnim)
-  gAnim=requestAnimationFrame(stepGraph)
-}
-
-function gDown(e){
-  const rect=graphCanvas.getBoundingClientRect()
-  const sx=e.clientX-rect.left
-  const sy=e.clientY-rect.top
-  const w=screenToWorld(sx,sy)
-  const node=hitNode(w.x,w.y)
-  if(node){
-    gDragNode=node
-    graphPhysics=false
-    return
-  }
-  gPan=true
-  gPanStart={sx,sy,ox:gView.x,oy:gView.y}
-}
-function gMove(e){
-  const rect=graphCanvas.getBoundingClientRect()
-  const sx=e.clientX-rect.left
-  const sy=e.clientY-rect.top
-  if(gDragNode){
-    const w=screenToWorld(sx,sy)
-    gDragNode.x=w.x
-    gDragNode.y=w.y
-    renderGraph()
-    return
-  }
-  if(gPan && gPanStart){
-    gView.x=gPanStart.ox+(sx-gPanStart.sx)
-    gView.y=gPanStart.oy+(sy-gPanStart.sy)
-    renderGraph()
-  }
-}
-function gUp(e){
-  const rect=graphCanvas.getBoundingClientRect()
-  const sx=e.clientX-rect.left
-  const sy=e.clientY-rect.top
-  if(gDragNode){
-    const w=screenToWorld(sx,sy)
-    const id=gDragNode.id
-    gDragNode=null
-    graphPhysics=true
-    renderGraph()
-    const clickNode=hitNode(w.x,w.y)
-    if(clickNode && clickNode.id===id){
-      loadNote(id)
-      setView('editor')
+    for(let i=0;i<state.nodes.length;i++){
+      for(let j=i+1;j<state.nodes.length;j++){
+        const a=state.nodes[i], b=state.nodes[j];
+        const dx=a.x-b.x, dy=a.y-b.y;
+        const d2=dx*dx+dy*dy+0.001;
+        const f=12000/d2;
+        const inv=Math.sqrt(d2);
+        a.vx += (dx/inv)*f*dt;
+        a.vy += (dy/inv)*f*dt;
+        b.vx -= (dx/inv)*f*dt;
+        b.vy -= (dy/inv)*f*dt;
+      }
     }
-    return
+
+    for(const [ia,ib] of state.edges){
+      const a=state.nodes[ia], b=state.nodes[ib];
+      const dx=b.x-a.x, dy=b.y-a.y;
+      const dist=Math.sqrt(dx*dx+dy*dy)+0.001;
+      const desired=180;
+      const diff=(dist-desired);
+      const fx=(dx/dist)*diff*0.020;
+      const fy=(dy/dist)*diff*0.020;
+      a.vx += fx; a.vy += fy;
+      b.vx -= fx; b.vy -= fy;
+    }
+
+    for(const n of state.nodes){
+      if(state.dragging && state.dragging.id===n.id) continue;
+      n.x += n.vx; n.y += n.vy;
+      n.vx *= 0.86; n.vy *= 0.86;
+    }
+
+    draw();
+    requestAnimationFrame(tick);
   }
-  gPan=false
-  gPanStart=null
-}
-function gWheel(e){
-  e.preventDefault()
-  const rect=graphCanvas.getBoundingClientRect()
-  const sx=e.clientX-rect.left
-  const sy=e.clientY-rect.top
-  const before=screenToWorld(sx,sy)
-  const delta=Math.sign(e.deltaY)
-  const f=delta>0?0.92:1.08
-  gView.scale=clamp(gView.scale*f,0.45,2.8)
-  const after=screenToWorld(sx,sy)
-  gView.x+=(after.x-before.x)*gView.scale
-  gView.y+=(after.y-before.y)*gView.scale
-  renderGraph()
+
+  canvas.addEventListener("pointerdown", (e)=>{
+    const r = canvas.getBoundingClientRect();
+    const mx = e.clientX - r.left;
+    const my = e.clientY - r.top;
+    const n = pickNode(mx,my);
+    if(n){
+      state.dragging = { id:n.id };
+      canvas.setPointerCapture(e.pointerId);
+    }else{
+      state.dragging = { pan:true, ox: mx, oy: my, px: state.pan.x, py: state.pan.y };
+      canvas.setPointerCapture(e.pointerId);
+    }
+  });
+
+  canvas.addEventListener("pointermove", (e)=>{
+    if(!state.dragging) return;
+    const r = canvas.getBoundingClientRect();
+    const mx = e.clientX - r.left;
+    const my = e.clientY - r.top;
+
+    if(state.dragging.pan){
+      state.pan.x = state.dragging.px + (mx - state.dragging.ox);
+      state.pan.y = state.dragging.py + (my - state.dragging.oy);
+      return;
+    }
+
+    const node = state.nodes.find(x=>x.id===state.dragging.id);
+    if(!node) return;
+    const p = screenToWorld(mx,my);
+    node.x = p.x; node.y = p.y;
+    node.vx = 0; node.vy = 0;
+  });
+
+  canvas.addEventListener("pointerup", (e)=>{
+    if(!state.dragging) return;
+    if(!state.dragging.pan){
+      const r = canvas.getBoundingClientRect();
+      const mx = e.clientX - r.left;
+      const my = e.clientY - r.top;
+      const n = pickNode(mx,my);
+      if(n) openNote(n.id);
+    }
+    state.dragging = null;
+    canvas.releasePointerCapture(e.pointerId);
+  });
+
+  canvas.addEventListener("wheel", (e)=>{
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect();
+    const mx = e.clientX - r.left;
+    const my = e.clientY - r.top;
+    const p = screenToWorld(mx,my);
+    const factor = e.deltaY > 0 ? 0.92 : 1.08;
+    state.zoom = Math.max(0.35, Math.min(2.2, state.zoom*factor));
+    state.pan.x = mx - p.x*state.zoom;
+    state.pan.y = my - p.y*state.zoom;
+  }, { passive:false });
+
+  window.addEventListener("resize", ()=>{ resize(); });
+
+  graph = { resize, rebuild };
+  resize();
+  rebuild();
+  requestAnimationFrame(tick);
 }
 
-function initGames(){
-  snakeCanvas=$('snakeCanvas')
-  snakeCtx=snakeCanvas.getContext('2d')
-  tetrisCanvas=$('tetrisCanvas')
-  tetrisCtx=tetrisCanvas.getContext('2d')
-  runnerCanvas=$('runnerCanvas')
-  runnerCtx=runnerCanvas.getContext('2d')
-  resetSnake()
-  resetTetris()
-  resetRunner()
-  syncCheatUI()
+async function reloadGraph(){
+  await fetchLinks();
+  if(graph){
+    graph.rebuild();
+    graph.resize();
+  }else{
+    initGraph();
+  }
+  toast("Graph updated");
+}
+
+const TRACKS = [
+  { key:"A", name:"A - autumn! - one way (instrumental)", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/autumn!%20-%20one%20way%20(instrumental).mp3" },
+  { key:"J", name:"J - free jaydes pluggnb type beat", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/free%20jaydes%20%20pluggnb%20type%20beat%20self%20(1).mp3" },
+  { key:"J", name:"J - jaydes convenience (instrumental)", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes%20%20convenience%20(fixed%20instrumental)%20(1).mp3" },
+  { key:"M", name:"M - Me vs Me (instrumental)", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/Me%20vs%20Me%20(Instrumental)%20-%20Jaeychino%20and%20SlimeGetEm%20(1).mp3" },
+  { key:"K", name:"K - Kyle Richh x Sdot Go - Drive me crazy (instrumental)", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/Kyle%20Richh%20x%20Sdot%20Go%20-%20Drive%20me%20crazyOblivious%20(official%20instrumental)%20(1).mp3" }
+];
+
+function clamp01(n){
+  n = Number(n);
+  return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0.25;
+}
+
+function setupNerdAudio(){
+  const sel = el("trackSelect");
+  if(sel){
+    sel.innerHTML = "";
+    for(let i=0;i<TRACKS.length;i++){
+      const o = document.createElement("option");
+      o.value = String(i);
+      o.textContent = TRACKS[i].name;
+      sel.appendChild(o);
+    }
+    sel.value = String(APP.settings.nerd.track || 0);
+  }
+  const audio = el("bgAudio");
+  if(audio){
+    audio.loop = true;
+    audio.volume = clamp01(APP.settings.nerd.vol);
+  }
+  const v = el("musicVol");
+  if(v) v.value = String(APP.settings.nerd.vol);
+}
+
+function setTrack(idx){
+  const audio = el("bgAudio");
+  if(!audio) return;
+  const i = Math.max(0, Math.min(TRACKS.length-1, Number(idx)||0));
+  APP.settings.nerd.track = i;
+  audio.src = TRACKS[i].url;
+}
+
+function stopMusic(){
+  const audio = el("bgAudio");
+  const btn = el("btnPlayPause");
+  if(audio){
+    audio.pause();
+    audio.currentTime = 0;
+  }
+  if(btn) btn.textContent = "Play";
+}
+
+function playPauseMusic(){
+  if(!APP.audioUnlocked){
+    toast("Unlock first");
+    return;
+  }
+  const audio = el("bgAudio");
+  if(!audio) return;
+
+  if(!audio.src) setTrack(el("trackSelect")?.value ?? 0);
+
+  const btn = el("btnPlayPause");
+  if(audio.paused){
+    audio.play().then(()=>{
+      if(btn) btn.textContent = "Pause";
+    }).catch(()=>{
+      toast("Tap Play again");
+    });
+  }else{
+    audio.pause();
+    if(btn) btn.textContent = "Play";
+  }
+}
+
+function applyMusicVol(){
+  const audio = el("bgAudio");
+  const v = clamp01(el("musicVol")?.value ?? 0.25);
+  APP.settings.nerd.vol = v;
+  if(audio) audio.volume = v;
+}
+
+function unlockNerd(){
+  const pass = el("nerdPass")?.value ?? "";
+  if(pass !== "9999"){
+    toast("Wrong password");
+    return;
+  }
+  APP.audioUnlocked = true;
+  const panel = el("nerdPanel");
+  if(panel) panel.classList.remove("hidden");
+  const remember = !!el("rememberUnlock")?.checked;
+  if(remember){
+    localStorage.setItem("studyos_nerd_unlocked", "1");
+  }else{
+    localStorage.removeItem("studyos_nerd_unlocked");
+  }
+  toast("Unlocked");
+}
+
+function quickMute(){
+  const audio = el("bgAudio");
+  if(audio && !audio.paused){
+    stopMusic();
+    toast("Muted");
+  }
+}
+
+let audioCtx = null;
+function sfx(freq=440, dur=0.07, type="sine", gain=0.05){
+  if(!APP.sfxOn) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const t0 = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(gain, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t0);
+    o.stop(t0 + dur);
+  }catch(_){}
+}
+
+const GAME = {
+  mode: "snake",
+  running: false,
+  last: 0,
+  score: 0,
+  bestSnake: 0,
+  bestBeat: 0,
+  snake: null,
+  beat: null
+};
+
+function gameCanvas(){ return el("gameCanvas"); }
+
+function updateGameStats(){
+  const st = el("gameStats");
+  if(!st) return;
+  const best = GAME.mode==="snake" ? GAME.bestSnake : GAME.bestBeat;
+  st.textContent = `Score: ${GAME.score}   Best: ${best}`;
 }
 
 function syncCheatUI(){
-  $('snakeBest').textContent=String(gameCheats.snake?.highScore||0)
-  $('tBest').textContent=String(gameCheats.tetris?.highScore||0)
-  $('rBest').textContent=String(gameCheats.runner?.best||0)
-  if($('cSnakeNoDie')) $('cSnakeNoDie').checked=!!gameCheats.snake?.noDie
-  if($('cSnakeGhost')) $('cSnakeGhost').checked=!!gameCheats.snake?.ghost
-  if($('cSnakeWrap')) $('cSnakeWrap').checked=!!gameCheats.snake?.wrap
-  if($('cSnakeNoObs')) $('cSnakeNoObs').checked=!!gameCheats.snake?.noObstacles
-  if($('cSnakeNoPoison')) $('cSnakeNoPoison').checked=!!gameCheats.snake?.noPoison
-  $('cSnakeSpeed').value=gameCheats.snake?.speed??95
-  $('cSnakeSpeedV').textContent=(gameCheats.snake?.speed??95)+'ms'
-  if($('cSnakeBoost')) $('cSnakeBoost').checked=!!gameCheats.snake?.boost
-  if($('cTNoOver')) $('cTNoOver').checked=!!gameCheats.tetris?.noGameOver
-  $('cTLevel').value=gameCheats.tetris?.startLevel??1
-
-  if($('cRSlow')) $('cRSlow').checked=!!(gameCheats.runner?.slow)
-  if($('cRNoCrash')) $('cRNoCrash').checked=!!(gameCheats.runner?.noCrash)
+  const wrap = el("cheatWrap");
+  const slow = el("cheatSlow");
+  const mag = el("cheatMagnet");
+  if(wrap && GAME.snake) wrap.checked = !!GAME.snake.cheats.wrap;
+  if(slow && GAME.snake) slow.checked = !!GAME.snake.cheats.slow;
+  if(mag && GAME.snake) mag.checked = !!GAME.snake.cheats.magnet;
 }
 
-function resetSnake(){
-  snake=[{x:10,y:10}]
-  dir={x:0,y:0}
-  snakeScore=0
-  sObstacles=[]
-  sPoison=null
-  spawnFood()
-  $('snakeScore').textContent='0'
-  drawSnake()
-}
-function spawnFood(){
-  const occupied=(x,y)=>snake.some(s=>s.x===x&&s.y===y) || sObstacles.some(o=>o.x===x&&o.y===y) || (sPoison && sPoison.x===x && sPoison.y===y)
-  let tries=0
-  do{
-    food={x:Math.floor(Math.random()*S_TILE),y:Math.floor(Math.random()*S_TILE)}
-    tries++
-  }while(occupied(food.x,food.y) && tries<400)
+function initSnake(drawOnly){
+  const canvas = gameCanvas();
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const hard = el("snakeHard")?.checked ?? true;
 
-  if(!gameCheats.snake?.noPoison && snakeScore>=6 && Math.random()<0.28){
-    tries=0
-    do{
-      sPoison={x:Math.floor(Math.random()*S_TILE),y:Math.floor(Math.random()*S_TILE)}
-      tries++
-    }while(occupied(sPoison.x,sPoison.y) && tries<400)
-  }else{
-    sPoison=null
+  const size = 22;
+  const cols = Math.floor(canvas.width / size);
+  const rows = Math.floor(canvas.height / size);
+
+  const randCell = () => ({ x: Math.floor(Math.random()*cols), y: Math.floor(Math.random()*rows) });
+
+  function placeFree(s){
+    let tries = 0;
+    while(tries++ < 900){
+      const p = randCell();
+      if(s.body.some(b=>b.x===p.x&&b.y===p.y)) continue;
+      if(s.obstacles.some(o=>o.x===p.x&&o.y===p.y)) continue;
+      if(s.poison && s.poison.x===p.x && s.poison.y===p.y) continue;
+      if(s.food && s.food.x===p.x && s.food.y===p.y) continue;
+      return p;
+    }
+    return randCell();
   }
-}
-function startSnake(){
-  stopSnake()
-  resetSnake()
-  snakeRunning=true
-  dir={x:1,y:0}
-  setSnakeInterval()
-}
-function setSnakeInterval(){
-  const base=gameCheats.snake?.speed??95
-  const ramp=clamp(base - Math.floor(snakeScore/3)*6,55,140)
-  if(snakeInterval) clearInterval(snakeInterval)
-  snakeInterval=setInterval(tickSnake,ramp)
-}
-function stopSnake(){
-  snakeRunning=false
-  if(snakeInterval){clearInterval(snakeInterval);snakeInterval=null}
-}
-function tickSnake(){
-  const wrap=!!gameCheats.snake?.wrap
-  const nx=snake[0].x+dir.x
-  const ny=snake[0].y+dir.y
-  let head={x:nx,y:ny}
 
-  if(wrap){
-    head.x=(head.x+S_TILE)%S_TILE
-    head.y=(head.y+S_TILE)%S_TILE
-  }else{
-    if(head.x<0||head.x>=S_TILE||head.y<0||head.y>=S_TILE){
-      if(!gameCheats.snake?.noDie){gameOverSnake();return}
-      head.x=clamp(head.x,0,S_TILE-1)
-      head.y=clamp(head.y,0,S_TILE-1)
+  const snake = {
+    size, cols, rows, ctx, canvas,
+    dir:{x:1,y:0},
+    nextDir:{x:1,y:0},
+    body:[{x:Math.floor(cols/2), y:Math.floor(rows/2)}],
+    grow:3,
+    food:null,
+    poison:null,
+    obstacles:[],
+    stepAcc:0,
+    alive:true,
+    hard,
+    baseSpeed: hard ? 14 : 10,
+    cheats:{wrap:false, slow:false, magnet:false}
+  };
+
+  if(hard){
+    for(let i=0;i<10;i++){
+      const o = placeFree(snake);
+      if(Math.abs(o.x-snake.body[0].x)<4 && Math.abs(o.y-snake.body[0].y)<4) continue;
+      snake.obstacles.push(o);
     }
   }
 
-  if(!gameCheats.snake?.ghost && !gameCheats.snake?.noDie){
-    if(snake.some(s=>s.x===head.x&&s.y===head.y)){gameOverSnake();return}
-  }
+  snake.food = placeFree(snake);
 
-  if(!gameCheats.snake?.noObstacles && !gameCheats.snake?.noDie){
-    if(sObstacles.some(o=>o.x===head.x&&o.y===head.y)){gameOverSnake();return}
-  }
+  GAME.snake = snake;
+  GAME.running = false;
+  GAME.score = 0;
+  updateGameStats();
+  syncCheatUI();
 
-  snake.unshift(head)
+  function draw(){
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = "rgba(0,0,0,.25)";
+    ctx.fillRect(0,0,w,h);
 
-  if(sPoison && head.x===sPoison.x && head.y===sPoison.y){
-    sfx.bad()
-    if(!gameCheats.snake?.noDie){gameOverSnake();return}
-    sPoison=null
-  }
+    ctx.strokeStyle = "rgba(255,255,255,.08)";
+    ctx.lineWidth = 1;
+    for(let x=0;x<w;x+=snake.size){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+    for(let y=0;y<h;y+=snake.size){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
 
-  if(head.x===food.x&&head.y===food.y){
-    snakeScore++
-    $('snakeScore').textContent=String(snakeScore)
-    sfx.coin()
-    if(!gameCheats.snake?.noObstacles && snakeScore>=4 && snakeScore%3===0){
-      addObstacle()
-    }
-    if(snakeScore>(gameCheats.snake?.highScore||0)){
-      gameCheats.snake.highScore=snakeScore
-      $('snakeBest').textContent=String(snakeScore)
-      saveSettings()
-    }
-    spawnFood()
-    setSnakeInterval()
-  }else{
-    snake.pop()
-  }
-
-  drawSnake()
-}
-function addObstacle(){
-  let tries=0
-  const occupied=(x,y)=>snake.some(s=>s.x===x&&s.y===y) || (food && food.x===x && food.y===y) || (sPoison && sPoison.x===x && sPoison.y===y) || sObstacles.some(o=>o.x===x&&o.y===y)
-  let o
-  do{
-    o={x:Math.floor(Math.random()*S_TILE),y:Math.floor(Math.random()*S_TILE)}
-    tries++
-  }while(occupied(o.x,o.y) && tries<500)
-  if(tries<500) sObstacles.push(o)
-}
-function drawSnake(){
-  const W=snakeCanvas.width,H=snakeCanvas.height
-  snakeCtx.fillStyle='#050505'
-  snakeCtx.fillRect(0,0,W,H)
-  snakeCtx.strokeStyle='rgba(255,106,0,0.06)'
-  snakeCtx.lineWidth=0.5
-  const gs=W/S_TILE
-  for(let i=0;i<=S_TILE;i++){
-    snakeCtx.beginPath();snakeCtx.moveTo(i*gs,0);snakeCtx.lineTo(i*gs,H);snakeCtx.stroke()
-    snakeCtx.beginPath();snakeCtx.moveTo(0,i*gs);snakeCtx.lineTo(W,i*gs);snakeCtx.stroke()
-  }
-
-  if(!gameCheats.snake?.noObstacles){
-    sObstacles.forEach(o=>{
-      const x=o.x*gs,y=o.y*gs
-      snakeCtx.fillStyle='rgba(255,255,255,.14)'
-      snakeCtx.fillRect(x+2,y+2,gs-4,gs-4)
-      snakeCtx.fillStyle='rgba(0,0,0,.25)'
-      snakeCtx.fillRect(x+4,y+4,gs-8,gs-8)
-    })
-  }
-
-  snake.forEach((seg,idx)=>{
-    const x=seg.x*gs,y=seg.y*gs
-    snakeCtx.fillStyle=idx===0?'#ff6a00':'rgba(255,177,0,'+(0.58-(idx/snake.length)*0.38)+')'
-    snakeCtx.fillRect(x+1,y+1,gs-2,gs-2)
-  })
-
-  snakeCtx.fillStyle='#ffb100'
-  snakeCtx.beginPath()
-  snakeCtx.arc(food.x*gs+gs/2,food.y*gs+gs/2,gs/2-3,0,Math.PI*2)
-  snakeCtx.fill()
-
-  if(sPoison){
-    snakeCtx.fillStyle='rgba(255,59,59,.95)'
-    snakeCtx.beginPath()
-    snakeCtx.arc(sPoison.x*gs+gs/2,sPoison.y*gs+gs/2,gs/2-5,0,Math.PI*2)
-    snakeCtx.fill()
-  }
-
-  snakeCtx.fillStyle='rgba(238,242,255,.55)'
-  snakeCtx.font='900 12px Inter'
-  snakeCtx.textAlign='left'
-  const base=gameCheats.snake?.speed??95
-  const cur=clamp(base - Math.floor(snakeScore/3)*6,55,140)
-  snakeCtx.fillText('Speed '+cur+'ms',10,18)
-  if(!gameCheats.snake?.wrap) snakeCtx.fillText('Walls ON',10,34)
-}
-function gameOverSnake(){
-  stopSnake()
-  drawSnake()
-  sfx.unlock();sfx.tone(180,0.10,0.12)
-  const W=snakeCanvas.width,H=snakeCanvas.height
-  snakeCtx.fillStyle='rgba(0,0,0,.75)'
-  snakeCtx.fillRect(0,0,W,H)
-  snakeCtx.fillStyle='#ff6a00'
-  snakeCtx.font='900 28px Inter'
-  snakeCtx.textAlign='center'
-  snakeCtx.fillText('GAME OVER',W/2,H/2-10)
-  snakeCtx.fillStyle='#ffb100'
-  snakeCtx.font='900 16px Inter'
-  snakeCtx.fillText('Score: '+snakeScore,W/2,H/2+18)
-}
-
-function resetTetris(){
-  tBoard=Array.from({length:TR},()=>Array(TC).fill(0))
-  tScore=0
-  tLines=0
-  tLevel=Math.max(1,gameCheats.tetris?.startLevel??1)
-  $('tScore').textContent='0'
-  $('tLines').textContent='0'
-  $('tLevel').textContent=String(tLevel)
-  $('tBest').textContent=String(gameCheats.tetris?.highScore||0)
-  tPiece=makePiece()
-  drawTetris()
-}
-function makePiece(){
-  const t=Math.floor(Math.random()*7)+1
-  const s=T_SHAPES[t]
-  return{type:t,shape:s.map(r=>[...r]),x:Math.floor(TC/2)-Math.floor(s[0].length/2),y:0}
-}
-function tCollide(){
-  for(let r=0;r<tPiece.shape.length;r++){
-    for(let c=0;c<tPiece.shape[r].length;c++){
-      if(!tPiece.shape[r][c]) continue
-      const nx=tPiece.x+c
-      const ny=tPiece.y+r
-      if(nx<0||nx>=TC||ny>=TR) return true
-      if(ny>=0 && tBoard[ny][nx]) return true
-    }
-  }
-  return false
-}
-function tMove(dx,dy){
-  tPiece.x+=dx
-  tPiece.y+=dy
-  if(tCollide()){
-    tPiece.x-=dx
-    tPiece.y-=dy
-    if(dy>0) tLock()
-  }else{
-    if(dx!==0) {sfx.unlock();sfx.tone(420,0.02,0.06)}
-  }
-}
-function tRotate(){
-  const orig=tPiece.shape
-  tPiece.shape=tPiece.shape[0].map((_,ci)=>tPiece.shape.map(row=>row[ci]).reverse())
-  if(tCollide()) tPiece.shape=orig
-  else {sfx.unlock();sfx.tone(520,0.03,0.07)}
-}
-function tHardDrop(){
-  while(!tCollide()) tPiece.y++
-  tPiece.y--
-  tLock()
-}
-function tLock(){
-  for(let r=0;r<tPiece.shape.length;r++){
-    for(let c=0;c<tPiece.shape[r].length;c++){
-      if(!tPiece.shape[r][c]) continue
-      const ny=tPiece.y+r
-      if(ny<0){
-        if(gameCheats.tetris?.noGameOver){
-          resetTetris()
-          tRunning=true
-          requestAnimationFrame(tLoop)
-          return
-        }
-        tGameOver()
-        return
+    const drawCell = (p, fill, glow) => {
+      const px = p.x*snake.size;
+      const py = p.y*snake.size;
+      ctx.fillStyle = fill;
+      ctx.fillRect(px+2, py+2, snake.size-4, snake.size-4);
+      if(glow){
+        ctx.strokeStyle = "rgba(255,181,90,.55)";
+        ctx.strokeRect(px+1.5, py+1.5, snake.size-3, snake.size-3);
       }
-      tBoard[ny][tPiece.x+c]=tPiece.type
+    };
+
+    for(const o of snake.obstacles) drawCell(o, "rgba(255,255,255,.12)");
+    if(snake.poison) drawCell(snake.poison, "rgba(255,77,77,.30)", true);
+    drawCell(snake.food, "rgba(255,122,24,.35)", true);
+
+    const inv = performance.now() < APP.invincibleUntil;
+    for(let i=snake.body.length-1;i>=0;i--){
+      const b = snake.body[i];
+      const isHead = i===0;
+      drawCell(b, isHead ? (inv ? "rgba(68,208,122,.45)" : "rgba(255,181,90,.38)") : "rgba(255,122,24,.20)", isHead);
+    }
+
+    if(!snake.alive){
+      ctx.fillStyle = "rgba(0,0,0,.55)";
+      ctx.fillRect(0,0,w,h);
+      ctx.fillStyle = "rgba(244,244,247,.95)";
+      ctx.font = "700 32px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Game Over", w/2, h/2 - 10);
+      ctx.font = "14px system-ui";
+      ctx.fillStyle = "rgba(244,244,247,.75)";
+      ctx.fillText("Press Start to try again", w/2, h/2 + 22);
+    }else if(!GAME.running){
+      ctx.fillStyle = "rgba(0,0,0,.40)";
+      ctx.fillRect(0,0,w,h);
+      ctx.fillStyle = "rgba(244,244,247,.92)";
+      ctx.font = "700 26px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Press Start", w/2, h/2);
+      ctx.font = "13px system-ui";
+      ctx.fillStyle = "rgba(244,244,247,.72)";
+      ctx.fillText("or Space / tap canvas", w/2, h/2 + 28);
     }
   }
-  clearLines()
-  tPiece=makePiece()
-  if(tCollide()){
-    if(gameCheats.tetris?.noGameOver){
-      resetTetris()
-      tRunning=true
-      requestAnimationFrame(tLoop)
-      return
-    }
-    tGameOver()
-  }
-}
-function clearLines(){
-  let cleared=0
-  for(let r=TR-1;r>=0;r--){
-    if(tBoard[r].every(v=>v!==0)){
-      tBoard.splice(r,1)
-      tBoard.unshift(Array(TC).fill(0))
-      cleared++
-      r++
-    }
-  }
-  if(cleared){
-    tScore+=[0,100,300,500,800][cleared]*tLevel
-    tLines+=cleared
-    tLevel=Math.max(tLevel,Math.floor(tLines/10)+1)
-    $('tScore').textContent=String(tScore)
-    $('tLines').textContent=String(tLines)
-    $('tLevel').textContent=String(tLevel)
-    sfx.unlock();sfx.tone(720,0.06,0.10)
-    if(tScore>(gameCheats.tetris?.highScore||0)){
-      gameCheats.tetris.highScore=tScore
-      $('tBest').textContent=String(tScore)
-      saveSettingsDebounced()
-    }
-  }
-}
-function drawCell(c,r,col){
-  const x=c*TS,y=r*TS
-  tetrisCtx.fillStyle=col
-  tetrisCtx.fillRect(x+1,y+1,TS-2,TS-2)
-  tetrisCtx.fillStyle='rgba(255,255,255,.12)'
-  tetrisCtx.fillRect(x+2,y+2,TS-6,3)
-}
-function drawTetris(){
-  const W=tetrisCanvas.width,H=tetrisCanvas.height
-  tetrisCtx.fillStyle='#050505'
-  tetrisCtx.fillRect(0,0,W,H)
-  tetrisCtx.strokeStyle='rgba(255,106,0,0.06)'
-  tetrisCtx.lineWidth=0.5
-  for(let r=0;r<=TR;r++){tetrisCtx.beginPath();tetrisCtx.moveTo(0,r*TS);tetrisCtx.lineTo(W,r*TS);tetrisCtx.stroke()}
-  for(let c=0;c<=TC;c++){tetrisCtx.beginPath();tetrisCtx.moveTo(c*TS,0);tetrisCtx.lineTo(c*TS,H);tetrisCtx.stroke()}
 
-  for(let r=0;r<TR;r++) for(let c=0;c<TC;c++) if(tBoard[r][c]) drawCell(c,r,T_COLORS[tBoard[r][c]])
+  function step(dt){
+    if(!GAME.running || !snake.alive) return;
 
-  if(!tPiece) return
-  for(let r=0;r<tPiece.shape.length;r++){
-    for(let c=0;c<tPiece.shape[r].length;c++){
-      if(!tPiece.shape[r][c]) continue
-      drawCell(tPiece.x+c,tPiece.y+r,T_COLORS[tPiece.type])
-    }
-  }
-}
-function startTetris(){
-  stopTetris()
-  resetTetris()
-  tRunning=true
-  tDrop=0
-  tLast=0
-  requestAnimationFrame(tLoop)
-}
-function stopTetris(){tRunning=false}
-function tLoop(time=0){
-  if(!tRunning) return
-  const dt=time-tLast
-  tLast=time
-  tDrop+=dt
-  const speed=Math.max(85,700-(tLevel-1)*60)
-  if(tDrop>=speed){
-    tMove(0,1)
-    tDrop=0
-  }
-  drawTetris()
-  requestAnimationFrame(tLoop)
-}
-function tGameOver(){
-  tRunning=false
-  drawTetris()
-  sfx.unlock();sfx.tone(140,0.12,0.12)
-  const W=tetrisCanvas.width,H=tetrisCanvas.height
-  tetrisCtx.fillStyle='rgba(0,0,0,.75)'
-  tetrisCtx.fillRect(0,0,W,H)
-  tetrisCtx.fillStyle='#ff6a00'
-  tetrisCtx.font='900 22px Inter'
-  tetrisCtx.textAlign='center'
-  tetrisCtx.fillText('GAME OVER',W/2,H/2-12)
-  tetrisCtx.fillStyle='#ffb100'
-  tetrisCtx.font='900 14px Inter'
-  tetrisCtx.fillText('Score: '+tScore,W/2,H/2+14)
-}
+    const speed = snake.cheats.slow ? Math.max(7, snake.baseSpeed - 6) : snake.baseSpeed + Math.min(18, Math.floor(GAME.score/4));
+    snake.stepAcc += dt * speed;
 
-function resetRunner(){
-  rRunning=false
-  cancelAnimationFrame(rAnim)
-  rLast=0
-  rDist=0
-  rSpeed=220
-  rPlayer={x:70,y:210,v:0,ground:210,rad:16,canDash:true,dashing:false}
-  rObstacles=[]
-  rSpawn=0
-  $('rDist').textContent='0'
-  drawRunner(0)
-}
-function startRunner(){
-  resetRunner()
-  rRunning=true
-  rLast=0
-  rAnim=requestAnimationFrame(rLoop)
-}
-function stopRunner(){
-  rRunning=false
-  cancelAnimationFrame(rAnim)
-}
-function rLoop(t){
-  if(!rRunning) return
-  if(!rLast) rLast=t
-  const dt=(t-rLast)/1000
-  rLast=t
-  const slow=gameCheats.runner?.slow
-  const speed=(slow? rSpeed*0.72 : rSpeed)
-  rDist += speed*dt
-  $('rDist').textContent=String(Math.floor(rDist/10))
-  if(Math.floor(rDist/10)>(gameCheats.runner?.best||0)){
-    gameCheats.runner.best=Math.floor(rDist/10)
-    $('rBest').textContent=String(gameCheats.runner.best)
-    saveSettingsDebounced()
-  }
-
-  rPlayer.v += 1200*dt
-  rPlayer.y += rPlayer.v*dt
-  if(rPlayer.y>rPlayer.ground){rPlayer.y=rPlayer.ground;rPlayer.v=0;rPlayer.canDash=true;rPlayer.dashing=false}
-
-  rSpawn -= dt
-  if(rSpawn<=0){
-    const gap = clamp(1.05 - (rDist/8000), 0.48, 1.05)
-    rSpawn = gap
-    const h = 18 + Math.random()*26
-    const w = 14 + Math.random()*22
-    rObstacles.push({x:runnerCanvas.width+40,y:rPlayer.ground-h,w,h})
-  }
-  rObstacles.forEach(o=>o.x -= speed*dt)
-  rObstacles = rObstacles.filter(o=>o.x>-80)
-
-  if(!gameCheats.runner?.noCrash){
-    for(const o of rObstacles){
-      const px=rPlayer.x, py=rPlayer.y, pr=rPlayer.rad
-      const cx=clamp(px, o.x, o.x+o.w)
-      const cy=clamp(py, o.y, o.y+o.h)
-      const dx=px-cx, dy=py-cy
-      if(dx*dx+dy*dy < pr*pr){
-        rGameOver()
-        return
+    if(snake.cheats.magnet){
+      const head = snake.body[0];
+      const dx = head.x - snake.food.x;
+      const dy = head.y - snake.food.y;
+      if(Math.abs(dx)+Math.abs(dy) > 2){
+        snake.food.x += dx>0 ? 1 : -1;
+        snake.food.y += dy>0 ? 1 : -1;
+        snake.food.x = (snake.food.x + snake.cols) % snake.cols;
+        snake.food.y = (snake.food.y + snake.rows) % snake.rows;
       }
     }
-  }
 
-  drawRunner(t)
-  rAnim=requestAnimationFrame(rLoop)
-}
-function drawRunner(t){
-  const W=runnerCanvas.width,H=runnerCanvas.height
-  runnerCtx.fillStyle='#050505'
-  runnerCtx.fillRect(0,0,W,H)
+    while(snake.stepAcc >= 1){
+      snake.stepAcc -= 1;
+      snake.dir = snake.nextDir;
 
-  const g=runnerCtx.createLinearGradient(0,0,0,H)
-  g.addColorStop(0,'rgba(255,106,0,0.05)')
-  g.addColorStop(1,'rgba(255,177,0,0.02)')
-  runnerCtx.fillStyle=g
-  runnerCtx.fillRect(0,0,W,H)
+      const head = { ...snake.body[0] };
+      head.x += snake.dir.x;
+      head.y += snake.dir.y;
 
-  runnerCtx.strokeStyle='rgba(255,106,0,0.12)'
-  runnerCtx.lineWidth=2
-  runnerCtx.beginPath()
-  runnerCtx.moveTo(0,rPlayer.ground+18)
-  runnerCtx.lineTo(W,rPlayer.ground+18)
-  runnerCtx.stroke()
+      if(snake.cheats.wrap){
+        head.x = (head.x + snake.cols) % snake.cols;
+        head.y = (head.y + snake.rows) % snake.rows;
+      }
 
-  const stars = 30
-  for(let i=0;i<stars;i++){
-    const x=(i*97 + Math.floor((t||0)/8))%W
-    const y=(i*41)%140
-    runnerCtx.fillStyle='rgba(255,255,255,0.06)'
-    runnerCtx.fillRect(x,y,2,2)
-  }
+      const hitWall = head.x<0 || head.x>=snake.cols || head.y<0 || head.y>=snake.rows;
+      const hitSelf = snake.body.some((b,i)=> i>0 && b.x===head.x && b.y===head.y);
+      const hitObs = snake.obstacles.some(o=>o.x===head.x && o.y===head.y);
+      const inv = performance.now() < APP.invincibleUntil;
 
-  rObstacles.forEach(o=>{
-    runnerCtx.fillStyle='rgba(255,177,0,0.85)'
-    runnerCtx.fillRect(o.x,o.y,o.w,o.h)
-    runnerCtx.fillStyle='rgba(0,0,0,0.28)'
-    runnerCtx.fillRect(o.x+2,o.y+2,o.w-4,4)
-  })
+      if((hitWall || hitSelf || hitObs) && !inv){
+        snake.alive = false;
+        GAME.running = false;
+        sfx(120, 0.16, "square", 0.08);
+        if(GAME.score > GAME.bestSnake) GAME.bestSnake = GAME.score;
+        toast("Game over");
+        draw();
+        updateGameStats();
+        return;
+      }
 
-  runnerCtx.fillStyle=rPlayer.dashing?'rgba(34,197,94,0.95)':'rgba(255,106,0,0.95)'
-  runnerCtx.beginPath()
-  runnerCtx.arc(rPlayer.x,rPlayer.y,rPlayer.rad,0,Math.PI*2)
-  runnerCtx.fill()
-  runnerCtx.fillStyle='rgba(255,255,255,0.12)'
-  runnerCtx.beginPath()
-  runnerCtx.arc(rPlayer.x-5,rPlayer.y-6,5,0,Math.PI*2)
-  runnerCtx.fill()
-}
-function rJump(){
-  if(!rRunning) return
-  if(rPlayer.y>=rPlayer.ground-0.5){
-    rPlayer.v=-520
-    sfx.unlock();sfx.tone(560,0.05,0.10)
-  }
-}
-function rDash(){
-  if(!rRunning) return
-  if(rPlayer.canDash){
-    rPlayer.canDash=false
-    rPlayer.dashing=true
-    rPlayer.v=-240
-    sfx.unlock();sfx.tone(900,0.03,0.10)
-    setTimeout(()=>{rPlayer.dashing=false},180)
-  }
-}
-function rGameOver(){
-  rRunning=false
-  sfx.unlock();sfx.tone(150,0.12,0.14)
-  drawRunner(0)
-  runnerCtx.fillStyle='rgba(0,0,0,.75)'
-  runnerCtx.fillRect(0,0,runnerCanvas.width,runnerCanvas.height)
-  runnerCtx.fillStyle='#ff6a00'
-  runnerCtx.font='900 28px Inter'
-  runnerCtx.textAlign='center'
-  runnerCtx.fillText('CRASHED',runnerCanvas.width/2,runnerCanvas.height/2-8)
-  runnerCtx.fillStyle='#ffb100'
-  runnerCtx.font='900 14px Inter'
-  runnerCtx.fillText('Distance: '+Math.floor(rDist/10),runnerCanvas.width/2,runnerCanvas.height/2+18)
-}
+      snake.body.unshift(head);
 
-function switchGame(mode){
-  const snake=mode==='snake'
-  const tetris=mode==='tetris'
-  const runner=mode==='runner'
+      if(head.x===snake.food.x && head.y===snake.food.y){
+        snake.grow += 1;
+        GAME.score += 1;
+        sfx(660, 0.06, "sine", 0.04);
+        if(snake.hard && GAME.score % 3 === 0) snake.obstacles.push(placeFree(snake));
+        if(snake.hard && !snake.poison && Math.random() < 0.20) snake.poison = placeFree(snake);
+        snake.food = placeFree(snake);
+        updateGameStats();
+      }
 
-  $('tabSnake').classList.toggle('active',snake)
-  $('tabTetris').classList.toggle('active',tetris)
-  $('tabRunner').classList.toggle('active',runner)
+      if(snake.poison && head.x===snake.poison.x && head.y===snake.poison.y){
+        snake.poison = null;
+        snake.grow = Math.max(0, snake.grow - 2);
+        GAME.score = Math.max(0, GAME.score - 2);
+        sfx(220, 0.10, "sawtooth", 0.05);
+        updateGameStats();
+      }
 
-  $('snakeCanvas').style.display=snake?'block':'none'
-  $('tetrisCanvas').style.display=tetris?'block':'none'
-  $('runnerCanvas').style.display=runner?'block':'none'
-
-  $('snakeScoreBox').style.display=snake?'block':'none'
-  $('tetrisScoreBox').style.display=tetris?'block':'none'
-  $('runnerScoreBox').style.display=runner?'block':'none'
-
-  $('snakeCheats').style.display=snake?'block':'none'
-  $('tetrisCheats').style.display=tetris?'block':'none'
-  $('runnerCheats').style.display=runner?'block':'none'
-
-  $('gTitle').textContent=snake?'Snake Break':''
-  if(tetris) $('gTitle').textContent='Tetris Break'
-  if(runner) $('gTitle').textContent='Pulse Runner'
-}
-
-function applyMusicMode(){
-  const mode=nerdPrefs.musicMode||'off'
-  if(mode==='off'){
-    audio.pause()
-    audio.src=''
-    return
-  }
-  const url=MUSIC_URLS[mode]
-  if(!url) return
-  if(audio.src!==url) audio.src=url
-  const play=()=>audio.play().catch(()=>{})
-  if(document.visibilityState==='visible') play()
-}
-
-function tryQuickMute(){
-  if(audio.paused) return
-  audio.pause()
-  toast('Audio','Muted','warn')
-}
-
-function initAuth(){
-  let mode='signin'
-  const setTabs=()=>{
-    $('tabSignIn').classList.toggle('active',mode==='signin')
-    $('tabSignUp').classList.toggle('active',mode==='signup')
-    $('authGo').textContent=mode==='signin'?'Enter':'Create'
-    $('authErr').textContent=''
-  }
-  $('tabSignIn').onclick=()=>{mode='signin';setTabs()}
-  $('tabSignUp').onclick=()=>{mode='signup';setTabs()}
-
-  $('authGo').onclick=async ()=>{
-    const email=$('authEmail').value.trim()
-    const pass=$('authPass').value
-    if(!email||!pass){$('authErr').textContent='Enter email + password';return}
-    $('authErr').textContent=''
-    try{
-      if(mode==='signup'){
-        const {error}=await supabase.auth.signUp({email,password:pass})
-        if(error){$('authErr').textContent=error.message;return}
-        toast('Check email','Confirm your account then sign in','ok')
+      if(snake.grow>0){
+        snake.grow -= 1;
       }else{
-        const {error}=await supabase.auth.signInWithPassword({email,password:pass})
-        if(error){$('authErr').textContent=error.message;return}
-      }
-    }catch(e){
-      $('authErr').textContent='Auth failed'
-    }
-  }
-
-  $('authMagic').onclick=async ()=>{
-    const email=$('authEmail').value.trim()
-    if(!email){$('authErr').textContent='Enter email';return}
-    const {error}=await supabase.auth.signInWithOtp({email,options:{emailRedirectTo:location.href}})
-    if(error){$('authErr').textContent=error.message;return}
-    toast('Magic link sent','Check your email','ok')
-  }
-
-  $('authReset').onclick=async ()=>{
-    const email=$('authEmail').value.trim()
-    if(!email){$('authErr').textContent='Enter email';return}
-    const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.href})
-    if(error){$('authErr').textContent=error.message;return}
-    toast('Reset sent','Check your email','ok')
-  }
-
-  setTabs()
-}
-
-async function signOut(){
-  tryQuickMute()
-  await supabase.auth.signOut()
-  location.reload()
-}
-
-function wireUI(){
-  $('btnNew').onclick=createNote
-  $('saveNow').onclick=saveNote
-  $('delNote').onclick=deleteNote
-
-  $('modeEdit').onclick=()=>setView('editor')
-  $('modePreview').onclick=()=>setView('preview')
-  $('modeGraph').onclick=()=>setView('graph')
-
-  $('toggleFull').onclick=toggleFullPreview
-  $('toggleSplit').onclick=()=>{
-    if(splitMode==='split') setSplit('editor')
-    else setSplit('split')
-  }
-
-  $('doPdf').onclick=openPdfModal
-  $('pdfClose').onclick=closePdfModal
-  $('pdfCancel').onclick=closePdfModal
-  $('pdfGo').onclick=exportPdf
-
-  $('openSettings').onclick=openSettings
-  $('setClose').onclick=closeSettings
-  $('setCancel').onclick=closeSettings
-  $('setSave').onclick=saveSettingsFromModal
-
-  $('search').oninput=renderList
-  $('sort').onchange=()=>{
-    uiPrefs.sort=$('sort').value
-    saveSettingsDebounced()
-    renderList()
-  }
-
-  $('openPalette').onclick=openPalette
-  $('paletteBack').onclick=e=>{if(e.target.id==='paletteBack') closePalette()}
-  $('paletteQ').oninput=()=>renderPalette($('paletteQ').value)
-  $('paletteQ').onkeydown=e=>{
-    if(e.key==='Escape'){closePalette();return}
-    if(e.key==='Enter'){
-      const first=$('paletteList').querySelector('.pItem')
-      if(first) first.click()
-    }
-  }
-
-  $('schoolSelect').onchange=()=>{
-    currentSchool=$('schoolSelect').value
-    saveSettingsDebounced()
-    autosave()
-    updateCrumb()
-    toast('School',currentSchool,'ok')
-  }
-
-  $('title').oninput=()=>{autosave();updatePreview();updateCrumb();renderList()}
-  $('body').oninput=()=>{autosave();updatePreview();refreshLinksUI()}
-  $('grade').onchange=()=>{autosave();updateCrumb();renderList();refreshLinksUI()}
-
-  document.querySelectorAll('.tool').forEach(t=>{
-    t.onclick=()=>applyMd(t.getAttribute('data-md'))
-  })
-
-  $('linkSearch').oninput=searchLinkCandidates
-  $('closeDrop').onclick=()=>{$('cardDrop').style.display='none';$('linkSearch').value=''}
-  $('unlinkAll').onclick=unlinkAll
-  $('jumpPreview').onclick=()=>setView('preview')
-  $('jumpGraph').onclick=()=>setView('graph')
-  $('linkAllMentions').onclick=linkAllMentions
-  $('backToEdit').onclick=()=>setView('editor')
-
-  $('tStart').onclick=startTimer
-  $('tPause').onclick=pauseTimer
-  $('tReset').onclick=resetTimer
-  $('mFocus').onclick=()=>setTimer(timerPresets.focus||25)
-  $('mBreak').onclick=()=>setTimer(timerPresets.break||5)
-  $('mLong').onclick=()=>setTimer(timerPresets.long||15)
-  $('mBreakGame').onclick=()=>{setTimer(timerPresets.break||5);setView('games')}
-
-  $('btnGames').onclick=()=>setView('games')
-
-  $('tabSnake').onclick=()=>{switchGame('snake');resetSnake()}
-  $('tabTetris').onclick=()=>{switchGame('tetris');resetTetris()}
-  $('tabRunner').onclick=()=>{switchGame('runner');resetRunner()}
-  $('gStart').onclick=()=>{
-    const snake=$('snakeCanvas').style.display!=='none'
-    const tetris=$('tetrisCanvas').style.display!=='none'
-    const runner=$('runnerCanvas').style.display!=='none'
-    if(snake) startSnake()
-    else if(tetris) startTetris()
-    else if(runner) startRunner()
-  }
-  $('gClose').onclick=()=>{
-    stopSnake()
-    stopTetris()
-    stopRunner()
-    setView('editor')
-  }
-
-  $('cSnakeNoDie').onchange=()=>{
-    gameCheats.snake.noDie=$('cSnakeNoDie').checked
-    saveSettings()
-    toast('Cheat','Snake No-Die '+(gameCheats.snake.noDie?'ON':'OFF'),'warn')
-  }
-  $('cSnakeGhost').onchange=()=>{
-    gameCheats.snake.ghost=$('cSnakeGhost').checked
-    saveSettings()
-    toast('Cheat','Snake Ghost '+(gameCheats.snake.ghost?'ON':'OFF'),'warn')
-  }
-  $('cSnakeWrap').onchange=()=>{
-    gameCheats.snake.wrap=$('cSnakeWrap').checked
-    saveSettings()
-    toast('Cheat','Snake Wrap '+(gameCheats.snake.wrap?'ON':'OFF'),'warn')
-    if(snakeRunning) setSnakeInterval()
-  }
-  $('cSnakeNoObs').onchange=()=>{
-    gameCheats.snake.noObstacles=$('cSnakeNoObs').checked
-    if(gameCheats.snake.noObstacles) sObstacles=[]
-    saveSettings()
-    toast('Cheat','Snake Obstacles '+(gameCheats.snake.noObstacles?'OFF':'ON'),'warn')
-    drawSnake()
-  }
-  $('cSnakeNoPoison').onchange=()=>{
-    gameCheats.snake.noPoison=$('cSnakeNoPoison').checked
-    if(gameCheats.snake.noPoison) sPoison=null
-    saveSettings()
-    toast('Cheat','Snake Poison '+(gameCheats.snake.noPoison?'OFF':'ON'),'warn')
-    drawSnake()
-  }
-  $('cSnakeSpeed').oninput=()=>{
-    const v=parseInt($('cSnakeSpeed').value,10)
-    gameCheats.snake.speed=v
-    $('cSnakeSpeedV').textContent=v+'ms'
-    saveSettings()
-    if(snakeRunning) setSnakeInterval()
-  }
-  $('cSnakeBoost').onchange=()=>{
-    gameCheats.snake.boost=$('cSnakeBoost').checked
-    saveSettings()
-    toast('Cheat','Snake Boost '+(gameCheats.snake.boost?'ON':'OFF'),'warn')
-  }
-
-  $('cTNoOver').onchange=()=>{
-    gameCheats.tetris.noGameOver=$('cTNoOver').checked
-    saveSettingsDebounced()
-    toast('Tetris','No Game Over '+(gameCheats.tetris.noGameOver?'ON':'OFF'),'warn')
-  }
-  $('cTLevel').onchange=()=>{
-    const v=clamp(parseInt($('cTLevel').value||1,10),1,20)
-    gameCheats.tetris.startLevel=v
-    $('cTLevel').value=v
-    saveSettingsDebounced()
-    toast('Tetris','Start Level '+v,'warn')
-  }
-
-  $('cRNoCrash').onchange=()=>{
-    gameCheats.runner.noCrash=$('cRNoCrash').checked
-    saveSettingsDebounced()
-    toast('Runner','No Crash '+(gameCheats.runner.noCrash?'ON':'OFF'),'warn')
-  }
-  $('cRSlow').onchange=()=>{
-    gameCheats.runner.slow=$('cRSlow').checked
-    saveSettingsDebounced()
-    toast('Runner','Slow Obstacles '+(gameCheats.runner.slow?'ON':'OFF'),'warn')
-  }
-
-  $('gReset').onclick=()=>{buildGraph();renderGraph()}
-  $('gPhys').onclick=()=>{graphPhysics=!graphPhysics;toast('Graph','Physics '+(graphPhysics?'ON':'OFF'),'warn')}
-  $('gCenter').onclick=()=>{gView={x:0,y:0,scale:1};renderGraph()}
-
-  $('signOut').onclick=signOut
-
-  $('musicMode').onchange=()=>{nerdPrefs.musicMode=$('musicMode').value;saveSettingsDebounced();applyMusicMode()}
-  $('sfxMode').onchange=()=>{nerdPrefs.sfxMode=$('sfxMode').value;saveSettingsDebounced()}
-
-  document.addEventListener('keydown',e=>{
-    if((e.altKey && e.key.toLowerCase()==='m') || e.key==='`') { tryQuickMute(); return }
-
-    if(e.key==='Escape'){
-      if($('paletteBack').style.display==='flex') closePalette()
-      if($('modalPdf').style.display==='flex') closePdfModal()
-      if($('modalSettings').style.display==='flex') closeSettings()
-      if(document.body.classList.contains('previewFull')) toggleFullPreview()
-      closeMobileSidebar()
-      return
-    }
-    const k=e.key.toLowerCase()
-    if((e.ctrlKey||e.metaKey) && k==='k'){e.preventDefault();openPalette();return}
-    if((e.ctrlKey||e.metaKey) && k==='s'){e.preventDefault();saveNote();return}
-
-    if($('viewGames').classList.contains('active')){
-      const snake=$('snakeCanvas').style.display!=='none'
-      const tetris=$('tetrisCanvas').style.display!=='none'
-      const runner=$('runnerCanvas').style.display!=='none'
-
-      if(snake && snakeRunning){
-        if((k==='arrowup'||k==='w') && dir.y===0) dir={x:0,y:-1}
-        else if((k==='arrowdown'||k==='s') && dir.y===0) dir={x:0,y:1}
-        else if((k==='arrowleft'||k==='a') && dir.x===0) dir={x:-1,y:0}
-        else if((k==='arrowright'||k==='d') && dir.x===0) dir={x:1,y:0}
-        else if(k==='shift' && gameCheats.snake?.boost){
-          if(snakeRunning){
-            clearInterval(snakeInterval)
-            snakeInterval=setInterval(tickSnake, Math.max(35,(gameCheats.snake.speed||110)*0.55))
-            setTimeout(()=>{ if(snakeRunning){ clearInterval(snakeInterval); snakeInterval=setInterval(tickSnake,gameCheats.snake.speed||110)} },260)
-          }
-        }
-      }else if(tetris && tRunning){
-        if(e.key==='ArrowLeft') tMove(-1,0)
-        else if(e.key==='ArrowRight') tMove(1,0)
-        else if(e.key==='ArrowDown') tMove(0,1)
-        else if(e.key==='ArrowUp') tRotate()
-        else if(e.key===' '){tHardDrop();e.preventDefault()}
-      }else if(runner && rRunning){
-        if(e.key===' ' || e.key==='ArrowUp') {rJump();e.preventDefault()}
-        else if(e.key==='Shift') {rDash();e.preventDefault()}
+        snake.body.pop();
       }
     }
-  })
 
-  document.addEventListener('click',()=>{try{sfx.unlock()}catch(e){}})
+    draw();
+  }
 
-  $('backdrop').onclick=closeMobileSidebar
-  $('mobileMenu').onclick=openMobileSidebar
+  GAME.snake.step = step;
+  GAME.snake.draw = draw;
+  if(drawOnly) draw();
+}
 
-  window.addEventListener('resize',maybeMobileUI)
-  maybeMobileUI()
+function snakeInput(dx,dy){
+  const s = GAME.snake;
+  if(!s || !s.alive) return;
+  if(dx === -s.dir.x && dy === -s.dir.y) return;
+  s.nextDir = { x:dx, y:dy };
+}
 
-  window.addEventListener('online',()=>{if(activeId) setStatus('saved')})
-  window.addEventListener('offline',()=>setStatus('offline'))
+function initBeat(drawOnly){
+  const canvas = gameCanvas();
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
 
-  document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState!=='visible'){audio.pause();return}
-    if(nerdPrefs.musicMode && nerdPrefs.musicMode!=='off') applyMusicMode()
-  })
+  const beat = {
+    ctx, canvas,
+    x: 140,
+    y: canvas.height - 120,
+    vy: 0,
+    g: 2400,
+    jump: -820,
+    ground: canvas.height - 90,
+    alive: true,
+    speed: 420,
+    blocks: [],
+    score: 0
+  };
+
+  function spawn(){
+    const h = 38 + Math.floor(Math.random()*60);
+    const w = 28 + Math.floor(Math.random()*42);
+    const gap = 240 + Math.floor(Math.random()*180);
+    const y = beat.ground - h;
+    const x = canvas.width + gap;
+    beat.blocks.push({ x, y, w, h });
+  }
+
+  beat.blocks = [];
+  for(let i=0;i<4;i++) spawn();
+
+  GAME.beat = beat;
+  GAME.running = false;
+  GAME.score = 0;
+  updateGameStats();
+
+  function rectHit(a,b){
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  function draw(){
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = "rgba(0,0,0,.25)";
+    ctx.fillRect(0,0,w,h);
+
+    const prog = Math.min(1, (GAME.score % 20)/20);
+    ctx.fillStyle = "rgba(255,255,255,.10)";
+    ctx.fillRect(18, 18, w-36, 10);
+    ctx.fillStyle = "rgba(255,122,24,.55)";
+    ctx.fillRect(18, 18, (w-36)*prog, 10);
+
+    ctx.fillStyle = "rgba(255,255,255,.08)";
+    ctx.fillRect(0, beat.ground + 38, w, h);
+
+    for(const b of beat.blocks){
+      ctx.fillStyle = "rgba(255,255,255,.12)";
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+      ctx.strokeStyle = "rgba(255,122,24,.35)";
+      ctx.strokeRect(b.x+0.5, b.y+0.5, b.w-1, b.h-1);
+    }
+
+    ctx.fillStyle = "rgba(255,181,90,.35)";
+    ctx.fillRect(beat.x, beat.y, 38, 38);
+    ctx.strokeStyle = "rgba(255,181,90,.75)";
+    ctx.strokeRect(beat.x+0.5, beat.y+0.5, 37, 37);
+
+    if(!beat.alive){
+      ctx.fillStyle = "rgba(0,0,0,.55)";
+      ctx.fillRect(0,0,w,h);
+      ctx.fillStyle = "rgba(244,244,247,.95)";
+      ctx.font = "700 30px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Try again", w/2, h/2 - 12);
+      ctx.font = "14px system-ui";
+      ctx.fillStyle = "rgba(244,244,247,.72)";
+      ctx.fillText("Press Start or Space / tap", w/2, h/2 + 18);
+    }else if(!GAME.running){
+      ctx.fillStyle = "rgba(0,0,0,.40)";
+      ctx.fillRect(0,0,w,h);
+      ctx.fillStyle = "rgba(244,244,247,.92)";
+      ctx.font = "700 26px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Press Start", w/2, h/2);
+      ctx.font = "13px system-ui";
+      ctx.fillStyle = "rgba(244,244,247,.72)";
+      ctx.fillText("Space / tap to jump", w/2, h/2 + 28);
+    }
+  }
+
+  function step(dt){
+    if(!GAME.running || !beat.alive) return;
+
+    beat.vy += beat.g * dt;
+    beat.y += beat.vy * dt;
+    if(beat.y > beat.ground){
+      beat.y = beat.ground;
+      beat.vy = 0;
+    }
+
+    const speed = beat.speed + Math.min(900, GAME.score*10);
+    for(const b of beat.blocks) b.x -= speed * dt;
+
+    if(beat.blocks.length && beat.blocks[0].x + beat.blocks[0].w < -50){
+      beat.blocks.shift();
+      GAME.score += 1;
+      sfx(520, 0.05, "triangle", 0.035);
+      updateGameStats();
+      spawn();
+    }
+
+    const player = { x: beat.x, y: beat.y, w: 38, h: 38 };
+    for(const b of beat.blocks){
+      if(rectHit(player, b)){
+        beat.alive = false;
+        GAME.running = false;
+        sfx(140, 0.16, "square", 0.07);
+        if(GAME.score > GAME.bestBeat) GAME.bestBeat = GAME.score;
+        updateGameStats();
+        toast("Crashed");
+        draw();
+        return;
+      }
+    }
+
+    draw();
+  }
+
+  GAME.beat.step = step;
+  GAME.beat.draw = draw;
+  if(drawOnly) draw();
+}
+
+function beatJump(){
+  const b = GAME.beat;
+  if(!b || !b.alive) return;
+  if(b.y >= b.ground - 1){
+    b.vy = b.jump;
+    sfx(740, 0.04, "sine", 0.03);
+  }
+}
+
+function setGameMode(m){
+  GAME.mode = m;
+  if(el("gameTitle")) el("gameTitle").textContent = m==="snake" ? "Snake: Hard Mode" : "BeatJump";
+  if(el("gameHint")) el("gameHint").textContent = m==="snake" ? "Arrow keys / WASD. Tap to turn. Space to restart." : "Space / tap to jump. Survive and beat your best.";
+  if(m==="snake") initSnake(true); else initBeat(true);
+  updateGameStats();
+}
+
+function startGame(){
+  if(GAME.mode==="snake"){
+    if(!GAME.snake) initSnake(true);
+    if(!GAME.snake.alive) initSnake(true);
+    GAME.running = true;
+    sfx(440, 0.05, "sine", 0.03);
+  }else{
+    if(!GAME.beat) initBeat(true);
+    if(!GAME.beat.alive) initBeat(true);
+    GAME.running = true;
+    sfx(440, 0.05, "sine", 0.03);
+  }
+}
+
+function resetGame(){
+  GAME.running = false;
+  if(GAME.mode==="snake") initSnake(true); else initBeat(true);
+}
+
+function gameLoop(t){
+  const dt = GAME.last ? Math.min(0.05, (t - GAME.last)/1000) : 0;
+  GAME.last = t;
+  if(GAME.mode==="snake" && GAME.snake) GAME.snake.step(dt);
+  if(GAME.mode==="beat" && GAME.beat) GAME.beat.step(dt);
+  requestAnimationFrame(gameLoop);
+}
+
+function activateInvincible(){
+  APP.invincibleUntil = performance.now() + 10000;
+  toast("Invincible 10s");
+  sfx(880, 0.08, "triangle", 0.04);
+}
+
+function clearObstacles(){
+  if(GAME.snake){
+    GAME.snake.obstacles = [];
+    GAME.snake.poison = null;
+    toast("Cleared obstacles");
+    if(GAME.snake.draw) GAME.snake.draw();
+  }
+}
+
+function addLength(){
+  if(GAME.snake){
+    GAME.snake.grow += 5;
+    toast("+5 length");
+  }
+}
+
+let timer = { mode:"focus", running:false, remaining: 1500, last:0, focus:25*60, brk:5*60 };
+
+function timerRender(){
+  const m = Math.floor(timer.remaining/60);
+  const s = Math.floor(timer.remaining%60);
+  if(el("timerDisplay")) el("timerDisplay").textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  if(el("timerState")) el("timerState").textContent = timer.running ? (timer.mode==="focus" ? "Focusing" : "Break") : "Ready";
+}
+
+function timerSetFromInputs(){
+  const f = Number(el("focusMins")?.value ?? 25);
+  const b = Number(el("breakMins")?.value ?? 5);
+  timer.focus = (Number.isFinite(f) && f>0 && f<600) ? Math.round(f*60) : 1500;
+  timer.brk = (Number.isFinite(b) && b>0 && b<120) ? Math.round(b*60) : 300;
+  if(!timer.running){
+    timer.remaining = timer.mode==="focus" ? timer.focus : timer.brk;
+    timerRender();
+  }
+}
+
+function timerStart(){
+  timerSetFromInputs();
+  timer.running = true;
+  timer.last = performance.now();
+  sfx(520, 0.04, "triangle", 0.03);
+}
+
+function timerPause(){
+  timer.running = false;
+  sfx(260, 0.04, "triangle", 0.03);
+}
+
+function timerReset(){
+  timer.running = false;
+  timer.mode = "focus";
+  timer.remaining = timer.focus;
+  timerRender();
+}
+
+function timerTick(){
+  const now = performance.now();
+  if(timer.running){
+    const dt = (now - timer.last)/1000;
+    timer.last = now;
+    timer.remaining -= dt;
+    if(timer.remaining <= 0){
+      timer.mode = (timer.mode==="focus") ? "break" : "focus";
+      timer.remaining = timer.mode==="focus" ? timer.focus : timer.brk;
+      sfx(880, 0.10, "sine", 0.05);
+      toast(timer.mode==="focus" ? "Back to focus" : "Break time");
+    }
+    timerRender();
+  }
+  requestAnimationFrame(timerTick);
+}
+
+function showTab(name){
+  qsa(".navbtn").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
+  const panels = ["notes","graph","games","timer","settings"];
+  for(const p of panels){
+    const sec = el(`tab-${p}`);
+    if(sec) sec.classList.toggle("hidden", p!==name);
+  }
+  if(el("panelTitle")) el("panelTitle").textContent = name.charAt(0).toUpperCase()+name.slice(1);
+  if(name==="graph") reloadGraph();
+  if(name==="games" && !GAME.snake && !GAME.beat) setGameMode("snake");
+}
+
+function openAuthModal(open){
+  const m = el("authModal");
+  if(m) m.classList.toggle("hidden", !open);
+  const msg = el("authMsg");
+  if(msg) msg.textContent = "—";
+}
+
+async function signIn(){
+  const email = el("authEmail")?.value?.trim() || "";
+  const password = el("authPass")?.value || "";
+  if(el("authMsg")) el("authMsg").textContent = "Signing in...";
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if(error){
+    if(el("authMsg")) el("authMsg").textContent = error.message;
+    return;
+  }
+  if(data?.user){
+    if(el("authMsg")) el("authMsg").textContent = "Signed in";
+    openAuthModal(false);
+  }
+}
+
+async function signUp(){
+  const email = el("authEmail")?.value?.trim() || "";
+  const password = el("authPass")?.value || "";
+  if(el("authMsg")) el("authMsg").textContent = "Signing up...";
+  const { data, error } = await sb.auth.signUp({ email, password });
+  if(error){
+    if(el("authMsg")) el("authMsg").textContent = error.message;
+    return;
+  }
+  if(data?.session){
+    if(el("authMsg")) el("authMsg").textContent = "Account created and signed in";
+    openAuthModal(false);
+  }else{
+    if(el("authMsg")) el("authMsg").textContent = "Account created. Check email to confirm (if enabled).";
+  }
+}
+
+async function logout(){
+  await sb.auth.signOut();
+  toast("Logged out");
+}
+
+function bindUI(){
+  qsa(".navbtn").forEach(b=> b.addEventListener("click", ()=> showTab(b.dataset.tab)));
+
+  el("btnOpenAuth")?.addEventListener("click", ()=> openAuthModal(true));
+  el("btnCloseAuth")?.addEventListener("click", ()=> openAuthModal(false));
+  el("btnSignIn")?.addEventListener("click", signIn);
+  el("btnSignUp")?.addEventListener("click", signUp);
+  el("btnLogout")?.addEventListener("click", logout);
+
+  el("btnNewNote")?.addEventListener("click", createNote);
+  el("btnSaveNow")?.addEventListener("click", saveNow);
+  el("btnDelete")?.addEventListener("click", deleteNote);
+  el("btnPrint")?.addEventListener("click", printActive);
+  el("btnLink")?.addEventListener("click", linkNoteFlow);
+
+  el("noteSearch")?.addEventListener("input", renderNotesList);
+  el("filterSchool")?.addEventListener("change", renderNotesList);
+  el("filterCategory")?.addEventListener("change", renderNotesList);
+
+  ["noteTitle","noteSchool","noteCategory","noteGrade","noteTags","noteContent"].forEach(id=>{
+    el(id)?.addEventListener("input", ()=>{
+      if(!APP.activeNote) return;
+      setSaveState("Typing...");
+      scheduleAutosave();
+    });
+  });
+
+  el("btnSaveSettings")?.addEventListener("click", saveSettings);
+
+  el("nerdUnlock")?.addEventListener("click", unlockNerd);
+  el("btnPlayPause")?.addEventListener("click", playPauseMusic);
+  el("btnStop")?.addEventListener("click", stopMusic);
+  el("musicVol")?.addEventListener("input", applyMusicVol);
+  el("trackSelect")?.addEventListener("change", (e)=> setTrack(e.target.value));
+
+  el("rememberUnlock")?.addEventListener("change", (e)=>{
+    const on = !!e.target.checked;
+    if(on) localStorage.setItem("studyos_nerd_unlocked","1");
+    else localStorage.removeItem("studyos_nerd_unlocked");
+  });
+
+  el("sfxEnabled")?.addEventListener("change", (e)=>{ APP.sfxOn = !!e.target.checked; });
+  el("snakeHard")?.addEventListener("change", ()=>{ if(GAME.mode==="snake") initSnake(true); });
+
+  el("cheatWrap")?.addEventListener("change", (e)=>{ if(GAME.snake) GAME.snake.cheats.wrap = !!e.target.checked; });
+  el("cheatSlow")?.addEventListener("change", (e)=>{ if(GAME.snake) GAME.snake.cheats.slow = !!e.target.checked; });
+  el("cheatMagnet")?.addEventListener("change", (e)=>{ if(GAME.snake) GAME.snake.cheats.magnet = !!e.target.checked; });
+
+  el("btnInvincible")?.addEventListener("click", activateInvincible);
+  el("btnClearObs")?.addEventListener("click", clearObstacles);
+  el("btnAdd5")?.addEventListener("click", addLength);
+
+  el("btnGameSnake")?.addEventListener("click", ()=> setGameMode("snake"));
+  el("btnGameBeat")?.addEventListener("click", ()=> setGameMode("beat"));
+  el("btnGameStart")?.addEventListener("click", startGame);
+  el("btnGameReset")?.addEventListener("click", resetGame);
+
+  el("btnReloadGraph")?.addEventListener("click", reloadGraph);
+
+  el("btnTimerStart")?.addEventListener("click", timerStart);
+  el("btnTimerPause")?.addEventListener("click", timerPause);
+  el("btnTimerReset")?.addEventListener("click", timerReset);
+  el("focusMins")?.addEventListener("input", timerSetFromInputs);
+  el("breakMins")?.addEventListener("input", timerSetFromInputs);
+
+  const gc = el("gameCanvas");
+  if(gc){
+    gc.addEventListener("pointerdown", ()=>{
+      if(!GAME.running) startGame();
+      if(GAME.mode==="beat") beatJump();
+    });
+  }
+
+  window.addEventListener("keydown", (e)=>{
+    if(e.key === "`"){ quickMute(); return; }
+    if(e.key.toLowerCase() === "n" && !e.ctrlKey && !e.metaKey && !e.altKey){
+      if(document.activeElement && ["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName)) return;
+      createNote();
+      return;
+    }
+    if(e.key === "Escape"){ openAuthModal(false); return; }
+
+    if(GAME.mode==="snake"){
+      const k = e.key.toLowerCase();
+      if(k==="arrowup"||k==="w") snakeInput(0,-1);
+      if(k==="arrowdown"||k==="s") snakeInput(0,1);
+      if(k==="arrowleft"||k==="a") snakeInput(-1,0);
+      if(k==="arrowright"||k==="d") snakeInput(1,0);
+      if(k===" " && !GAME.running) startGame();
+    }else{
+      const k = e.key.toLowerCase();
+      if(k===" "){ if(!GAME.running) startGame(); beatJump(); }
+      if(k==="arrowup"||k==="w") beatJump();
+    }
+  });
 }
 
 async function boot(){
-  initAuth()
-  initSplitResize()
-  initGraph()
-  initGames()
-  wireUI()
+  bindUI();
+  setupNerdAudio();
+  timerRender();
+  timerTick();
+  requestAnimationFrame(gameLoop);
 
-  const sess=await supabase.auth.getSession()
-  if(sess.data?.session){
-    user=sess.data.session.user
-    $('authBack').style.display='none'
-    $('userEmail').textContent=user.email||'Signed in'
-    $('avatar').textContent=((user.email||'U')[0]||'U').toUpperCase()
-    try{
-      await ensureTables()
-      await ensureSettings()
-      await fetchNotes()
-      setSplit('split')
-      setStatus(navigator.onLine?'saved':'offline')
-    }catch(e){
-      console.error(e)
-      toast('Supabase setup needed',String(e.message||e),'bad')
-    }
-  }else{
-    $('authBack').style.display='flex'
+  const remembered = localStorage.getItem("studyos_nerd_unlocked")==="1";
+  if(remembered){
+    if(el("rememberUnlock")) el("rememberUnlock").checked = true;
+    APP.audioUnlocked = true;
+    if(el("nerdPanel")) el("nerdPanel").classList.remove("hidden");
   }
 
-  supabase.auth.onAuthStateChange(async (ev,session)=>{
-    if(session){
-      user=session.user
-      $('authBack').style.display='none'
-      $('userEmail').textContent=user.email||'Signed in'
-      $('avatar').textContent=((user.email||'U')[0]||'U').toUpperCase()
-      try{
-        await ensureTables()
-        await ensureSettings()
-        await fetchNotes()
-        setSplit('split')
-        setStatus(navigator.onLine?'saved':'offline')
-      }catch(e){
-        console.error(e)
-        toast('Supabase setup needed',String(e.message||e),'bad')
-      }
-    }else{
-      $('authBack').style.display='flex'
+  const { data } = await sb.auth.getSession();
+  APP.user = data?.session?.user || null;
+  setAuthedUI();
+
+  if(APP.user){
+    await ensureSettingsRow();
+    await loadSettings();
+    await fetchNotes();
+    await fetchLinks();
+  }else{
+    setEditorEnabled(false);
+    renderNotesList();
+  }
+
+  sb.auth.onAuthStateChange(async (_event, session)=>{
+    APP.user = session?.user || null;
+    setAuthedUI();
+    fillEditor(null);
+    renderNotesList();
+    if(APP.user){
+      await ensureSettingsRow();
+      await loadSettings();
+      await fetchNotes();
+      await fetchLinks();
     }
-  })
+  });
+
+  initGraph();
+  setGameMode("snake");
+  showTab("notes");
 }
 
-boot()
+boot();
 </script>
-
 </body>
 </html>
