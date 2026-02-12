@@ -386,7 +386,7 @@ button,input,select,textarea{font-family:var(--font)}
   color:rgba(238,242,255,.9);
   transition:transform .12s, border-color .12s, background .12s;
 }
-.timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);background:rgba(255,255,255,.06)}
+timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);background:rgba(255,255,255,.06)}
 .timer-modes{
   display:flex;
   gap:8px;
@@ -591,6 +591,7 @@ button,input,select,textarea{font-family:var(--font)}
   display:none;
 }
 .view.active{display:block}
+#viewPreview{overflow:auto;-webkit-overflow-scrolling:touch}
 
 .editor-shell{
   height:100%;
@@ -1299,7 +1300,7 @@ canvas{display:block;border-radius:16px;border:1px solid rgba(255,106,0,.25);bac
   margin:10px 0;
 }
 .cheatBox input[type="checkbox"]{accent-color:var(--brand)}
-.cheatBox input[type="range"]{accent-color:var(--brand);width:160px}
+cheatBox input[type="range"]{accent-color:var(--brand);width:160px}
 .cheatBox input[type="number"]{
   width:84px;
   padding:10px 10px;
@@ -1421,8 +1422,6 @@ hr.sep{border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0}
             <option value="amb5">Audio: Ambience 5</option>
             <option value="amb6">Audio: Ambience 6</option>
             <option value="amb7">Audio: Ambience 7</option>
-
-
           </select>
           <select id="sfxMode">
             <option value="on">Game SFX: On</option>
@@ -1736,9 +1735,14 @@ hr.sep{border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0}
 
                   <div id="snakeCheats">
                     <label>Snake No-Die <input type="checkbox" id="cSnakeNoDie"></label>
-                    <label>Snake Speed <input type="range" id="cSnakeSpeed" min="40" max="200" step="5"></label>
+                    <label>Snake Speed <input type="range" id="cSnakeSpeed" min="5" max="260" step="1"></label>
                     <label>Snake Boost <input type="checkbox" id="cSnakeBoost"></label>
-                    <div class="smallHint">Speed: <span id="cSnakeSpeedV" style="color:rgba(255,210,170,.95);font-weight:950"></span></div>
+                    <label>Walls Kill <input type="checkbox" id="cSnakeWalls"></label>
+                    <label>Obstacles <input type="range" id="cSnakeObs" min="0" max="90" step="1"></label>
+                    <label>Evasive Food <input type="checkbox" id="cSnakeEvasive"></label>
+                    <label>Poison Food <input type="checkbox" id="cSnakePoison"></label>
+                    <label>Food Distance <input type="range" id="cSnakeFoodDist" min="0" max="14" step="1"></label>
+                    <div class="smallHint">Speed: <span id="cSnakeSpeedV" style="color:rgba(255,210,170,.95);font-weight:950"></span> · Obstacles: <span id="cSnakeObsV" style="color:rgba(255,210,170,.95);font-weight:950"></span> · Food Dist: <span id="cSnakeFoodDistV" style="color:rgba(255,210,170,.95);font-weight:950"></span></div>
                   </div>
 
                   <div id="tetrisCheats" style="display:none">
@@ -1800,7 +1804,7 @@ let activeId=null
 
 let uiPrefs={sort:'updated_desc',previewFull:false,sidebarHidden:false,lastOpenNoteId:null}
 let timerPresets={focus:25,break:5,long:15}
-let gameCheats={snake:{highScore:0,noDie:false,speed:110,boost:false},tetris:{highScore:0,noGameOver:false,startLevel:1},runner:{best:0,noCrash:false,slow:false}}
+let gameCheats={snake:{highScore:0,noDie:false,speed:70,boost:false,wallsKill:true,obstacles:28,evasive:true,poison:true,foodDist:9},tetris:{highScore:0,noGameOver:false,startLevel:1},runner:{best:0,noCrash:false,slow:false}}
 let currentSchool='Salesianum'
 let nerdUnlocked=false
 let nerdPrefs={musicMode:'off',sfxMode:'on'}
@@ -1828,11 +1832,17 @@ let gAnim=null
 let snakeCanvas=null
 let snakeCtx=null
 let snake=[]
-let food=null
+let sFood=null
+let sPoison=null
+let sObstacles=[]
 let dir={x:0,y:0}
 let snakeScore=0
 let snakeRunning=false
-let snakeInterval=null
+let sAnim=0
+let sLast=0
+let sAccum=0
+let sBoostUntil=0
+let sFoodBorn=0
 const S_TILE=21
 
 let tetrisCanvas=null
@@ -1918,7 +1928,7 @@ function relTime(iso){
   const h=Math.floor(m/60)
   if(h<24) return h+'h ago'
   const d=Math.floor(h/24)
-  if(d<7) return d+'d ago'
+  if(d<7) return h+'d ago'
   return fmtShort(iso)
 }
 function escapeHtml(s){
@@ -2054,7 +2064,7 @@ function sortNotes(arr){
 }
 
 function noteSnippet(n){
-  const s=(n.content||'').replace(/\\s+/g,' ').trim()
+  const s=(n.content||'').replace(/\s+/g,' ').trim()
   if(!s) return 'No content yet.'
   return s.length>90? s.slice(0,90)+'…' : s
 }
@@ -2259,7 +2269,7 @@ async function deleteNote(){
   if(!activeId) return
   const n=notes.find(x=>x.id===activeId)
   const t=(n?.title&&n.title.trim()?n.title:'Untitled')
-  if(!confirm('Delete \"'+t+'\"?')) return
+  if(!confirm('Delete "'+t+'"?')) return
   await supabase.from('note_links').delete().eq('user_id',user.id).or('note_a.eq.'+activeId+',note_b.eq.'+activeId)
   const r=await supabase.from('notes').delete().eq('id',activeId).eq('user_id',user.id)
   if(r.error){toast('Delete failed',r.error.message,'bad');return}
@@ -2476,7 +2486,7 @@ function applyMd(action){
   if(action==='ul') rep='- '+(sel||'Item')
   if(action==='ol') rep='1. '+(sel||'Item')
   if(action==='quote') rep='> '+(sel||'Quote')
-  if(action==='code') rep='```\\n'+(sel||'code')+'\\n```'
+  if(action==='code') rep='```\n'+(sel||'code')+'\n```'
   if(action==='link') rep='['+(sel||'text')+'](https://)'
   ta.value=before+rep+after
   const pos=before.length+rep.length
@@ -2582,7 +2592,7 @@ async function exportPdf(){
       windowWidth:820,
       html2canvas:{scale:1.35,backgroundColor:'#ffffff',useCORS:true}
     })
-    doc.save(((n.title&&n.title.trim()?n.title:'note')+'.pdf').replace(/[\\/:*?"<>|]+/g,'_'))
+    doc.save(((n.title&&n.title.trim()?n.title:'note')+'.pdf').replace(/[\/:*?"<>|]+/g,'_'))
     closePdfModal()
     toast('Exported','PDF saved','ok')
   }catch(e){
@@ -2964,9 +2974,17 @@ function syncCheatUI(){
   $('rBest').textContent=String(gameCheats.runner?.best||0)
 
   $('cSnakeNoDie').checked=!!gameCheats.snake?.noDie
-  $('cSnakeSpeed').value=gameCheats.snake?.speed??110
-  $('cSnakeSpeedV').textContent=(gameCheats.snake?.speed??110)+'ms'
+  $('cSnakeSpeed').value=String(clamp(parseInt(gameCheats.snake?.speed??70,10)||70,5,260))
+  $('cSnakeSpeedV').textContent=(clamp(parseInt(gameCheats.snake?.speed??70,10)||70,5,260))+'ms'
   $('cSnakeBoost').checked=!!gameCheats.snake?.boost
+
+  $('cSnakeWalls').checked=!!gameCheats.snake?.wallsKill
+  $('cSnakeObs').value=String(clamp(parseInt(gameCheats.snake?.obstacles??28,10)||28,0,90))
+  $('cSnakeObsV').textContent=String(clamp(parseInt(gameCheats.snake?.obstacles??28,10)||28,0,90))
+  $('cSnakeEvasive').checked=!!gameCheats.snake?.evasive
+  $('cSnakePoison').checked=!!gameCheats.snake?.poison
+  $('cSnakeFoodDist').value=String(clamp(parseInt(gameCheats.snake?.foodDist??9,10)||9,0,14))
+  $('cSnakeFoodDistV').textContent=String(clamp(parseInt(gameCheats.snake?.foodDist??9,10)||9,0,14))
 
   $('cTNoOver').checked=!!gameCheats.tetris?.noGameOver
   $('cTLevel').value=gameCheats.tetris?.startLevel??1
@@ -2975,53 +2993,281 @@ function syncCheatUI(){
   $('cRSlow').checked=!!gameCheats.runner?.slow
 }
 
+function sKey(x,y){return x+','+y}
+function sDistPlain(ax,ay,bx,by){return Math.abs(ax-bx)+Math.abs(ay-by)}
+function sDistTorus(ax,ay,bx,by){
+  const dx=Math.abs(ax-bx)
+  const dy=Math.abs(ay-by)
+  const ddx=Math.min(dx,S_TILE-dx)
+  const ddy=Math.min(dy,S_TILE-dy)
+  return ddx+ddy
+}
+function sWrapOn(){return !gameCheats.snake?.wallsKill}
+function sMinFoodDist(){return clamp(parseInt(gameCheats.snake?.foodDist??0,10)||0,0,14)}
+function sBaseObs(){return clamp(parseInt(gameCheats.snake?.obstacles??0,10)||0,0,90)}
+function sIsOccupied(x,y){
+  if(snake.some(s=>s.x===x&&s.y===y)) return true
+  if(sObstacles.some(o=>o.x===x&&o.y===y)) return true
+  if(sFood && sFood.x===x && sFood.y===y) return true
+  if(sPoison && sPoison.x===x && sPoison.y===y) return true
+  return false
+}
+function sSpawnFood(kind='normal'){
+  const head=snake[0]
+  const wrap=sWrapOn()
+  const minD=sMinFoodDist()
+  for(let i=0;i<1200;i++){
+    const x=Math.floor(Math.random()*S_TILE)
+    const y=Math.floor(Math.random()*S_TILE)
+    if(sIsOccupied(x,y)) continue
+    const d=wrap?sDistTorus(x,y,head.x,head.y):sDistPlain(x,y,head.x,head.y)
+    if(d<minD) continue
+    return {x,y,kind}
+  }
+  for(let x=0;x<S_TILE;x++){
+    for(let y=0;y<S_TILE;y++){
+      if(!sIsOccupied(x,y)) return {x,y,kind}
+    }
+  }
+  return {x:0,y:0,kind}
+}
+function buildSnakeObstacles(){
+  const count=sBaseObs()
+  const set=new Set(snake.map(s=>sKey(s.x,s.y)))
+  const obs=[]
+  let tries=0
+  while(obs.length<count && tries<6000){
+    tries++
+    const x=Math.floor(Math.random()*S_TILE)
+    const y=Math.floor(Math.random()*S_TILE)
+    const k=sKey(x,y)
+    if(set.has(k)) continue
+    if(obs.some(o=>o.x===x&&o.y===y)) continue
+    obs.push({x,y})
+  }
+  sObstacles=obs
+}
+function sSpawnObstacle(){
+  for(let i=0;i<900;i++){
+    const x=Math.floor(Math.random()*S_TILE)
+    const y=Math.floor(Math.random()*S_TILE)
+    if(sIsOccupied(x,y)) continue
+    return {x,y}
+  }
+  return null
+}
+function addSnakeObstacles(n){
+  const base=sBaseObs()
+  if(base<=0) return
+  const cap=clamp(base + Math.floor(snakeScore*0.8),0,220)
+  for(let i=0;i<n && sObstacles.length<cap;i++){
+    const o=sSpawnObstacle()
+    if(o) sObstacles.push(o)
+  }
+}
+function spawnSnakeFoods(){
+  sFood=sSpawnFood('normal')
+  sFoodBorn=performance.now()
+  sPoison=null
+  if(gameCheats.snake?.poison){
+    sPoison=sSpawnFood('poison')
+  }
+}
+function snakeStepMs(){
+  const base=clamp(parseInt(gameCheats.snake?.speed??70,10)||70,5,260)
+  const scale=Math.max(0.08,Math.pow(0.965,snakeScore))
+  let ms=base*scale
+  if(gameCheats.snake?.boost && performance.now()<sBoostUntil) ms*=0.52
+  return clamp(ms,2,260)
+}
+function maybeExpireFood(){
+  const ttl=clamp(3100 - snakeScore*22, 950, 3100)
+  if(!sFood) return
+  if(performance.now()-sFoodBorn>ttl){
+    if(snake.length>1) snake.pop()
+    spawnSnakeFoods()
+    addSnakeObstacles(1)
+    sfx.unlock();sfx.tone(210,0.04,0.08)
+  }
+}
+function moveFoodEvasive(){
+  if(!sFood || !gameCheats.snake?.evasive) return
+  const head=snake[0]
+  const wrap=sWrapOn()
+  const d=wrap?sDistTorus(sFood.x,sFood.y,head.x,head.y):sDistPlain(sFood.x,sFood.y,head.x,head.y)
+  if(d>4) return
+  if(Math.random()>0.72) return
+  const opts=[
+    {x:sFood.x+1,y:sFood.y},
+    {x:sFood.x-1,y:sFood.y},
+    {x:sFood.x,y:sFood.y+1},
+    {x:sFood.x,y:sFood.y-1}
+  ]
+  const cand=[]
+  for(const o of opts){
+    let x=o.x,y=o.y
+    if(wrap){
+      x=(x+S_TILE)%S_TILE
+      y=(y+S_TILE)%S_TILE
+    }else{
+      if(x<0||x>=S_TILE||y<0||y>=S_TILE) continue
+    }
+    if(sIsOccupied(x,y)) continue
+    const nd=wrap?sDistTorus(x,y,head.x,head.y):sDistPlain(x,y,head.x,head.y)
+    cand.push({x,y,nd})
+  }
+  cand.sort((a,b)=>b.nd-a.nd)
+  if(cand.length){
+    sFood.x=cand[0].x
+    sFood.y=cand[0].y
+    sFoodBorn=performance.now()
+    if(Math.random()<0.35) sfx.unlock(),sfx.tone(520,0.02,0.05)
+  }
+}
+function movePoisonHunt(){
+  if(!sPoison) return
+  const head=snake[0]
+  const wrap=sWrapOn()
+  const d=wrap?sDistTorus(sPoison.x,sPoison.y,head.x,head.y):sDistPlain(sPoison.x,sPoison.y,head.x,head.y)
+  if(d>8) return
+  if(Math.random()>0.45) return
+  const opts=[
+    {x:sPoison.x+1,y:sPoison.y},
+    {x:sPoison.x-1,y:sPoison.y},
+    {x:sPoison.x,y:sPoison.y+1},
+    {x:sPoison.x,y:sPoison.y-1}
+  ]
+  const cand=[]
+  for(const o of opts){
+    let x=o.x,y=o.y
+    if(wrap){
+      x=(x+S_TILE)%S_TILE
+      y=(y+S_TILE)%S_TILE
+    }else{
+      if(x<0||x>=S_TILE||y<0||y>=S_TILE) continue
+    }
+    if(snake.some(s=>s.x===x&&s.y===y)) continue
+    if(sObstacles.some(ob=>ob.x===x&&ob.y===y)) continue
+    if(sFood && sFood.x===x && sFood.y===y) continue
+    const nd=wrap?sDistTorus(x,y,head.x,head.y):sDistPlain(x,y,head.x,head.y)
+    cand.push({x,y,nd})
+  }
+  cand.sort((a,b)=>a.nd-b.nd)
+  if(cand.length){
+    sPoison.x=cand[0].x
+    sPoison.y=cand[0].y
+  }
+}
+
 function resetSnake(){
+  stopSnake()
   snake=[{x:10,y:10}]
   dir={x:0,y:0}
   snakeScore=0
-  spawnFood()
+  buildSnakeObstacles()
+  spawnSnakeFoods()
   $('snakeScore').textContent='0'
   drawSnake()
 }
-function spawnFood(){
-  food={x:Math.floor(Math.random()*S_TILE),y:Math.floor(Math.random()*S_TILE)}
-  if(snake.some(s=>s.x===food.x&&s.y===food.y)) spawnFood()
-}
+
 function startSnake(){
   stopSnake()
   resetSnake()
   snakeRunning=true
   dir={x:1,y:0}
-  const sp=gameCheats.snake?.speed??110
-  snakeInterval=setInterval(tickSnake,sp)
+  sLast=0
+  sAccum=0
+  sBoostUntil=0
+  sAnim=requestAnimationFrame(sLoop)
 }
+
 function stopSnake(){
   snakeRunning=false
-  if(snakeInterval){clearInterval(snakeInterval);snakeInterval=null}
+  if(sAnim) cancelAnimationFrame(sAnim)
+  sAnim=0
 }
-function tickSnake(){
-  const head={x:(snake[0].x+dir.x+S_TILE)%S_TILE, y:(snake[0].y+dir.y+S_TILE)%S_TILE}
-  if(!gameCheats.snake?.noDie){
-    if(snake.some(s=>s.x===head.x&&s.y===head.y)){gameOverSnake();return}
-  }else{
-    if(snake.some(s=>s.x===head.x&&s.y===head.y)){sfx.unlock();sfx.tone(220,0.04,0.08)}
+
+function stepSnake(){
+  if(!snakeRunning) return
+  const wrap=sWrapOn()
+  const noDie=!!gameCheats.snake?.noDie
+  const head0=snake[0]
+  let hx=head0.x+dir.x
+  let hy=head0.y+dir.y
+
+  let hitWall=false
+  if(!wrap){
+    if(hx<0||hx>=S_TILE||hy<0||hy>=S_TILE) hitWall=true
   }
-  snake.unshift(head)
-  if(head.x===food.x&&head.y===food.y){
+  if(hitWall){
+    if(noDie){
+      hx=(hx+S_TILE)%S_TILE
+      hy=(hy+S_TILE)%S_TILE
+      sfx.unlock();sfx.tone(240,0.04,0.08)
+    }else{
+      gameOverSnake()
+      return
+    }
+  }else if(wrap){
+    hx=(hx+S_TILE)%S_TILE
+    hy=(hy+S_TILE)%S_TILE
+  }
+
+  const hitSelf=snake.some(s=>s.x===hx&&s.y===hy)
+  const hitObs=sObstacles.some(o=>o.x===hx&&o.y===hy)
+  const hitPoison=(sPoison && sPoison.x===hx && sPoison.y===hy)
+
+  if(!noDie && (hitSelf||hitObs||hitPoison)){
+    gameOverSnake()
+    return
+  }
+  if(noDie && (hitSelf||hitObs||hitPoison)){
+    sfx.unlock();sfx.tone(hitPoison?160:220,0.04,0.08)
+  }
+
+  snake.unshift({x:hx,y:hy})
+
+  if(sFood && hx===sFood.x && hy===sFood.y){
     snakeScore++
     $('snakeScore').textContent=String(snakeScore)
-    sfx.unlock();sfx.tone(660,0.05,0.12)
-    spawnFood()
+    sfx.unlock();sfx.tone(740,0.05,0.12)
     if(snakeScore>(gameCheats.snake?.highScore||0)){
       gameCheats.snake.highScore=snakeScore
       $('snakeBest').textContent=String(snakeScore)
       saveSettingsDebounced()
     }
+    addSnakeObstacles(1 + Math.floor(snakeScore/6))
+    spawnSnakeFoods()
   }else{
     snake.pop()
   }
-  drawSnake()
+
+  moveFoodEvasive()
+  movePoisonHunt()
 }
+
+function sLoop(t){
+  if(!snakeRunning) return
+  if(!sLast) sLast=t
+  const dt=t-sLast
+  sLast=t
+  sAccum+=dt
+
+  maybeExpireFood()
+
+  const step=snakeStepMs()
+  let steps=0
+  const cap=24
+  while(sAccum>=step && steps<cap){
+    stepSnake()
+    sAccum-=step
+    steps++
+    if(!snakeRunning) break
+  }
+  drawSnake()
+  if(snakeRunning) sAnim=requestAnimationFrame(sLoop)
+}
+
 function drawSnake(){
   const W=snakeCanvas.width,H=snakeCanvas.height
   snakeCtx.fillStyle='#050505'
@@ -3033,16 +3279,40 @@ function drawSnake(){
     snakeCtx.beginPath();snakeCtx.moveTo(i*gs,0);snakeCtx.lineTo(i*gs,H);snakeCtx.stroke()
     snakeCtx.beginPath();snakeCtx.moveTo(0,i*gs);snakeCtx.lineTo(W,i*gs);snakeCtx.stroke()
   }
+
+  sObstacles.forEach(o=>{
+    const x=o.x*gs,y=o.y*gs
+    snakeCtx.fillStyle='rgba(255,59,59,0.62)'
+    snakeCtx.fillRect(x+1,y+1,gs-2,gs-2)
+    snakeCtx.fillStyle='rgba(0,0,0,0.22)'
+    snakeCtx.fillRect(x+2,y+2,gs-6,4)
+  })
+
+  if(sPoison){
+    snakeCtx.fillStyle='rgba(255,59,59,0.92)'
+    snakeCtx.beginPath()
+    snakeCtx.arc(sPoison.x*gs+gs/2,sPoison.y*gs+gs/2,gs/2-4,0,Math.PI*2)
+    snakeCtx.fill()
+    snakeCtx.fillStyle='rgba(0,0,0,0.25)'
+    snakeCtx.beginPath()
+    snakeCtx.arc(sPoison.x*gs+gs/2-3,sPoison.y*gs+gs/2-3,4,0,Math.PI*2)
+    snakeCtx.fill()
+  }
+
+  if(sFood){
+    snakeCtx.fillStyle='#ffb100'
+    snakeCtx.beginPath()
+    snakeCtx.arc(sFood.x*gs+gs/2,sFood.y*gs+gs/2,gs/2-3,0,Math.PI*2)
+    snakeCtx.fill()
+  }
+
   snake.forEach((seg,idx)=>{
     const x=seg.x*gs,y=seg.y*gs
     snakeCtx.fillStyle=idx===0?'#ff6a00':'rgba(255,177,0,'+(0.65-(idx/snake.length)*0.40)+')'
     snakeCtx.fillRect(x+1,y+1,gs-2,gs-2)
   })
-  snakeCtx.fillStyle='#ffb100'
-  snakeCtx.beginPath()
-  snakeCtx.arc(food.x*gs+gs/2,food.y*gs+gs/2,gs/2-3,0,Math.PI*2)
-  snakeCtx.fill()
 }
+
 function gameOverSnake(){
   stopSnake()
   drawSnake()
@@ -3573,19 +3843,48 @@ function wireUI(){
     toast('Snake','No-Die '+(gameCheats.snake.noDie?'ON':'OFF'),'warn')
   }
   $('cSnakeSpeed').oninput=()=>{
-    const v=parseInt($('cSnakeSpeed').value,10)
+    const v=clamp(parseInt($('cSnakeSpeed').value,10),5,260)
     gameCheats.snake.speed=v
     $('cSnakeSpeedV').textContent=v+'ms'
     saveSettingsDebounced()
-    if(snakeRunning){
-      clearInterval(snakeInterval)
-      snakeInterval=setInterval(tickSnake,v)
-    }
   }
   $('cSnakeBoost').onchange=()=>{
     gameCheats.snake.boost=$('cSnakeBoost').checked
     saveSettingsDebounced()
     toast('Snake','Boost '+(gameCheats.snake.boost?'ON':'OFF'),'warn')
+  }
+  $('cSnakeWalls').onchange=()=>{
+    gameCheats.snake.wallsKill=$('cSnakeWalls').checked
+    saveSettingsDebounced()
+    toast('Snake','Walls '+(gameCheats.snake.wallsKill?'KILL':'WRAP'),'warn')
+    buildSnakeObstacles()
+    spawnSnakeFoods()
+  }
+  $('cSnakeObs').oninput=()=>{
+    const v=clamp(parseInt($('cSnakeObs').value,10),0,90)
+    gameCheats.snake.obstacles=v
+    $('cSnakeObsV').textContent=String(v)
+    saveSettingsDebounced()
+    buildSnakeObstacles()
+    spawnSnakeFoods()
+  }
+  $('cSnakeEvasive').onchange=()=>{
+    gameCheats.snake.evasive=$('cSnakeEvasive').checked
+    saveSettingsDebounced()
+    toast('Snake','Evasive Food '+(gameCheats.snake.evasive?'ON':'OFF'),'warn')
+  }
+  $('cSnakePoison').onchange=()=>{
+    gameCheats.snake.poison=$('cSnakePoison').checked
+    saveSettingsDebounced()
+    toast('Snake','Poison '+(gameCheats.snake.poison?'ON':'OFF'),'warn')
+    spawnSnakeFoods()
+  }
+  $('cSnakeFoodDist').oninput=()=>{
+    const v=clamp(parseInt($('cSnakeFoodDist').value,10),0,14)
+    gameCheats.snake.foodDist=v
+    $('cSnakeFoodDistV').textContent=String(v)
+    saveSettingsDebounced()
+    spawnSnakeFoods()
   }
 
   $('cTNoOver').onchange=()=>{
@@ -3660,11 +3959,8 @@ function wireUI(){
         else if((k==='arrowleft'||k==='a') && dir.x===0) dir={x:-1,y:0}
         else if((k==='arrowright'||k==='d') && dir.x===0) dir={x:1,y:0}
         else if(k==='shift' && gameCheats.snake?.boost){
-          if(snakeRunning){
-            clearInterval(snakeInterval)
-            snakeInterval=setInterval(tickSnake, Math.max(35,(gameCheats.snake.speed||110)*0.55))
-            setTimeout(()=>{ if(snakeRunning){ clearInterval(snakeInterval); snakeInterval=setInterval(tickSnake,gameCheats.snake.speed||110)} },260)
-          }
+          sBoostUntil=performance.now()+260
+          sfx.unlock();sfx.tone(980,0.03,0.10)
         }
       }else if(tetris && tRunning){
         if(e.key==='ArrowLeft') tMove(-1,0)
