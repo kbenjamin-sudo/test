@@ -1400,7 +1400,7 @@ hr.sep{border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0}
       <hr class="sep">
 
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <div style="font-weight:950;color:rgba(238,242,255,.85)">Audio</div>
+        <div style="font-weight:950;color:rgba(238,242,255,.85)">Settings for nerds</div>
         <div style="font-size:11px;color:rgba(238,242,255,.55);font-weight:850">optional</div>
       </div>
       <div style="height:10px"></div>
@@ -1412,7 +1412,11 @@ hr.sep{border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0}
       <div id="nerdBox" style="display:none;margin-top:10px">
         <p style="margin-bottom:10px">Private background audio (off by default). Quick mute: <span style="font-family:var(--mono)">Alt</span>+<span style="font-family:var(--mono)">M</span> or <span style="font-family:var(--mono)">`</span>.</p>
         <div class="row">
-          <select id="musicMode"><option value="off">Music: Off</option><option value="a">A — autumn! · one way (instrumental)</option><option value="j1">J — free jaydes · pluggnb type (instrumental)</option><option value="j2">J — jaydes · convenience (instrumental)</option><option value="j3">J — jaydes · entry four (instrumental)</option><option value="k">K — Kyle Richh x Sdot Go · Drive me crazy (instrumental)</option><option value="m">M — Me vs Me (instrumental)</option></select>
+          <select id="musicMode">
+            <option value="off">Audio: Off</option>
+            <option value="amb1">Audio: Ambience 1</option>
+            <option value="amb2">Audio: Ambience 2</option>
+          </select>
           <select id="sfxMode">
             <option value="on">Game SFX: On</option>
             <option value="off">Game SFX: Off</option>
@@ -1723,8 +1727,12 @@ hr.sep{border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0}
                 <div class="cheatBox">
                   <div class="h">Game tweaks (saved)</div>
 
-                  <div id="snakeCheats"><label>Snake No-Die <input type="checkbox" id="cSnakeNoDie"></label><label>Ghost (ignore self-hit) <input type="checkbox" id="cSnakeGhost"></label><label>Wrap walls <input type="checkbox" id="cSnakeWrap"></label><label>No Obstacles <input type="checkbox" id="cSnakeNoObs"></label><label>No Poison <input type="checkbox" id="cSnakeNoPoison"></label><label>Base Speed <input type="range" id="cSnakeSpeed" min="55" max="140" step="5"></label><label>Snake Boost <input type="checkbox" id="cSnakeBoost"></label><div class="smallHint">Speed: <span id="cSnakeSpeedV" style="color:rgba(255,210,170,.95);font-weight:950"></span> · Gets faster as you score</div></div>
-              </div>
+                  <div id="snakeCheats">
+                    <label>Snake No-Die <input type="checkbox" id="cSnakeNoDie"></label>
+                    <label>Snake Speed <input type="range" id="cSnakeSpeed" min="40" max="200" step="5"></label>
+                    <label>Snake Boost <input type="checkbox" id="cSnakeBoost"></label>
+                    <div class="smallHint">Speed: <span id="cSnakeSpeedV" style="color:rgba(255,210,170,.95);font-weight:950"></span></div>
+                  </div>
 
                   <div id="tetrisCheats" style="display:none">
                     <label>No Game Over <input type="checkbox" id="cTNoOver"></label>
@@ -1785,8 +1793,9 @@ let activeId=null
 
 let uiPrefs={sort:'updated_desc',previewFull:false,sidebarHidden:false,lastOpenNoteId:null}
 let timerPresets={focus:25,break:5,long:15}
-let gameCheats={snake:{highScore:0,noDie:false,ghost:false,wrap:false,noObstacles:false,noPoison:false,speed:95,boost:false},tetris:{highScore:0,noGameOver:false,startLevel:1},runner:{best:0,noCrash:false,slow:false}}
+let gameCheats={snake:{highScore:0,noDie:false,speed:110,boost:false},tetris:{highScore:0,noGameOver:false,startLevel:1},runner:{best:0,noCrash:false,slow:false}}
 let currentSchool='Salesianum'
+let nerdUnlocked=false
 let nerdPrefs={musicMode:'off',sfxMode:'on'}
 
 let autosaveT=null
@@ -1813,8 +1822,6 @@ let snakeCanvas=null
 let snakeCtx=null
 let snake=[]
 let food=null
-let sPoison=null
-let sObstacles=[]
 let dir={x:0,y:0}
 let snakeScore=0
 let snakeRunning=false
@@ -1851,12 +1858,8 @@ audio.loop=true
 audio.preload='auto'
 audio.volume=0.35
 const MUSIC_URLS={
-  a:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/autumn!%20-%20one%20way%20(instrumental).mp3',
-  j1:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/free%20jaydes%20%20pluggnb%20type%20beat%20self%20(1).mp3',
-  j2:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes%20%20convenience%20(fixed%20instrumental)%20(1).mp3',
-  j3:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes%20-%20entry%20four%20(instrumental)%20(prod.%20khozy)%20(1).mp3',
-  k:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/Kyle%20Richh%20x%20Sdot%20Go%20-%20Drive%20me%20crazyOblivious%20(official%20instrumental)%20(1).mp3',
-  m:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/Me%20vs%20Me%20(Instrumental)%20-%20Jaeychino%20and%20SlimeGetEm%20(1).mp3'
+  amb1:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/free%20jaydes%20%20pluggnb%20type%20beat%20self%20(1).mp3',
+  amb2:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes%20%20convenience%20(fixed%20instrumental)%20(1).mp3'
 }
 
 const sfx = (()=> {
@@ -2949,128 +2952,63 @@ function syncCheatUI(){
   $('rBest').textContent=String(gameCheats.runner?.best||0)
 
   $('cSnakeNoDie').checked=!!gameCheats.snake?.noDie
-  $('cSnakeGhost').checked=!!gameCheats.snake?.ghost
-  $('cSnakeWrap').checked=!!gameCheats.snake?.wrap
-  $('cSnakeNoObs').checked=!!gameCheats.snake?.noObstacles
-  $('cSnakeNoPoison').checked=!!gameCheats.snake?.noPoison
-  $('cSnakeSpeed').value=gameCheats.snake?.speed??95
-  $('cSnakeSpeedV').textContent=(gameCheats.snake?.speed??95)+'ms'
+  $('cSnakeSpeed').value=gameCheats.snake?.speed??110
+  $('cSnakeSpeedV').textContent=(gameCheats.snake?.speed??110)+'ms'
   $('cSnakeBoost').checked=!!gameCheats.snake?.boost
 
   $('cTNoOver').checked=!!gameCheats.tetris?.noGameOver
   $('cTLevel').value=gameCheats.tetris?.startLevel??1
 
-  $('cREasy').checked=!!(gameCheats.runner?.slow)
-  $('cRDash').checked=!!(gameCheats.runner?.noCrash)
+  $('cRNoCrash').checked=!!gameCheats.runner?.noCrash
+  $('cRSlow').checked=!!gameCheats.runner?.slow
 }
 
 function resetSnake(){
   snake=[{x:10,y:10}]
   dir={x:0,y:0}
   snakeScore=0
-  sObstacles=[]
-  sPoison=null
   spawnFood()
   $('snakeScore').textContent='0'
   drawSnake()
 }
 function spawnFood(){
-  const occupied=(x,y)=>snake.some(s=>s.x===x&&s.y===y) || sObstacles.some(o=>o.x===x&&o.y===y) || (sPoison && sPoison.x===x && sPoison.y===y)
-  let tries=0
-  do{
-    food={x:Math.floor(Math.random()*S_TILE),y:Math.floor(Math.random()*S_TILE)}
-    tries++
-  }while(occupied(food.x,food.y) && tries<400)
-
-  if(!gameCheats.snake?.noPoison && snakeScore>=6 && Math.random()<0.28){
-    tries=0
-    do{
-      sPoison={x:Math.floor(Math.random()*S_TILE),y:Math.floor(Math.random()*S_TILE)}
-      tries++
-    }while(occupied(sPoison.x,sPoison.y) && tries<400)
-  }else{
-    sPoison=null
-  }
+  food={x:Math.floor(Math.random()*S_TILE),y:Math.floor(Math.random()*S_TILE)}
+  if(snake.some(s=>s.x===food.x&&s.y===food.y)) spawnFood()
 }
 function startSnake(){
   stopSnake()
   resetSnake()
   snakeRunning=true
   dir={x:1,y:0}
-  setSnakeInterval()
-}
-function setSnakeInterval(){
-  const base=gameCheats.snake?.speed??95
-  const ramp=clamp(base - Math.floor(snakeScore/3)*6,55,140)
-  if(snakeInterval) clearInterval(snakeInterval)
-  snakeInterval=setInterval(tickSnake,ramp)
+  const sp=gameCheats.snake?.speed??110
+  snakeInterval=setInterval(tickSnake,sp)
 }
 function stopSnake(){
   snakeRunning=false
   if(snakeInterval){clearInterval(snakeInterval);snakeInterval=null}
 }
 function tickSnake(){
-  const wrap=!!gameCheats.snake?.wrap
-  const nx=snake[0].x+dir.x
-  const ny=snake[0].y+dir.y
-  let head={x:nx,y:ny}
-
-  if(wrap){
-    head.x=(head.x+S_TILE)%S_TILE
-    head.y=(head.y+S_TILE)%S_TILE
-  }else{
-    if(head.x<0||head.x>=S_TILE||head.y<0||head.y>=S_TILE){
-      if(!gameCheats.snake?.noDie){gameOverSnake();return}
-      head.x=clamp(head.x,0,S_TILE-1)
-      head.y=clamp(head.y,0,S_TILE-1)
-    }
-  }
-
-  if(!gameCheats.snake?.ghost && !gameCheats.snake?.noDie){
+  const head={x:(snake[0].x+dir.x+S_TILE)%S_TILE, y:(snake[0].y+dir.y+S_TILE)%S_TILE}
+  if(!gameCheats.snake?.noDie){
     if(snake.some(s=>s.x===head.x&&s.y===head.y)){gameOverSnake();return}
+  }else{
+    if(snake.some(s=>s.x===head.x&&s.y===head.y)){sfx.unlock();sfx.tone(220,0.04,0.08)}
   }
-
-  if(!gameCheats.snake?.noObstacles && !gameCheats.snake?.noDie){
-    if(sObstacles.some(o=>o.x===head.x&&o.y===head.y)){gameOverSnake();return}
-  }
-
   snake.unshift(head)
-
-  if(sPoison && head.x===sPoison.x && head.y===sPoison.y){
-    sfx.bad()
-    if(!gameCheats.snake?.noDie){gameOverSnake();return}
-    sPoison=null
-  }
-
   if(head.x===food.x&&head.y===food.y){
     snakeScore++
     $('snakeScore').textContent=String(snakeScore)
-    sfx.coin()
-    if(!gameCheats.snake?.noObstacles && snakeScore>=4 && snakeScore%3===0){
-      addObstacle()
-    }
+    sfx.unlock();sfx.tone(660,0.05,0.12)
+    spawnFood()
     if(snakeScore>(gameCheats.snake?.highScore||0)){
       gameCheats.snake.highScore=snakeScore
       $('snakeBest').textContent=String(snakeScore)
-      saveSettings()
+      saveSettingsDebounced()
     }
-    spawnFood()
-    setSnakeInterval()
   }else{
     snake.pop()
   }
-
   drawSnake()
-}
-function addObstacle(){
-  let tries=0
-  const occupied=(x,y)=>snake.some(s=>s.x===x&&s.y===y) || (food && food.x===x && food.y===y) || (sPoison && sPoison.x===x && sPoison.y===y) || sObstacles.some(o=>o.x===x&&o.y===y)
-  let o
-  do{
-    o={x:Math.floor(Math.random()*S_TILE),y:Math.floor(Math.random()*S_TILE)}
-    tries++
-  }while(occupied(o.x,o.y) && tries<500)
-  if(tries<500) sObstacles.push(o)
 }
 function drawSnake(){
   const W=snakeCanvas.width,H=snakeCanvas.height
@@ -3083,42 +3021,15 @@ function drawSnake(){
     snakeCtx.beginPath();snakeCtx.moveTo(i*gs,0);snakeCtx.lineTo(i*gs,H);snakeCtx.stroke()
     snakeCtx.beginPath();snakeCtx.moveTo(0,i*gs);snakeCtx.lineTo(W,i*gs);snakeCtx.stroke()
   }
-
-  if(!gameCheats.snake?.noObstacles){
-    sObstacles.forEach(o=>{
-      const x=o.x*gs,y=o.y*gs
-      snakeCtx.fillStyle='rgba(255,255,255,.14)'
-      snakeCtx.fillRect(x+2,y+2,gs-4,gs-4)
-      snakeCtx.fillStyle='rgba(0,0,0,.25)'
-      snakeCtx.fillRect(x+4,y+4,gs-8,gs-8)
-    })
-  }
-
   snake.forEach((seg,idx)=>{
     const x=seg.x*gs,y=seg.y*gs
-    snakeCtx.fillStyle=idx===0?'#ff6a00':'rgba(255,177,0,'+(0.58-(idx/snake.length)*0.38)+')'
+    snakeCtx.fillStyle=idx===0?'#ff6a00':'rgba(255,177,0,'+(0.65-(idx/snake.length)*0.40)+')'
     snakeCtx.fillRect(x+1,y+1,gs-2,gs-2)
   })
-
   snakeCtx.fillStyle='#ffb100'
   snakeCtx.beginPath()
   snakeCtx.arc(food.x*gs+gs/2,food.y*gs+gs/2,gs/2-3,0,Math.PI*2)
   snakeCtx.fill()
-
-  if(sPoison){
-    snakeCtx.fillStyle='rgba(255,59,59,.95)'
-    snakeCtx.beginPath()
-    snakeCtx.arc(sPoison.x*gs+gs/2,sPoison.y*gs+gs/2,gs/2-5,0,Math.PI*2)
-    snakeCtx.fill()
-  }
-
-  snakeCtx.fillStyle='rgba(238,242,255,.55)'
-  snakeCtx.font='900 12px Inter'
-  snakeCtx.textAlign='left'
-  const base=gameCheats.snake?.speed??95
-  const cur=clamp(base - Math.floor(snakeScore/3)*6,55,140)
-  snakeCtx.fillText('Speed '+cur+'ms',10,18)
-  if(!gameCheats.snake?.wrap) snakeCtx.fillText('Walls ON',10,34)
 }
 function gameOverSnake(){
   stopSnake()
@@ -3646,45 +3557,23 @@ function wireUI(){
 
   $('cSnakeNoDie').onchange=()=>{
     gameCheats.snake.noDie=$('cSnakeNoDie').checked
-    saveSettings()
-    toast('Cheat','Snake No-Die '+(gameCheats.snake.noDie?'ON':'OFF'),'warn')
-  }
-  $('cSnakeGhost').onchange=()=>{
-    gameCheats.snake.ghost=$('cSnakeGhost').checked
-    saveSettings()
-    toast('Cheat','Snake Ghost '+(gameCheats.snake.ghost?'ON':'OFF'),'warn')
-  }
-  $('cSnakeWrap').onchange=()=>{
-    gameCheats.snake.wrap=$('cSnakeWrap').checked
-    saveSettings()
-    toast('Cheat','Snake Wrap '+(gameCheats.snake.wrap?'ON':'OFF'),'warn')
-    if(snakeRunning) setSnakeInterval()
-  }
-  $('cSnakeNoObs').onchange=()=>{
-    gameCheats.snake.noObstacles=$('cSnakeNoObs').checked
-    if(gameCheats.snake.noObstacles) sObstacles=[]
-    saveSettings()
-    toast('Cheat','Snake Obstacles '+(gameCheats.snake.noObstacles?'OFF':'ON'),'warn')
-    drawSnake()
-  }
-  $('cSnakeNoPoison').onchange=()=>{
-    gameCheats.snake.noPoison=$('cSnakeNoPoison').checked
-    if(gameCheats.snake.noPoison) sPoison=null
-    saveSettings()
-    toast('Cheat','Snake Poison '+(gameCheats.snake.noPoison?'OFF':'ON'),'warn')
-    drawSnake()
+    saveSettingsDebounced()
+    toast('Snake','No-Die '+(gameCheats.snake.noDie?'ON':'OFF'),'warn')
   }
   $('cSnakeSpeed').oninput=()=>{
     const v=parseInt($('cSnakeSpeed').value,10)
     gameCheats.snake.speed=v
     $('cSnakeSpeedV').textContent=v+'ms'
-    saveSettings()
-    if(snakeRunning) setSnakeInterval()
+    saveSettingsDebounced()
+    if(snakeRunning){
+      clearInterval(snakeInterval)
+      snakeInterval=setInterval(tickSnake,v)
+    }
   }
   $('cSnakeBoost').onchange=()=>{
     gameCheats.snake.boost=$('cSnakeBoost').checked
-    saveSettings()
-    toast('Cheat','Snake Boost '+(gameCheats.snake.boost?'ON':'OFF'),'warn')
+    saveSettingsDebounced()
+    toast('Snake','Boost '+(gameCheats.snake.boost?'ON':'OFF'),'warn')
   }
 
   $('cTNoOver').onchange=()=>{
@@ -3716,6 +3605,18 @@ function wireUI(){
   $('gCenter').onclick=()=>{gView={x:0,y:0,scale:1};renderGraph()}
 
   $('signOut').onclick=signOut
+
+  $('nerdUnlock').onclick=()=>{
+    const p=($('nerdPass').value||'').trim()
+    if(p==='9999'){
+      nerdUnlocked=true
+      $('nerdBox').style.display='block'
+      $('nerdLockRow').style.display='none'
+      $('nerdPass').value=''
+      toast('Unlocked','Advanced settings enabled','ok')
+    }else{
+      toast('Nope','Wrong password','bad')
+    }
   }
 
   $('musicMode').onchange=()=>{nerdPrefs.musicMode=$('musicMode').value;saveSettingsDebounced();applyMusicMode()}
