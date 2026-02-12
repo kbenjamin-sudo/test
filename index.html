@@ -19,7 +19,7 @@
   --card:#0c0f14;
   --stroke:rgba(255,255,255,.10);
   --stroke2:rgba(255,255,255,.14);
-  --text:#eef2ff; 
+  --text:#eef2ff;
   --muted:rgba(238,242,255,.55);
   --muted2:rgba(238,242,255,.35);
   --brand:#ff6a00;
@@ -1400,7 +1400,7 @@ hr.sep{border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0}
       <hr class="sep">
 
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <div style="font-weight:950;color:rgba(238,242,255,.85)">Settings for nerds</div>
+        <div style="font-weight:950;color:rgba(238,242,255,.85)">Audio</div>
         <div style="font-size:11px;color:rgba(238,242,255,.55);font-weight:850">optional</div>
       </div>
       <div style="height:10px"></div>
@@ -1787,7 +1787,6 @@ let uiPrefs={sort:'updated_desc',previewFull:false,sidebarHidden:false,lastOpenN
 let timerPresets={focus:25,break:5,long:15}
 let gameCheats={snake:{highScore:0,noDie:false,ghost:false,wrap:false,noObstacles:false,noPoison:false,speed:95,boost:false},tetris:{highScore:0,noGameOver:false,startLevel:1},runner:{best:0,noCrash:false,slow:false}}
 let currentSchool='Salesianum'
-let nerdUnlocked=false
 let nerdPrefs={musicMode:'off',sfxMode:'on'}
 
 let autosaveT=null
@@ -3687,10 +3686,6 @@ function wireUI(){
     saveSettings()
     toast('Cheat','Snake Boost '+(gameCheats.snake.boost?'ON':'OFF'),'warn')
   }
-    gameCheats.snake.boost=$('cSnakeBoost').checked
-    saveSettingsDebounced()
-    toast('Snake','Boost '+(gameCheats.snake.boost?'ON':'OFF'),'warn')
-  }
 
   $('cTNoOver').onchange=()=>{
     gameCheats.tetris.noGameOver=$('cTNoOver').checked
@@ -3721,18 +3716,6 @@ function wireUI(){
   $('gCenter').onclick=()=>{gView={x:0,y:0,scale:1};renderGraph()}
 
   $('signOut').onclick=signOut
-
-  $('nerdUnlock').onclick=()=>{
-    const p=($('nerdPass').value||'').trim()
-    if(p==='9999'){
-      nerdUnlocked=true
-      $('nerdBox').style.display='block'
-      $('nerdLockRow').style.display='none'
-      $('nerdPass').value=''
-      toast('Unlocked','Advanced settings enabled','ok')
-    }else{
-      toast('Nope','Wrong password','bad')
-    }
   }
 
   $('musicMode').onchange=()=>{nerdPrefs.musicMode=$('musicMode').value;saveSettingsDebounced();applyMusicMode()}
