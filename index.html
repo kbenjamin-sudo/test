@@ -40,6 +40,27 @@
   --top:66px;
 }
 
+body.skyTheme{
+  --bg:#eaf3ff;
+  --panel:rgba(255,255,255,.82);
+  --panel2:rgba(255,255,255,.78);
+  --card:rgba(255,255,255,.84);
+  --stroke:rgba(15,23,42,.10);
+  --stroke2:rgba(15,23,42,.16);
+  --text:#0b1220;
+  --muted:rgba(11,18,32,.60);
+  --muted2:rgba(11,18,32,.40);
+  --brand:#3b82f6;
+  --brand2:#60a5fa;
+  --shadow:0 16px 55px rgba(2,6,23,.18);
+  --shadow2:0 22px 80px rgba(2,6,23,.22);
+}
+body.skyTheme{
+  background:radial-gradient(1200px 700px at 20% -10%, rgba(59,130,246,.22), transparent 55%),
+             radial-gradient(900px 600px at 110% 15%, rgba(96,165,250,.18), transparent 60%),
+             linear-gradient(#eef6ff,#e8f1ff);
+}
+
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{
@@ -591,6 +612,9 @@ timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);
   display:none;
 }
 .view.active{display:block}
+#viewPreview{overflow:auto}
+#viewGames{overflow:auto}
+
 #viewPreview{overflow:auto;-webkit-overflow-scrolling:touch}
 
 .editor-shell{
@@ -1331,9 +1355,88 @@ kbd{
   font-size:11px;
 }
 hr.sep{border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0}
+
+/* --- Mockup-match refresh (skyTheme) --- */
+body.skyTheme{
+  --bg: #eaf1ff;
+  --panel: #ffffff;
+  --panel2: #f6f8ff;
+  --text: #0f172a;
+  --muted: rgba(15,23,42,.62);
+  --border: rgba(15,23,42,.10);
+  --shadow: 0 18px 40px rgba(15,23,42,.10);
+  --shadow2: 0 10px 24px rgba(15,23,42,.08);
+  --accent: #3b82f6;
+  --accent2: #1d4ed8;
+  --accent3: #60a5fa;
+}
+body.skyTheme::before{
+  content:"";
+  position:fixed;
+  inset:-40px;
+  background:
+    radial-gradient(900px 480px at 70% 15%, rgba(96,165,250,.35), transparent 60%),
+    radial-gradient(800px 520px at 25% 35%, rgba(59,130,246,.22), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.85), rgba(234,241,255,1));
+  z-index:-2;
+}
+body.skyTheme .app{
+  backdrop-filter: blur(8px);
+}
+body.skyTheme .sidebar{
+  background: linear-gradient(180deg, #2b6cb0, #1e4aa8);
+  border-right: 1px solid rgba(255,255,255,.18);
+  box-shadow: 14px 0 30px rgba(15,23,42,.10);
+  position: relative;
+  overflow: hidden;
+}
+body.skyTheme .sidebar::after{
+  content:"";
+  position:absolute;
+  inset:auto -40px -120px -40px;
+  height: 220px;
+  background:
+    radial-gradient(260px 120px at 20% 40%, rgba(255,255,255,.16), transparent 70%),
+    radial-gradient(320px 160px at 70% 50%, rgba(255,255,255,.10), transparent 70%);
+  transform: rotate(-6deg);
+}
+body.skyTheme .brand{
+  color:#fff;
+  letter-spacing:.2px;
+}
+body.skyTheme .navItem{
+  color: rgba(255,255,255,.86);
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+}
+body.skyTheme .navItem:hover{
+  background: rgba(255,255,255,.10);
+}
+body.skyTheme .navItem.active{
+  background: rgba(255,255,255,.16);
+  border-color: rgba(255,255,255,.22);
+}
+body.skyTheme .topbar{
+  background: rgba(255,255,255,.62);
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: var(--shadow2);
+}
+body.skyTheme .card{
+  border-radius: 18px;
+  box-shadow: var(--shadow2);
+}
+body.skyTheme .btn.primary{
+  background: linear-gradient(180deg, var(--accent), var(--accent2));
+  box-shadow: 0 10px 22px rgba(29,78,216,.22);
+}
+body.skyTheme .btn.primary:hover{ filter: brightness(1.02); }
+body.skyTheme input, body.skyTheme textarea, body.skyTheme select{
+  background: rgba(255,255,255,.88);
+}
+
 </style>
 </head>
-<body>
+<body class="skyTheme">
 
 <div class="toastWrap" id="toastWrap"></div>
 
@@ -1389,6 +1492,10 @@ hr.sep{border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0}
         <select id="setPreviewFull">
           <option value="0">Preview Full-screen: Off</option>
           <option value="1">Preview Full-screen: On</option>
+        </select>
+        <select id="setTheme">
+          <option value="dark">Theme: Dark</option>
+          <option value="sky">Theme: Sky</option>
         </select>
       </div>
       <div style="height:10px"></div>
@@ -1779,7 +1886,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const SUPABASE_URL='https://cgmazcvmpcgistoimqlw.supabase.co'
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc'
-const supabase=createClient(SUPABASE_URL,SUPABASE_KEY)
+const supabase=createClient(SUPABASE_URL,SUPABASE_KEY,{global:{fetch:(url,options)=>fetch(url,{...(options||{}),keepalive:true})}})
 
 marked.setOptions({
   breaks:true,
@@ -1802,7 +1909,7 @@ let notes=[]
 let links=[]
 let activeId=null
 
-let uiPrefs={sort:'updated_desc',previewFull:false,sidebarHidden:false,lastOpenNoteId:null}
+let uiPrefs={sort:'updated_desc',previewFull:false,sidebarHidden:false,theme:'sky',lastOpenNoteId:null}
 let timerPresets={focus:25,break:5,long:15}
 let gameCheats={snake:{highScore:0,noDie:false,speed:70,boost:false,wallsKill:true,obstacles:28,evasive:true,poison:true,foodDist:9},tetris:{highScore:0,noGameOver:false,startLevel:1},runner:{best:0,noCrash:false,slow:false}}
 let currentSchool='Salesianum'
@@ -1972,6 +2079,9 @@ function applySettingsRow(s){
   $('sort').value=uiPrefs.sort||'updated_desc'
   $('setSidebar').value=uiPrefs.sidebarHidden? '1':'0'
   $('setPreviewFull').value=uiPrefs.previewFull? '1':'0'
+  $('setTheme').value=uiPrefs.theme||'dark'
+
+  document.body.classList.toggle('skyTheme',(uiPrefs.theme||'dark')==='sky')
   $('setFocus').value=timerPresets.focus||25
   $('setBreak').value=timerPresets.break||5
   $('setLong').value=timerPresets.long||15
@@ -2200,11 +2310,23 @@ function loadNote(id){
   $('body').value=n.content||''
   $('grade').value=n.grade||''
 
+  const d=loadDraft()
+  const serverMs = Date.parse(n.updated_at||n.created_at||0) || 0
+  if(d && (d.updated_at_ms||0) > serverMs){
+    $('title').value = (d.title ?? $('title').value)
+    $('body').value = (d.body ?? $('body').value)
+    $('grade').value = (d.grade ?? $('grade').value)
+    autosaveDirty = true
+    setStatus('Recovered changes')
+  }else{
+    setStatus('Saved')
+  }
+
   updateCrumb()
   renderList()
   updatePreview()
   refreshLinksUI()
-  setStatus('saved')
+  setStatus('Saved')
 }
 
 function updateCrumb(){
@@ -2218,52 +2340,77 @@ function updateCrumb(){
   $('crumbSub').innerHTML=chips.join('')
 }
 
+function draftKey(){
+  return user && activeId ? `studyoS_draft_${user.id}_${activeId}` : null
+}
+
+function saveDraft(){
+  const k = draftKey()
+  if(!k) return
+  const payload = {
+    title: $('title').value,
+    content: $('body').value,
+    grade: $('grade').value,
+    updated_at_ms: Date.now()
+  }
+  try{ localStorage.setItem(k, JSON.stringify(payload)) }catch{}
+}
+
+function loadDraft(){
+  const k = draftKey()
+  if(!k) return null
+  try{
+    const raw = localStorage.getItem(k)
+    return raw ? JSON.parse(raw) : null
+  }catch{ return null }
+}
+
+function clearDraft(){
+  const k = draftKey()
+  if(!k) return
+  try{ localStorage.removeItem(k) }catch{}
+}
+
 function autosave(){
   if(!activeId) return
-  if(!navigator.onLine){setStatus('offline');return}
-  autosaveDirty=true
-  setStatus('saving')
-  clearTimeout(autosaveT)
-  autosaveT=setTimeout(async ()=>{
-    if(!autosaveDirty) return
-    autosaveDirty=false
-    await saveNote()
-  },750)
+  autosaveDirty = true
+  saveDraft()
+  setStatus('Editing…')
+  if(autosaveTimer) clearTimeout(autosaveTimer)
+  autosaveTimer = setTimeout(async ()=>{
+    const ok = await saveNote()
+    if(ok){
+      autosaveDirty = false
+      clearDraft()
+    }else{
+      autosaveDirty = true
+      setStatus('Offline / not saved')
+    }
+  }, 650)
 }
 
 async function saveNote(){
-  if(!activeId) return
-  if(!user){ toast('Not signed in','Please sign in','bad'); return }
-  if(!navigator.onLine){setStatus('offline');return}
-  const n=notes.find(x=>x.id===activeId)
-  if(!n) return
-
-  setStatus('saving')
-  const title=$('title').value
-  const content=$('body').value
-  const grade=$('grade').value||''
-  const updated_at=nowIso()
-
-  const r=await supabase.from('notes').update({title,content,grade,school:currentSchool,updated_at}).eq('id',activeId).eq('user_id',user.id)
-  if(r.error){
-    setStatus('error')
-    toast('Save failed',r.error.message,'bad')
-    console.error(r.error)
-    return
+  if(!user || !activeId) return false
+  saveDraft()
+  const payload = {
+    id: activeId,
+    user_id: user.id,
+    title: $('title').value.trim() || 'Untitled',
+    body: $('body').value,
+    grade: $('grade').value || null,
+    updated_at: new Date().toISOString()
   }
-
-  n.title=title
-  n.content=content
-  n.grade=grade
-  n.school=currentSchool
-  n.updated_at=updated_at
-
-  setStatus('saved')
-  updateCrumb()
-  renderList()
-  updatePreview()
-  refreshLinksUI()
+  setStatus('Saving…')
+  try{
+    const { error } = await supabase.from('notes').upsert(payload)
+    if(error) throw error
+    setStatus('Saved')
+    return true
+  }catch(e){
+    return false
+  }
 }
+
 
 async function deleteNote(){
   if(!activeId) return
@@ -2606,6 +2753,8 @@ function closeSettings(){ $('modalSettings').style.display='none' }
 function saveSettingsFromModal(){
   uiPrefs.sidebarHidden=$('setSidebar').value==='1'
   uiPrefs.previewFull=$('setPreviewFull').value==='1'
+  uiPrefs.theme=$('setTheme').value||'dark'
+  document.body.classList.toggle('skyTheme',uiPrefs.theme==='sky')
   timerPresets.focus=clamp(parseInt($('setFocus').value||25,10),1,180)
   timerPresets.break=clamp(parseInt($('setBreak').value||5,10),1,60)
   timerPresets.long=clamp(parseInt($('setLong').value||15,10),1,120)
@@ -3983,11 +4132,14 @@ function wireUI(){
   window.addEventListener('resize',maybeMobileUI)
   maybeMobileUI()
 
-  window.addEventListener('online',()=>{if(activeId) setStatus('saved')})
+  window.addEventListener('online',()=>{if(activeId) setStatus('Saved')})
   window.addEventListener('offline',()=>setStatus('offline'))
 
   document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState!=='visible'){audio.pause();return}
+    if(document.visibilityState!=='visible'){
+      if(activeId && autosaveDirty){saveNote()}
+      audio.pause();return
+    }
     if(nerdPrefs.musicMode && nerdPrefs.musicMode!=='off') applyMusicMode()
   })
 }
