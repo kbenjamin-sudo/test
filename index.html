@@ -3752,7 +3752,6 @@ function wireUI(){
   $('gCenter').onclick=()=>{gView={x:0,y:0,scale:1};renderGraph()}
 
   $('signOut').onclick=signOut
-  }
 
   $('musicMode').onchange=()=>{nerdPrefs.musicMode=$('musicMode').value;saveSettingsDebounced();applyMusicMode()}
   $('sfxMode').onchange=()=>{nerdPrefs.sfxMode=$('sfxMode').value;saveSettingsDebounced()}
@@ -3873,4 +3872,3 @@ boot()
 
 </body>
 </html>
-
