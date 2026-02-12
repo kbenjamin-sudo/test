@@ -1330,6 +1330,42 @@ kbd{
   font-size:11px;
 }
 hr.sep{border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0}
+
+/* --- v4: Chromebook + iPad scroll/touch fixes --- */
+:root{ --vh: 100dvh; }
+html, body{ height:100%; }
+body{
+  min-height: var(--vh);
+  -webkit-text-size-adjust:100%;
+  overscroll-behavior: none;
+}
+.app{
+  min-height: var(--vh);
+}
+.sidebar, .main{
+  min-height: 0; /* allow inner overflow areas to scroll */
+}
+.note-list, .modal-body, .sheet, .game-area{
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+@media (pointer: coarse){
+  button, .btn, select, input{
+    min-height:44px;
+  }
+}
+@media (max-width: 900px){
+  .app{
+    grid-template-columns: 1fr !important;
+  }
+  .sidebar{
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+}
+
 </style>
 </head>
 <body>
