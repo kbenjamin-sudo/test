@@ -1,2446 +1,3740 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>StudyOS</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <style>
 :root{
-  --bg0:#05060a;
-  --bg1:#0b0f1d;
-  --card:rgba(255,255,255,.06);
-  --card2:rgba(255,255,255,.09);
-  --stroke:rgba(255,255,255,.12);
+  --bg:#07080a;
+  --panel:#0e1116;
+  --panel2:#10151d;
+  --card:#0c0f14;
+  --stroke:rgba(255,255,255,.10);
+  --stroke2:rgba(255,255,255,.14);
   --text:#eef2ff;
-  --muted:rgba(238,242,255,.68);
-  --muted2:rgba(238,242,255,.48);
-  --a:#70f0ff;
-  --b:#ff7ad9;
-  --c:#7cff86;
-  --d:#ffd36b;
-  --bad:#ff6b6b;
-  --good:#7cffc1;
-  --shadow:0 18px 60px rgba(0,0,0,.55);
-  --r:18px;
+  --muted:rgba(238,242,255,.55);
+  --muted2:rgba(238,242,255,.35);
+  --brand:#ff6a00;
+  --brand2:#ffb100;
+  --ok:#22c55e;
+  --bad:#ff3b3b;
+  --warn:#ffb100;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --font:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  --shadow:0 16px 55px rgba(0,0,0,.55);
+  --shadow2:0 22px 80px rgba(0,0,0,.75);
+  --r12:12px;
+  --r14:14px;
+  --r16:16px;
+  --r18:18px;
+  --r22:22px;
+  --side:320px;
+  --top:66px;
 }
-*{box-sizing:border-box}
+
+*{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{
-  margin:0;
-  font-family:Inter,system-ui,Segoe UI,Roboto,Arial;
+  background:radial-gradient(1200px 700px at 20% -10%, rgba(255,106,0,.14), transparent 55%),
+             radial-gradient(900px 600px at 110% 15%, rgba(255,177,0,.12), transparent 60%),
+             linear-gradient(#07080a,#07080a);
   color:var(--text);
-  background:
-    radial-gradient(900px 550px at 18% 20%, rgba(112,240,255,.16), transparent 60%),
-    radial-gradient(780px 540px at 76% 24%, rgba(255,122,217,.14), transparent 60%),
-    radial-gradient(820px 600px at 52% 88%, rgba(124,255,134,.10), transparent 60%),
-    linear-gradient(180deg, var(--bg0), var(--bg1));
-  overflow-x:hidden;
-}
-#app{max-width:1180px;margin:26px auto 40px;padding:0 18px}
-.topbar{
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
-  padding:14px 16px;border:1px solid var(--stroke);border-radius:22px;
-  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-  box-shadow:var(--shadow);
-  position:sticky;top:14px;z-index:40;
-  backdrop-filter: blur(14px);
-}
-.brand{display:flex;align-items:center;gap:10px}
-.logo{
-  width:34px;height:34px;border-radius:12px;
-  background:conic-gradient(from 210deg, rgba(112,240,255,.95), rgba(255,122,217,.9), rgba(124,255,134,.9), rgba(255,211,107,.9), rgba(112,240,255,.95));
-  box-shadow:0 0 0 1px rgba(255,255,255,.14) inset, 0 14px 40px rgba(112,240,255,.12);
-}
-.brand h1{margin:0;font-size:14px;letter-spacing:.6px;font-weight:900;text-transform:uppercase}
-.brand .sub{font-size:12px;color:var(--muted2);font-weight:700;margin-top:2px}
-.pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.pill{
-  display:flex;align-items:center;gap:8px;
-  padding:8px 10px;border-radius:999px;border:1px solid var(--stroke);
-  background:rgba(255,255,255,.04);
-  font-weight:800;font-size:12px;color:var(--muted);
-}
-.dot{width:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.22)}
-.dot.good{background:rgba(124,255,193,.92)}
-.dot.bad{background:rgba(255,107,107,.92)}
-.tabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 2px 14px}
-.tab{
-  padding:10px 12px;border-radius:999px;border:1px solid var(--stroke);
-  background:rgba(255,255,255,.04);
-  font-weight:900;font-size:12px;color:var(--muted);
-  cursor:pointer;user-select:none;
-  transition:transform .12s ease, background .12s ease, border-color .12s ease;
-}
-.tab:hover{transform:translateY(-1px);background:rgba(255,255,255,.06)}
-.tab.active{background:linear-gradient(135deg, rgba(112,240,255,.18), rgba(255,122,217,.12));border-color:rgba(255,255,255,.18);color:var(--text)}
-.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
-@media (max-width:980px){.grid{grid-template-columns:1fr}}
-.card{
-  border:1px solid var(--stroke);border-radius:var(--r);
-  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-  box-shadow:var(--shadow);
+  font-family:var(--font);
   overflow:hidden;
 }
-.card .hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 14px 10px}
-.card .title{font-weight:900;letter-spacing:.3px}
-.card .body{padding:0 14px 14px}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.btn{
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.06);
-  color:var(--text);
-  padding:10px 12px;border-radius:12px;
-  font-weight:900;font-size:12px;
-  cursor:pointer;user-select:none;
-  transition:transform .12s ease, background .12s ease, border-color .12s ease;
+
+a{color:inherit}
+button,input,select,textarea{font-family:var(--font)}
+::selection{background:rgba(255,106,0,.35)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:999px;border:2px solid rgba(0,0,0,0)}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.18)}
+::-webkit-scrollbar-track{background:transparent}
+
+.app{
+  height:100%;
+  display:grid;
+  grid-template-columns: var(--side) 1fr;
 }
-.btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.09)}
-.btn.primary{background:linear-gradient(135deg, rgba(112,240,255,.22), rgba(255,122,217,.18));border-color:rgba(255,255,255,.2)}
-.btn.good{background:linear-gradient(135deg, rgba(124,255,193,.18), rgba(112,240,255,.12))}
-.btn.bad{background:linear-gradient(135deg, rgba(255,107,107,.22), rgba(255,211,107,.10))}
-.btn.ghost{background:transparent}
-.input, select, textarea{
-  width:100%;
-  border:1px solid rgba(255,255,255,.16);
-  background:rgba(10,14,26,.55);
-  color:var(--text);
+
+.sidebar{
+  position:relative;
+  background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));
+  border-right:1px solid var(--stroke);
+  overflow:hidden;
+}
+
+.side-inner{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+.brand{
+  padding:18px 18px 14px;
+  border-bottom:1px solid var(--stroke);
+  background:linear-gradient(180deg, rgba(255,106,0,.08), rgba(255,255,255,0));
+}
+
+.brand-top{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logo{
+  width:42px;height:42px;
   border-radius:14px;
-  padding:11px 12px;
-  outline:none;
-  font-weight:800;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  color:#fff;
+  box-shadow:0 0 0 1px rgba(255,255,255,.14) inset, 0 14px 40px rgba(255,106,0,.18);
+  user-select:none;
 }
-textarea{min-height:210px;resize:vertical;line-height:1.35}
-.small{font-size:12px;color:var(--muted2);font-weight:800}
-.kbd{padding:3px 7px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);font-weight:900;font-size:11px;color:var(--muted)}
-.split{display:grid;grid-template-columns:1fr 1.15fr;gap:14px}
-@media (max-width:980px){.split{grid-template-columns:1fr}}
-.list{display:flex;flex-direction:column;gap:10px}
-.noteItem{
-  padding:11px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  cursor:pointer;
+
+.brand-name{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
 }
-.noteItem:hover{background:rgba(255,255,255,.06)}
-.noteItem.active{background:linear-gradient(135deg, rgba(112,240,255,.14), rgba(255,122,217,.10));border-color:rgba(255,255,255,.18)}
-.noteTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.tag{
-  padding:5px 8px;border-radius:999px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.05);
-  font-weight:900;font-size:11px;color:var(--muted);
+.brand-name .t{
+  font-weight:900;
+  letter-spacing:-.5px;
+  font-size:18px;
   white-space:nowrap;
 }
-.tag.a{border-color:rgba(112,240,255,.25)}
-.tag.b{border-color:rgba(255,122,217,.25)}
-.tag.c{border-color:rgba(124,255,134,.25)}
-.tag.d{border-color:rgba(255,211,107,.25)}
-.hr{height:1px;background:rgba(255,255,255,.10);margin:12px 0}
-.toastWrap{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:10px;z-index:100}
-.toast{
-  max-width:360px;
-  padding:12px 12px;
+.brand-name .s{
+  font-weight:700;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.school-pill{
+  margin-top:10px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,106,0,.35);
+  background:rgba(255,106,0,.10);
+  color:rgba(255,220,200,.92);
+  font-weight:800;
+  font-size:11px;
+  cursor:pointer;
+  user-select:none;
+  width:max-content;
+  transition:transform .15s, background .15s, border-color .15s;
+}
+.school-pill:hover{transform:translateY(-1px);background:rgba(255,106,0,.16);border-color:rgba(255,106,0,.55)}
+.school-pill span{opacity:.95}
+
+.side-actions{
+  margin-top:12px;
+  display:flex;
+  gap:10px;
+}
+
+.btn{
+  border:1px solid var(--stroke2);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  padding:10px 12px;
   border-radius:14px;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(8,10,18,.72);
-  box-shadow:0 18px 70px rgba(0,0,0,.6);
-  backdrop-filter: blur(14px);
+  cursor:pointer;
+  font-weight:800;
+  font-size:12px;
+  transition:transform .15s, border-color .15s, background .15s, box-shadow .15s;
+  user-select:none;
 }
-.toast .t{font-weight:900}
-.toast .m{color:var(--muted);font-weight:800;font-size:12px;margin-top:4px}
-.modalBack{
-  position:fixed;inset:0;background:rgba(0,0,0,.55);
-  display:none;align-items:center;justify-content:center;z-index:120;
-  padding:18px;
+.btn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.06);
+  border-color:rgba(255,106,0,.45);
+  box-shadow:0 14px 38px rgba(0,0,0,.35);
 }
-.modal{
-  width:min(720px, 96vw);
-  border-radius:22px;border:1px solid rgba(255,255,255,.14);
-  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-  box-shadow:0 22px 90px rgba(0,0,0,.7);
-  overflow:hidden;
-  backdrop-filter: blur(18px);
+.btn:active{transform:translateY(0)}
+.btn.primary{
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  border-color:transparent;
+  color:#111;
 }
-.modal .mh{padding:14px 14px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.modal .mb{padding:0 14px 14px}
-.gameGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-@media (max-width:980px){.gameGrid{grid-template-columns:1fr}}
-.gameCard{
+.btn.primary:hover{
+  border-color:transparent;
+  box-shadow:0 18px 55px rgba(255,106,0,.16);
+}
+.btn.ghost{
+  background:transparent;
+  border-color:rgba(255,255,255,.12);
+}
+.btn.danger{
+  border-color:rgba(255,59,59,.35);
+  color:rgba(255,180,180,.95);
+}
+.btn.danger:hover{
+  border-color:rgba(255,59,59,.7);
+  background:rgba(255,59,59,.10);
+}
+
+.search-wrap{
+  padding:12px 18px 10px;
+}
+.search{
+  width:100%;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.20);
+  color:var(--text);
+  padding:12px 12px;
+  font-weight:750;
+  font-size:12px;
+  transition:border-color .15s, box-shadow .15s;
+}
+.search:focus{
+  border-color:rgba(255,106,0,.55);
+  box-shadow:0 0 0 4px rgba(255,106,0,.12);
+}
+.search::placeholder{color:rgba(238,242,255,.35);font-weight:700}
+
+.side-filters{
+  padding:0 18px 10px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.side-filters select{
+  flex:1;
+  border-radius:14px;
   border:1px solid rgba(255,255,255,.12);
   background:rgba(255,255,255,.04);
-  border-radius:18px;
-  padding:12px;
+  color:var(--text);
+  padding:10px 10px;
+  font-weight:850;
+  font-size:11px;
+  cursor:pointer;
 }
-.gameCard h3{margin:0 0 6px;font-size:14px;font-weight:900}
-.gameCard p{margin:0;color:var(--muted);font-weight:800;font-size:12px;line-height:1.3}
-.canvasWrap{border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);overflow:hidden}
-#graphCanvas{width:100%;height:420px;display:block}
-.timerBig{font-size:54px;font-weight:900;letter-spacing:1px}
+.side-filters .kbtn{
+  width:48px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:950;
+}
+
+.note-list{
+  flex:1;
+  overflow:auto;
+  padding:10px 12px 14px;
+}
+
+.group{
+  margin:10px 6px 14px;
+}
+.group-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:9px 10px;
+  color:rgba(238,242,255,.65);
+  font-weight:900;
+  font-size:10px;
+  letter-spacing:1.15px;
+  text-transform:uppercase;
+  user-select:none;
+}
+.group-head .count{
+  font-size:10px;
+  padding:3px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.10);
+  color:rgba(238,242,255,.75);
+  font-weight:950;
+  letter-spacing:.4px;
+}
+
+.note-card{
+  margin:8px 6px;
+  padding:12px 12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.10);
+  cursor:pointer;
+  transition:transform .13s, border-color .13s, background .13s, box-shadow .13s;
+}
+.note-card:hover{
+  transform:translateY(-1px);
+  border-color:rgba(255,106,0,.35);
+  background:rgba(255,255,255,.055);
+  box-shadow:0 18px 45px rgba(0,0,0,.35);
+}
+.note-card.active{
+  border-color:rgba(255,106,0,.75);
+  background:linear-gradient(180deg, rgba(255,106,0,.14), rgba(255,255,255,.04));
+  box-shadow:0 25px 65px rgba(0,0,0,.45);
+}
+.note-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:6px;
+}
+.note-title .t{
+  font-weight:900;
+  font-size:13px;
+  letter-spacing:-.2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.note-title .tag{
+  font-size:10px;
+  padding:4px 9px;
+  border-radius:999px;
+  border:1px solid rgba(255,177,0,.30);
+  color:rgba(255,212,150,.95);
+  background:rgba(255,177,0,.08);
+  font-weight:950;
+  flex-shrink:0;
+}
+.note-snippet{
+  color:rgba(238,242,255,.55);
+  font-weight:650;
+  font-size:11px;
+  line-height:1.4;
+  height:30px;
+  overflow:hidden;
+}
+.note-meta{
+  margin-top:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:rgba(238,242,255,.35);
+  font-weight:800;
+  font-size:10px;
+}
+.badges{
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+.badge{
+  font-size:9px;
+  font-weight:950;
+  padding:3px 7px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);
+  color:rgba(238,242,255,.7);
+}
+.badge.link{border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.08);color:rgba(152,255,200,.95)}
+.badge.draft{border-color:rgba(255,255,255,.10);background:rgba(255,255,255,.03);color:rgba(238,242,255,.45)}
+
+.side-footer{
+  padding:12px 18px 14px;
+  border-top:1px solid var(--stroke);
+  background:linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.03));
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.timerbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  background:rgba(0,0,0,.22);
+  border:1px solid rgba(255,255,255,.12);
+  padding:10px 12px;
+  border-radius:16px;
+}
+.timerbar .time{
+  font-family:var(--mono);
+  font-size:18px;
+  font-weight:950;
+  letter-spacing:1px;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.timerbar .tbtns{display:flex;gap:8px}
+.timerbar .tbtn{
+  width:38px;height:34px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:950;
+  color:rgba(238,242,255,.9);
+  transition:transform .12s, border-color .12s, background .12s;
+}
+.timerbar .tbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);background:rgba(255,255,255,.06)}
+.timer-modes{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.pill{
+  padding:7px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  color:rgba(238,242,255,.75);
+  font-weight:900;
+  font-size:10px;
+  cursor:pointer;
+  user-select:none;
+  transition:transform .12s,border-color .12s,background .12s;
+}
+.pill:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.4);background:rgba(255,255,255,.06)}
+
+.userline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  color:rgba(238,242,255,.65);
+  font-weight:800;
+  font-size:11px;
+}
+.userline .left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.avatar{
+  width:34px;height:34px;
+  border-radius:12px;
+  background:linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+  border:1px solid rgba(255,255,255,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:950;
+  color:rgba(238,242,255,.92);
+  user-select:none;
+}
+.userline .email{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:170px;
+  color:rgba(238,242,255,.8);
+}
+.userline .out{padding:8px 10px;border-radius:14px}
+
+.main{
+  position:relative;
+  overflow:hidden;
+}
+
+.topbar{
+  height:var(--top);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  border-bottom:1px solid var(--stroke);
+  background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0));
+}
+
+.top-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+.mode-tabs{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.tab{
+  padding:9px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  color:rgba(238,242,255,.78);
+  font-weight:900;
+  font-size:12px;
+  cursor:pointer;
+  user-select:none;
+  transition:transform .12s, border-color .12s, background .12s;
+}
+.tab:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.35);background:rgba(255,255,255,.06)}
+.tab.active{
+  background:linear-gradient(135deg, rgba(255,106,0,.22), rgba(255,177,0,.10));
+  border-color:rgba(255,106,0,.6);
+  color:rgba(255,245,240,.98);
+  box-shadow:0 18px 48px rgba(0,0,0,.35);
+}
+.notecrumb{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+.notecrumb .title{
+  font-weight:950;
+  letter-spacing:-.4px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:520px;
+}
+.notecrumb .sub{
+  font-weight:800;
+  color:rgba(238,242,255,.55);
+  font-size:11px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.chip{
+  padding:3px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  color:rgba(238,242,255,.7);
+  font-weight:900;
+  font-size:10px;
+}
+
+.top-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.03);
+  font-weight:900;
+  font-size:11px;
+  color:rgba(238,242,255,.75);
+  user-select:none;
+  transition:border-color .3s;
+}
+.status.is-saving{border-color:rgba(255,177,0,.4)}
+.status.is-saved{border-color:rgba(34,197,94,.35)}
+.status.is-error{border-color:rgba(255,59,59,.4)}
+.dot{width:8px;height:8px;border-radius:50%;transition:all .3s}
+.dot.ok{background:var(--ok);box-shadow:0 0 16px rgba(34,197,94,.35)}
+.dot.warn{background:var(--warn);box-shadow:0 0 16px rgba(255,177,0,.35);animation:dotPulse 1.1s ease infinite}
+.dot.bad{background:var(--bad);box-shadow:0 0 16px rgba(255,59,59,.35)}
+@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+
+.iconbtn{
+  width:44px;height:40px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:950;
+  font-size:13px;
+  transition:transform .12s, border-color .12s, background .12s;
+  user-select:none;
+}
+.iconbtn:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.35);background:rgba(255,255,255,.06)}
+.iconbtn.primary{
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  border-color:transparent;
+  color:#131313;
+}
+.iconbtn.primary:hover{border-color:transparent;box-shadow:0 18px 55px rgba(255,106,0,.18)}
+.iconbtn.danger{border-color:rgba(255,59,59,.35);color:rgba(255,180,180,.95)}
+.iconbtn.danger:hover{border-color:rgba(255,59,59,.7);background:rgba(255,59,59,.10)}
+.iconbtn.wide{
+  width:auto;
+  padding:0 12px;
+  gap:10px;
+}
+.iconbtn.wide span{font-weight:950;font-size:12px}
+
+.content{
+  height:calc(100% - var(--top));
+  position:relative;
+  overflow:hidden;
+}
+
+.view{
+  position:absolute;
+  inset:0;
+  display:none;
+}
+.view.active{display:block}
+
+.editor-shell{
+  height:100%;
+  display:grid;
+  grid-template-rows: 64px 1fr;
+}
+
+.toolbar{
+  padding:12px 18px;
+  border-bottom:1px solid var(--stroke);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+}
+.lefttools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tool{
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  cursor:pointer;
+  font-weight:950;
+  font-size:11px;
+  color:rgba(238,242,255,.84);
+  transition:transform .12s, border-color .12s, background .12s;
+  user-select:none;
+}
+.tool:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.35);background:rgba(255,255,255,.06)}
+.tool.active{
+  background:linear-gradient(135deg, rgba(255,106,0,.18), rgba(255,177,0,.08));
+  border-color:rgba(255,106,0,.55);
+}
+
+.metapick{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.metapick select,.metapick input{
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  padding:10px 10px;
+  font-weight:850;
+  font-size:11px;
+}
+.metapick input{width:260px}
+.metapick input::placeholder{color:rgba(238,242,255,.35);font-weight:750}
+.metapick input:focus,.metapick select:focus{
+  border-color:rgba(255,106,0,.55);
+  box-shadow:0 0 0 4px rgba(255,106,0,.10);
+}
+
+.split{
+  height:100%;
+  display:grid;
+  grid-template-columns: 1fr 12px 1fr;
+  overflow:hidden;
+}
+.split.singleEditor{grid-template-columns: 1fr}
+.split.singlePreview{grid-template-columns: 1fr}
+
+.pane{
+  height:100%;
+  overflow:auto;
+  padding:18px 18px 22px;
+}
+
+.divider{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:col-resize;
+  user-select:none;
+}
+.divider::before{
+  content:'';
+  width:6px;
+  height:55%;
+  border-radius:999px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.12);
+  transition:background .12s,border-color .12s;
+}
+.divider:hover::before{background:rgba(255,106,0,.16);border-color:rgba(255,106,0,.35)}
+
+.titleInput{
+  width:100%;
+  border:none;
+  outline:none;
+  background:transparent;
+  color:var(--text);
+  font-weight:950;
+  letter-spacing:-.9px;
+  font-size:38px;
+  padding:8px 0 12px;
+}
+.titleInput::placeholder{color:rgba(238,242,255,.18)}
+
+.bodyInput{
+  width:100%;
+  min-height:calc(100% - 70px);
+  border:1px solid rgba(255,255,255,.10);
+  outline:none;
+  background:rgba(0,0,0,.18);
+  color:rgba(238,242,255,.92);
+  border-radius:18px;
+  padding:16px 16px;
+  font-family:var(--mono);
+  font-size:14px;
+  line-height:1.75;
+  resize:none;
+  transition:border-color .12s, box-shadow .12s;
+}
+.bodyInput:focus{
+  border-color:rgba(255,106,0,.55);
+  box-shadow:0 0 0 5px rgba(255,106,0,.10);
+}
+.bodyInput::placeholder{color:rgba(238,242,255,.25)}
+
+.rightpane{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.card{
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  padding:14px;
+}
+.cardhead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+.cardhead .h{
+  font-weight:950;
+  font-size:11px;
+  letter-spacing:1.1px;
+  text-transform:uppercase;
+  color:rgba(238,242,255,.65);
+}
+.cardhead .act{
+  display:flex;
+  gap:8px;
+}
+.linkbtn{
+  font-weight:950;
+  font-size:11px;
+  color:rgba(255,200,160,.92);
+  cursor:pointer;
+  user-select:none;
+}
+.linkbtn:hover{color:rgba(255,220,200,.98)}
+.pills{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.pillnote{
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.18);
+  color:rgba(238,242,255,.82);
+  font-weight:900;
+  font-size:11px;
+  cursor:pointer;
+  user-select:none;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  transition:transform .12s,border-color .12s,background .12s;
+}
+.pillnote:hover{transform:translateY(-1px);border-color:rgba(255,106,0,.35);background:rgba(255,255,255,.06)}
+.pillnote .x{
+  width:18px;height:18px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  font-weight:950;
+  font-size:12px;
+}
+.pillnote:hover .x{border-color:rgba(255,59,59,.35);background:rgba(255,59,59,.10);color:rgba(255,200,200,.95)}
+
+.preview{
+  max-width:980px;
+  margin:0 auto;
+  padding:22px 24px 40px;
+}
+.preview h1{
+  font-size:52px;
+  font-weight:950;
+  letter-spacing:-1.25px;
+  margin-bottom:10px;
+  background:linear-gradient(135deg, rgba(255,240,230,.98), rgba(255,210,170,.88));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.preview .metaRow{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:20px;
+}
+.preview .metaRow .chip{font-size:11px;padding:6px 10px}
+.preview .body{
+  font-size:16px;
+  line-height:1.95;
+  color:rgba(238,242,255,.92);
+}
+.preview .body h2{margin-top:2.2em;margin-bottom:.7em;font-size:28px;color:rgba(255,210,170,.92);font-weight:950;letter-spacing:-.5px}
+.preview .body h3{margin-top:1.8em;margin-bottom:.6em;font-size:22px;color:rgba(255,177,0,.92);font-weight:950}
+.preview .body p{margin:1em 0}
+.preview .body a{color:rgba(255,190,150,.95);font-weight:900;text-decoration:none;border-bottom:2px solid transparent}
+.preview .body a:hover{border-bottom-color:rgba(255,190,150,.65)}
+.preview .body code{
+  font-family:var(--mono);
+  font-size:.9em;
+  padding:2px 7px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.22);
+  color:rgba(255,220,170,.95);
+}
+.preview .body pre{
+  margin:1.2em 0;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.22);
+  overflow:auto;
+  padding:14px;
+}
+.preview .body pre code{background:transparent;border:none;padding:0;color:rgba(238,242,255,.92)}
+.preview .body blockquote{
+  margin:1.2em 0;
+  padding:14px 16px;
+  border-left:4px solid rgba(255,106,0,.85);
+  background:rgba(255,255,255,.04);
+  border-radius:0 18px 18px 0;
+  color:rgba(238,242,255,.72);
+  font-style:italic;
+}
+.preview .body ul,.preview .body ol{margin:1em 0 1em 1.4em}
+.preview .body li{margin:.35em 0}
+
+.graphWrap{
+  height:100%;
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+}
+#graph{
+  width:100%;
+  height:100%;
+  display:block;
+}
+.graphUI{
+  position:absolute;
+  top:14px;right:14px;
+  display:flex;
+  gap:10px;
+}
+.graphUI .iconbtn{height:42px}
+.graphHint{
+  position:absolute;
+  left:14px;bottom:14px;
+  padding:10px 12px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.25);
+  color:rgba(238,242,255,.70);
+  font-weight:850;
+  font-size:11px;
+}
+
+.modalBack{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.72);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:3000;
+  backdrop-filter:blur(10px);
+}
+.modal{
+  width:92%;
+  max-width:720px;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(14,17,22,.92);
+  box-shadow:var(--shadow2);
+  overflow:hidden;
+}
+.modalTop{
+  padding:16px 18px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.modalTop .h{
+  font-weight:950;
+  font-size:14px;
+  letter-spacing:-.25px;
+}
+.modalBody{
+  padding:16px 18px 18px;
+}
+.modalBody p{
+  color:rgba(238,242,255,.62);
+  font-weight:700;
+  font-size:12px;
+  line-height:1.7;
+  margin-bottom:14px;
+}
+.row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.row input,.row select{
+  flex:1;
+  min-width:190px;
+  padding:12px 12px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.22);
+  color:var(--text);
+  font-weight:850;
+  font-size:12px;
+}
+.row input:focus,.row select:focus{
+  border-color:rgba(255,106,0,.55);
+  box-shadow:0 0 0 5px rgba(255,106,0,.10);
+}
+.modalActions{
+  padding:14px 18px 18px;
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+}
+.modalActions .btn{border-radius:16px}
+
+.toastWrap{
+  position:fixed;
+  right:14px;
+  bottom:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  z-index:4000;
+  pointer-events:none;
+}
+.toast{
+  pointer-events:none;
+  width:320px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(14,17,22,.88);
+  backdrop-filter:blur(10px);
+  box-shadow:var(--shadow);
+  padding:12px 12px;
+}
+.toast .t1{font-weight:950;font-size:12px;margin-bottom:3px}
+.toast .t2{font-weight:750;font-size:11px;color:rgba(238,242,255,.62);line-height:1.5}
+.toast.ok{border-color:rgba(34,197,94,.28)}
+.toast.warn{border-color:rgba(255,177,0,.28)}
+.toast.bad{border-color:rgba(255,59,59,.32)}
+
+.paletteBack{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.62);
+  display:none;
+  align-items:flex-start;
+  justify-content:center;
+  padding-top:95px;
+  z-index:3500;
+  backdrop-filter:blur(10px);
+}
+.palette{
+  width:92%;
+  max-width:760px;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(14,17,22,.92);
+  box-shadow:var(--shadow2);
+  overflow:hidden;
+}
+.paletteTop{
+  padding:14px 14px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.paletteTop input{
+  flex:1;
+  padding:12px 12px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.22);
+  color:var(--text);
+  font-weight:900;
+}
+.paletteTop input:focus{
+  border-color:rgba(255,106,0,.55);
+  box-shadow:0 0 0 5px rgba(255,106,0,.10);
+}
+.paletteTop .hint{
+  color:rgba(238,242,255,.55);
+  font-weight:900;
+  font-size:11px;
+  white-space:nowrap;
+}
+.paletteList{
+  max-height:430px;
+  overflow:auto;
+}
+.pItem{
+  padding:12px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  cursor:pointer;
+  border-top:1px solid rgba(255,255,255,.06);
+  transition:background .12s;
+}
+.pItem:hover{background:rgba(255,255,255,.05)}
+.pItem .l{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  min-width:0;
+}
+.pIco{
+  width:34px;height:34px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,106,0,.25);
+  background:rgba(255,106,0,.10);
+}
+.pTxt{min-width:0}
+.pA{
+  font-weight:950;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.pB{
+  margin-top:2px;
+  font-weight:750;
+  font-size:11px;
+  color:rgba(238,242,255,.55);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.pK{
+  color:rgba(238,242,255,.55);
+  font-weight:950;
+  font-size:11px;
+  white-space:nowrap;
+}
+
+.authBack{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(900px 650px at 20% 10%, rgba(255,106,0,.14), transparent 60%),
+             radial-gradient(700px 520px at 90% 25%, rgba(255,177,0,.12), transparent 65%),
+             rgba(0,0,0,.82);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:5000;
+}
+.authCard{
+  width:92%;
+  max-width:460px;
+  border-radius:26px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(14,17,22,.90);
+  box-shadow:var(--shadow2);
+  padding:22px;
+}
+.authHead{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
+}
+.authHead .t{
+  font-weight:950;
+  font-size:18px;
+  letter-spacing:-.4px;
+}
+.authHead .s{
+  font-weight:800;
+  font-size:11px;
+  color:rgba(238,242,255,.55);
+  margin-top:2px;
+}
+.authTabs{
+  display:flex;
+  gap:10px;
+  margin:10px 0 14px;
+}
+.atab{
+  flex:1;
+  text-align:center;
+  padding:10px 10px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  font-weight:950;
+  font-size:12px;
+  cursor:pointer;
+  user-select:none;
+}
+.atab.active{
+  border-color:rgba(255,106,0,.55);
+  background:linear-gradient(135deg, rgba(255,106,0,.18), rgba(255,177,0,.08));
+}
+.authCard input{
+  width:100%;
+  padding:12px 12px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.22);
+  color:var(--text);
+  font-weight:850;
+  margin-bottom:10px;
+  outline:none;
+}
+.authCard input:focus{
+  border-color:rgba(255,106,0,.55);
+  box-shadow:0 0 0 5px rgba(255,106,0,.10);
+}
+.authRow{
+  display:flex;
+  gap:10px;
+  margin-top:6px;
+}
+.authRow .btn{flex:1}
+.authErr{
+  margin-top:10px;
+  font-weight:850;
+  font-size:12px;
+  color:rgba(255,170,170,.95);
+  min-height:16px;
+}
+.authSmall{
+  margin-top:10px;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  color:rgba(238,242,255,.55);
+  font-weight:850;
+  font-size:11px;
+}
+.authSmall span{cursor:pointer;user-select:none}
+.authSmall span:hover{color:rgba(255,220,200,.95)}
+
+body.previewFull .sidebar{display:none}
+body.previewFull .topbar{display:none}
+body.previewFull .app{grid-template-columns:1fr}
+body.previewFull .content{height:100%}
+body.previewFull .preview{max-width:none;padding:44px 70px}
+body.previewFull .preview h1{font-size:60px}
+
+@media (max-width:1080px){
+  .app{grid-template-columns: 300px 1fr}
+  .notecrumb .title{max-width:360px}
+}
+@media (max-width:900px){
+  .app{grid-template-columns: 1fr}
+  .sidebar{
+    position:fixed;
+    left:-340px;top:0;bottom:0;
+    width:320px;
+    z-index:2500;
+    transition:left .18s ease;
+  }
+  .sidebar.open{left:0}
+  .backdrop{
+    position:fixed;
+    inset:0;
+    display:none;
+    background:rgba(0,0,0,.6);
+    z-index:2400;
+  }
+  .backdrop.show{display:block}
+  .topbar{padding:0 12px}
+  .notecrumb .title{max-width:240px}
+  .metapick input{width:190px}
+}
+.backdrop{display:none}
+
+.gamesWrap{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+.gameCard{
+  width:min(980px,96vw);
+  border-radius:24px;
+  border:1px solid rgba(255,106,0,.35);
+  background:rgba(14,17,22,.88);
+  box-shadow:var(--shadow2);
+  padding:16px;
+}
+.gameTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  padding:6px 8px 12px;
+}
+.gTabs{display:flex;gap:10px;flex-wrap:wrap}
+.gTab{
+  padding:10px 12px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  cursor:pointer;
+  font-weight:950;
+  font-size:12px;
+  user-select:none;
+}
+.gTab.active{
+  border-color:rgba(255,106,0,.55);
+  background:linear-gradient(135deg, rgba(255,106,0,.18), rgba(255,177,0,.08));
+}
+.gameTitle{
+  font-weight:950;
+  font-size:14px;
+  color:rgba(255,220,200,.95);
+}
+.gameBody{
+  display:grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap:12px;
+}
+@media (max-width:900px){
+  .gameBody{grid-template-columns: 1fr}
+}
+.canvasWrap{
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.22);
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+canvas{display:block;border-radius:16px;border:1px solid rgba(255,106,0,.25);background:#050505;box-shadow:0 0 40px rgba(255,106,0,.10)}
+.gameSide{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.scoreBox{
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  padding:14px;
+}
+.scoreBox .r{display:flex;justify-content:space-between;gap:10px;margin:7px 0;font-weight:900}
+.scoreBox .r span{color:rgba(255,210,170,.95)}
+.cheatBox{
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  padding:14px;
+}
+.cheatBox .h{font-weight:950;font-size:12px;color:rgba(255,220,200,.95);margin-bottom:10px}
+.cheatBox label{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  font-weight:850;
+  font-size:12px;
+  color:rgba(238,242,255,.80);
+  margin:10px 0;
+}
+.cheatBox input[type="checkbox"]{accent-color:var(--brand)}
+.cheatBox input[type="range"]{accent-color:var(--brand);width:160px}
+.cheatBox input[type="number"]{
+  width:84px;
+  padding:10px 10px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.22);
+  color:var(--text);
+  font-weight:950;
+  outline:none;
+}
+.gameBtns{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.smallHint{
+  color:rgba(238,242,255,.55);
+  font-weight:800;
+  font-size:11px;
+  line-height:1.6;
+}
+kbd{
+  font-family:var(--mono);
+  padding:3px 7px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.22);
+  font-size:11px;
+}
+hr.sep{border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0}
 </style>
 </head>
 <body>
-<div id="app">
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo"></div>
-      <div>
-        <h1>StudyOS</h1>
-        <div class="sub" id="subline">Notes • Graph • Games • Timer</div>
-      </div>
-    </div>
-    <div class="pills">
-      <div class="pill"><div class="dot" id="dotAuth"></div><span id="authLabel">Guest</span></div>
-      <div class="pill"><span id="schoolLabel">School: —</span></div>
-      <div class="pill"><span class="kbd">Shift</span><span class="kbd">Click</span><span class="small">to link notes</span></div>
-    </div>
-  </div>
-
-  <div class="tabs" id="tabs">
-    <div class="tab active" data-view="notesView">Notes</div>
-    <div class="tab" data-view="graphView">Graph</div>
-    <div class="tab" data-view="gamesView">Games</div>
-    <div class="tab" data-view="timerView">Timer</div>
-    <div class="tab" data-view="settingsView">Settings</div>
-  </div>
-
-  <div id="notesView" class="view">
-    <div class="card">
-      <div class="hd">
-        <div class="title">Your notes</div>
-        <div class="row">
-          <input class="input" id="noteSearch" placeholder="Search notes…" style="width:260px">
-          <button class="btn primary" id="newNoteBtn">New</button>
-        </div>
-      </div>
-      <div class="body">
-        <div class="split">
-          <div>
-            <div class="row" style="margin-bottom:10px">
-              <select id="filterSubject" style="flex:1;min-width:180px"></select>
-              <button class="btn" id="refreshBtn">Refresh</button>
-            </div>
-            <div class="list" id="notesList"></div>
-            <div class="small" style="margin-top:10px">Tip: <span class="kbd">Ctrl</span> + <span class="kbd">S</span> saves. <span class="kbd">Ctrl</span> + <span class="kbd">P</span> exports PDF.</div>
-          </div>
-          <div>
-            <div class="row" style="margin-bottom:10px">
-              <input class="input" id="noteTitle" placeholder="Title">
-            </div>
-            <div class="row" style="margin-bottom:10px">
-              <select id="noteSubject" style="flex:1;min-width:180px"></select>
-              <select id="noteGrade" style="width:160px"></select>
-              <select id="noteSchool" style="width:220px"></select>
-            </div>
-            <textarea id="noteContent" placeholder="Write it out…"></textarea>
-            <div class="row" style="margin-top:10px;justify-content:space-between">
-              <div class="row">
-                <button class="btn good" id="saveNoteBtn">Save</button>
-                <button class="btn bad" id="deleteNoteBtn">Delete</button>
-                <button class="btn" id="duplicateNoteBtn">Duplicate</button>
-              </div>
-              <div class="row">
-                <button class="btn" id="pdfBtn">Export PDF</button>
-              </div>
-            </div>
-            <div class="small" id="noteMeta" style="margin-top:10px"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="graphView" class="view" style="display:none">
-    <div class="grid">
-      <div class="card">
-        <div class="hd">
-          <div class="title">Graph</div>
-          <div class="row">
-            <button class="btn" id="layoutBtn">Auto layout</button>
-            <button class="btn" id="clearLinksBtn">Clear links</button>
-          </div>
-        </div>
-        <div class="body">
-          <div class="canvasWrap">
-            <canvas id="graphCanvas" width="1100" height="420"></canvas>
-          </div>
-          <div class="small" style="margin-top:10px">Click a note to focus. <span class="kbd">Shift</span> + click a second note to link. Drag to rearrange.</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="hd">
-          <div class="title">Focused note</div>
-          <div class="row">
-            <button class="btn" id="openFocusedBtn">Open in editor</button>
-          </div>
-        </div>
-        <div class="body">
-          <div class="small" id="focusSub"></div>
-          <div class="hr"></div>
-          <div id="focusTitle" style="font-weight:900;font-size:16px"></div>
-          <div class="small" id="focusText" style="margin-top:8px;white-space:pre-wrap"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="gamesView" class="view" style="display:none">
-    <div class="card">
-      <div class="hd">
-        <div class="title">Games</div>
-        <div class="row">
-          <button class="btn" id="toggleSfxBtn">SFX: On</button>
-        </div>
-      </div>
-      <div class="body">
-        <div class="gameGrid">
-          <div class="gameCard">
-            <h3>Neon Snake+</h3>
-            <p>Classic snake, but speed ramps, neon boost, and a score combo.</p>
-            <div class="row" style="margin-top:10px">
-              <button class="btn primary" data-game="snake">Play</button>
-            </div>
-          </div>
-          <div class="gameCard">
-            <h3>Mini Tetris</h3>
-            <p>Drop blocks and clear lines. Simple, fast, satisfying.</p>
-            <div class="row" style="margin-top:10px">
-              <button class="btn primary" data-game="tetris">Play</button>
-            </div>
-          </div>
-          <div class="gameCard">
-            <h3>Runner</h3>
-            <p>Jump over obstacles. Survive longer, get faster.</p>
-            <div class="row" style="margin-top:10px">
-              <button class="btn primary" data-game="runner">Play</button>
-            </div>
-          </div>
-          <div class="gameCard">
-            <h3>Memory Match</h3>
-            <p>Flip tiles. Match pairs. Beat your time.</p>
-            <div class="row" style="margin-top:10px">
-              <button class="btn primary" data-game="memory">Play</button>
-            </div>
-          </div>
-          <div class="gameCard">
-            <h3>Rapid Click</h3>
-            <p>30 seconds. How many clicks can you stack?</p>
-            <div class="row" style="margin-top:10px">
-              <button class="btn primary" data-game="click">Play</button>
-            </div>
-          </div>
-          <div class="gameCard">
-            <h3>Zen Break</h3>
-            <p>Chill mode: tap bubbles, no timer, just vibes.</p>
-            <div class="row" style="margin-top:10px">
-              <button class="btn primary" data-game="zen">Play</button>
-            </div>
-          </div>
-        </div>
-        <div class="small" style="margin-top:10px">All games work offline. Music is optional and lives in a locked section.</div>
-      </div>
-    </div>
-  </div>
-
-  <div id="timerView" class="view" style="display:none">
-    <div class="grid">
-      <div class="card">
-        <div class="hd">
-          <div class="title">Timer</div>
-          <div class="row">
-            <button class="btn" data-preset="25">Pomodoro 25</button>
-            <button class="btn" data-preset="50">Deep 50</button>
-            <button class="btn" data-preset="10">Quick 10</button>
-          </div>
-        </div>
-        <div class="body">
-          <div class="timerBig" id="timerDisplay">25:00</div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn primary" id="timerStart">Start</button>
-            <button class="btn" id="timerPause">Pause</button>
-            <button class="btn bad" id="timerReset">Reset</button>
-          </div>
-          <div class="small" style="margin-top:10px">Shortcuts: <span class="kbd">Space</span> start/pause, <span class="kbd">R</span> reset (when Timer tab is open)</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="hd">
-          <div class="title">Session notes</div>
-          <div class="row">
-            <button class="btn" id="timerLogBtn">Log focus note</button>
-          </div>
-        </div>
-        <div class="body">
-          <textarea id="timerNotes" placeholder="What are you working on right now?"></textarea>
-          <div class="small" style="margin-top:10px">This saves to your settings if you’re signed in.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="settingsView" class="view" style="display:none">
-    <div class="grid">
-      <div class="card">
-        <div class="hd">
-          <div class="title">Account</div>
-          <div class="row">
-            <button class="btn" id="signOutBtn" style="display:none">Sign out</button>
-          </div>
-        </div>
-        <div class="body">
-          <div class="small">Sign in to sync notes across devices. Guest mode saves locally in this browser.</div>
-          <div class="hr"></div>
-          <div class="row" style="align-items:flex-start">
-            <div style="flex:1;min-width:220px">
-              <input class="input" id="emailInput" placeholder="Email">
-            </div>
-            <div style="flex:1;min-width:220px">
-              <input class="input" id="passInput" placeholder="Password" type="password">
-            </div>
-          </div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn primary" id="signInBtn">Sign in</button>
-            <button class="btn" id="signUpBtn">Sign up</button>
-            <button class="btn" id="importLocalBtn">Import local notes</button>
-          </div>
-          <div class="small" id="acctStatus" style="margin-top:10px"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="hd">
-          <div class="title">Preferences</div>
-          <div class="row">
-            <button class="btn" id="exportLocalBtn">Export local backup</button>
-          </div>
-        </div>
-        <div class="body">
-          <div class="row">
-            <div style="flex:1;min-width:220px">
-              <div class="small" style="margin-bottom:8px">School</div>
-              <select id="currentSchool"></select>
-            </div>
-            <div style="flex:1;min-width:220px">
-              <div class="small" style="margin-bottom:8px">Theme</div>
-              <select id="themeSelect"></select>
-            </div>
-          </div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn good" id="saveSettingsBtn">Save preferences</button>
-          </div>
-          <div class="hr"></div>
-          <div class="row" style="justify-content:space-between;align-items:center">
-            <div class="small">Settings for nerds</div>
-            <button class="btn" id="openNerdBtn">Open</button>
-          </div>
-          <div class="small" style="margin-top:8px">This section is password-locked. It only affects your browser/account.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <div class="toastWrap" id="toastWrap"></div>
 
-<div class="modalBack" id="modalBack">
-  <div class="modal" id="modalBox">
-    <div class="mh">
-      <div class="title" id="modalTitle">Game</div>
-      <button class="btn" id="modalClose">Close</button>
+<div class="paletteBack" id="paletteBack">
+  <div class="palette">
+    <div class="paletteTop">
+      <input id="paletteQ" placeholder="Search notes or type a command...">
+      <div class="hint">Enter · Esc · Ctrl+K</div>
     </div>
-    <div class="mb" id="modalBody"></div>
+    <div class="paletteList" id="paletteList"></div>
   </div>
 </div>
 
-<div class="modalBack" id="nerdBack">
+<div class="modalBack" id="modalPdf">
   <div class="modal">
-    <div class="mh">
-      <div class="title">Settings for nerds</div>
-      <button class="btn" id="nerdClose">Close</button>
+    <div class="modalTop">
+      <div class="h">Export PDF</div>
+      <div class="iconbtn" id="pdfClose">✕</div>
     </div>
-    <div class="mb">
-      <div id="nerdLocked">
-        <div class="small">Enter passcode to unlock.</div>
-        <div class="row" style="margin-top:10px">
-          <input class="input" id="nerdPass" placeholder="Passcode" type="password" style="max-width:220px">
-          <button class="btn primary" id="nerdUnlockBtn">Unlock</button>
-        </div>
-        <div class="small" id="nerdMsg" style="margin-top:8px"></div>
+    <div class="modalBody">
+      <p>Exports a styled PDF of the current note. Optionally include linked notes as an appendix.</p>
+      <div class="row">
+        <select id="pdfIncludeLinks">
+          <option value="1">Include linked notes</option>
+          <option value="0">Only this note</option>
+        </select>
+        <select id="pdfIncludeDates">
+          <option value="1">Include dates</option>
+          <option value="0">No dates</option>
+        </select>
       </div>
-      <div id="nerdUnlocked" style="display:none">
-        <div class="row" style="align-items:flex-start">
-          <div style="flex:1;min-width:240px">
-            <div class="small" style="margin-bottom:8px">Personal audio</div>
-            <select id="audioTrack"></select>
-            <div class="row" style="margin-top:10px">
-              <button class="btn primary" id="audioToggle">Play</button>
-              <button class="btn" id="audioMute">Mute</button>
-            </div>
-            <div class="row" style="margin-top:10px;align-items:center">
-              <div class="small" style="min-width:72px">Volume</div>
-              <input id="audioVol" type="range" min="0" max="1" step="0.01" style="flex:1">
-            </div>
-            <div class="row" style="margin-top:8px">
-              <button class="btn" id="audioLoopBtn">Loop: On</button>
-              <button class="btn" id="audioSaveBtn">Save audio prefs</button>
-            </div>
-            <div class="small" style="margin-top:10px">Shortcut: <span class="kbd">Alt</span> + <span class="kbd">M</span> quick mute/unmute (after unlock).</div>
-          </div>
-          <div style="flex:1;min-width:240px">
-            <div class="small" style="margin-bottom:8px">SFX</div>
-            <div class="row">
-              <button class="btn" id="sfxToggleBtn">Game SFX: On</button>
-            </div>
-            <div class="small" style="margin-top:10px">SFX are tiny beeps generated in-browser, no extra files.</div>
-          </div>
-        </div>
-      </div>
+    </div>
+    <div class="modalActions">
+      <button class="btn ghost" id="pdfCancel">Cancel</button>
+      <button class="btn primary" id="pdfGo">Export</button>
     </div>
   </div>
 </div>
 
-<div id="pdfPrint" style="position:fixed;left:-9999px;top:-9999px;width:720px;padding:24px;background:#ffffff;color:#111111;font-family:Inter,system-ui">
-  <div style="font-size:22px;font-weight:900" id="pdfTitle"></div>
-  <div style="margin-top:6px;font-size:12px;font-weight:800;color:#444" id="pdfMeta"></div>
-  <div style="margin-top:14px;white-space:pre-wrap;line-height:1.35" id="pdfBody"></div>
+<div class="modalBack" id="modalSettings">
+  <div class="modal">
+    <div class="modalTop">
+      <div class="h">Settings</div>
+      <div class="iconbtn" id="setClose">✕</div>
+    </div>
+    <div class="modalBody">
+      <p>These sync across devices.</p>
+      <div class="row">
+        <select id="setSidebar">
+          <option value="0">Sidebar: Normal</option>
+          <option value="1">Sidebar: Hidden (mobile style)</option>
+        </select>
+        <select id="setPreviewFull">
+          <option value="0">Preview Full-screen: Off</option>
+          <option value="1">Preview Full-screen: On</option>
+        </select>
+      </div>
+      <div style="height:10px"></div>
+      <div class="row">
+        <input id="setFocus" type="number" min="1" max="180" placeholder="Focus minutes">
+        <input id="setBreak" type="number" min="1" max="60" placeholder="Break minutes">
+        <input id="setLong" type="number" min="1" max="120" placeholder="Long break minutes">
+      </div>
+
+      <hr class="sep">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div style="font-weight:950;color:rgba(238,242,255,.85)">Settings for nerds</div>
+        <div style="font-size:11px;color:rgba(238,242,255,.55);font-weight:850">optional</div>
+      </div>
+      <div style="height:10px"></div>
+      <div class="row" id="nerdLockRow">
+        <input id="nerdPass" type="password" inputmode="numeric" placeholder="Password">
+        <button class="btn" id="nerdUnlock">Unlock</button>
+      </div>
+
+      <div id="nerdBox" style="display:none;margin-top:10px">
+        <p style="margin-bottom:10px">Private background audio (off by default). Quick mute: <span style="font-family:var(--mono)">Alt</span>+<span style="font-family:var(--mono)">M</span> or <span style="font-family:var(--mono)">`</span>.</p>
+        <div class="row">
+          <select id="musicMode">
+            <option value="off">Audio: Off</option>
+            <option value="amb1">Audio: Ambience 1</option>
+            <option value="amb2">Audio: Ambience 2</option>
+          </select>
+          <select id="sfxMode">
+            <option value="on">Game SFX: On</option>
+            <option value="off">Game SFX: Off</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+    <div class="modalActions">
+      <button class="btn ghost" id="setCancel">Cancel</button>
+      <button class="btn primary" id="setSave">Save</button>
+    </div>
+  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-<script>
-const SUPABASE_URL = "https://cgmazcvmpcgistoimqlw.supabase.co"
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc"
+<div class="authBack" id="authBack">
+  <div class="authCard">
+    <div class="authHead">
+      <div class="logo">S</div>
+      <div>
+        <div class="t">StudyOS</div>
+        <div class="s">Everything saves. Everywhere.</div>
+      </div>
+    </div>
+    <div class="authTabs">
+      <div class="atab active" id="tabSignIn">Sign In</div>
+      <div class="atab" id="tabSignUp">Sign Up</div>
+    </div>
+    <input id="authEmail" type="email" placeholder="Email">
+    <input id="authPass" type="password" placeholder="Password">
+    <div class="authRow">
+      <button class="btn primary" id="authGo">Enter</button>
+      <button class="btn ghost" id="authMagic">Magic Link</button>
+    </div>
+    <div class="authSmall">
+      <span id="authReset">Forgot password?</span>
+      <span id="authTip">Ctrl+K inside app</span>
+    </div>
+    <div class="authErr" id="authErr"></div>
+  </div>
+</div>
 
-const AUDIO_TRACKS = [
-  {name:"entry four (instrumental)", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes%20-%20entry%20four%20(instrumental)%20(prod.%20khozy).mp3"},
-  {name:"convenience (fixed instrumental)", url:"https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes%20%20convenience%20(fixed%20instrumental).mp3"}
-]
+<div class="backdrop" id="backdrop"></div>
 
-const SUBJECTS = ["All","Math","Science","English","History","Language","Computer Science","Art","Music","Health","Other"]
-const GRADES = ["—","Period 1","Period 2","Period 3","Period 4","Period 5","Period 6","Period 7","Period 8","Honors","AP","IB"]
-const SCHOOLS = ["Salesianum","St. Mark's","St. Peter","Charter","Public","Other"]
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-inner">
+      <div class="brand">
+        <div class="brand-top">
+          <div class="logo">S</div>
+          <div class="brand-name">
+            <div class="t">StudyOS</div>
+            <div class="s">notes · links · graph · games</div>
+          </div>
+        </div>
 
-const THEMES = {
-  "Aurora Neon": {
-    bg0:"#05060a", bg1:"#0b0f1d", a:"#70f0ff", b:"#ff7ad9", c:"#7cff86", d:"#ffd36b"
-  },
-  "Mint Twilight": {
-    bg0:"#04080b", bg1:"#061225", a:"#65ffe4", b:"#a48bff", c:"#7cffc1", d:"#ffe07a"
-  },
-  "Mono Night": {
-    bg0:"#06060a", bg1:"#0a0a14", a:"#cfd4ff", b:"#9aa2ff", c:"#7cffc1", d:"#ffd36b"
+        <div class="side-actions">
+          <button class="btn primary" id="btnNew">New Note</button>
+          <button class="btn" id="btnGames">Games</button>
+        </div>
+
+        <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
+          <select id="schoolSelect" class="search" style="padding:10px 10px;border-radius:14px;max-width:100%;font-weight:900">
+            <option value="Salesianum">School: Salesianum</option>
+            <option value="St Peter Cathedral">School: St Peter Cathedral</option>
+            <option value="Charter">School: Charter</option>
+            <option value="Public">School: Public</option>
+            <option value="Other">School: Other</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="search-wrap">
+        <input class="search" id="search" placeholder="Search titles + content (Ctrl+K)">
+      </div>
+
+      <div class="side-filters">
+        <select id="sort">
+          <option value="updated_desc">Sort: Updated</option>
+          <option value="title_asc">Sort: Title</option>
+          <option value="grade_asc">Sort: Grade</option>
+        </select>
+        <button class="btn kbtn" id="openPalette">⌘</button>
+      </div>
+
+      <div class="note-list" id="noteList"></div>
+
+      <div class="side-footer">
+        <div class="timerbar">
+          <div class="time" id="timerText">25:00</div>
+          <div class="tbtns">
+            <div class="tbtn" id="tStart">▶</div>
+            <div class="tbtn" id="tPause">⏸</div>
+            <div class="tbtn" id="tReset">↺</div>
+          </div>
+        </div>
+        <div class="timer-modes">
+          <div class="pill" id="mFocus">Focus</div>
+          <div class="pill" id="mBreak">Break</div>
+          <div class="pill" id="mLong">Long</div>
+          <div class="pill" id="mBreakGame">Break+Game</div>
+        </div>
+        <div class="userline">
+          <div class="left">
+            <div class="avatar" id="avatar">U</div>
+            <div class="email" id="userEmail">Signed out</div>
+          </div>
+          <button class="btn ghost out" id="signOut">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="top-left">
+        <div class="mode-tabs">
+          <div class="tab active" id="modeEdit">Edit</div>
+          <div class="tab" id="modePreview">Preview</div>
+          <div class="tab" id="modeGraph">Graph</div>
+        </div>
+        <div class="notecrumb">
+          <div class="title" id="crumbTitle">No note selected</div>
+          <div class="sub" id="crumbSub"></div>
+        </div>
+      </div>
+
+      <div class="top-right">
+        <div class="status" id="saveStatus"><span class="dot warn"></span><span>Not saved</span></div>
+        <div class="iconbtn wide" id="toggleSplit"><span>Split</span></div>
+        <div class="iconbtn wide" id="toggleFull"><span>Full</span></div>
+        <div class="iconbtn wide" id="doPdf"><span>PDF</span></div>
+        <div class="iconbtn" id="openSettings">⚙</div>
+        <div class="iconbtn primary" id="saveNow">Save</div>
+        <div class="iconbtn danger" id="delNote">🗑</div>
+        <div class="iconbtn" id="mobileMenu" style="display:none">☰</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <section class="view active" id="viewEditor">
+        <div class="editor-shell">
+          <div class="toolbar">
+            <div class="lefttools">
+              <div class="tool" data-md="bold">B</div>
+              <div class="tool" data-md="italic">I</div>
+              <div class="tool" data-md="h1">H1</div>
+              <div class="tool" data-md="h2">H2</div>
+              <div class="tool" data-md="ul">• List</div>
+              <div class="tool" data-md="ol">1. List</div>
+              <div class="tool" data-md="quote">Quote</div>
+              <div class="tool" data-md="code">Code</div>
+              <div class="tool" data-md="link">Link</div>
+            </div>
+            <div class="metapick">
+              <select id="grade">
+                <option value="">Grade: (none)</option>
+                <option value="8th">8th</option>
+                <option value="9th">9th</option>
+                <option value="10th">10th</option>
+                <option value="11th">11th</option>
+                <option value="12th">12th</option>
+              </select>
+              <input id="linkSearch" placeholder="Link notes by title...">
+            </div>
+          </div>
+
+          <div class="split" id="split">
+            <div class="pane" id="paneLeft">
+              <input class="titleInput" id="title" placeholder="Untitled">
+              <textarea class="bodyInput" id="body" placeholder="Write in Markdown..."></textarea>
+            </div>
+
+            <div class="divider" id="divider"></div>
+
+            <div class="pane" id="paneRight">
+              <div class="rightpane">
+                <div class="card" id="cardLinks" style="display:none">
+                  <div class="cardhead">
+                    <div class="h">Linked notes</div>
+                    <div class="act">
+                      <div class="linkbtn" id="unlinkAll">Unlink all</div>
+                      <div class="linkbtn" id="jumpPreview">Preview</div>
+                    </div>
+                  </div>
+                  <div class="pills" id="linksPills"></div>
+                </div>
+
+                <div class="card" id="cardBack" style="display:none">
+                  <div class="cardhead">
+                    <div class="h">Backlinks</div>
+                    <div class="act">
+                      <div class="linkbtn" id="jumpGraph">Graph</div>
+                    </div>
+                  </div>
+                  <div class="pills" id="backPills"></div>
+                </div>
+
+                <div class="card" id="cardMentions" style="display:none">
+                  <div class="cardhead">
+                    <div class="h">Unlinked mentions</div>
+                    <div class="act">
+                      <div class="linkbtn" id="linkAllMentions">Link all</div>
+                    </div>
+                  </div>
+                  <div class="pills" id="menPills"></div>
+                </div>
+
+                <div class="card">
+                  <div class="cardhead">
+                    <div class="h">Shortcuts</div>
+                    <div class="act"></div>
+                  </div>
+                  <div class="smallHint">
+                    <div><kbd>Ctrl</kbd> + <kbd>S</kbd> save</div>
+                    <div><kbd>Ctrl</kbd> + <kbd>K</kbd> command palette</div>
+                    <div><kbd>Esc</kbd> exit full-screen preview / close dialogs</div>
+                  </div>
+                </div>
+
+                <div class="card" id="cardDrop" style="display:none">
+                  <div class="cardhead">
+                    <div class="h">Link results</div>
+                    <div class="act"><div class="linkbtn" id="closeDrop">Close</div></div>
+                  </div>
+                  <div id="dropList"></div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="view" id="viewPreview">
+        <div class="preview">
+          <h1 id="pTitle">Untitled</h1>
+          <div class="metaRow" id="pMeta"></div>
+          <div class="body" id="pBody"></div>
+          <div class="card" id="pLinksCard" style="margin-top:20px;display:none">
+            <div class="cardhead">
+              <div class="h">Linked notes</div>
+              <div class="act"><div class="linkbtn" id="backToEdit">Back</div></div>
+            </div>
+            <div class="pills" id="pLinks"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="viewGraph">
+        <div class="graphWrap">
+          <canvas id="graph"></canvas>
+          <div class="graphUI">
+            <div class="iconbtn wide" id="gReset"><span>Reset</span></div>
+            <div class="iconbtn wide" id="gPhys"><span>Physics</span></div>
+            <div class="iconbtn wide" id="gCenter"><span>Center</span></div>
+          </div>
+          <div class="graphHint">Drag to pan · Scroll to zoom · Click a node to open</div>
+        </div>
+      </section>
+
+      <section class="view" id="viewGames">
+        <div class="gamesWrap">
+          <div class="gameCard">
+            <div class="gameTop">
+              <div class="gameTitle" id="gTitle">Break Games</div>
+              <div class="gTabs">
+                <div class="gTab active" id="tabSnake">Snake+</div>
+                <div class="gTab" id="tabTetris">Tetris</div>
+                <div class="gTab" id="tabRunner">Pulse Runner</div>
+              </div>
+              <div class="gameBtns">
+                <button class="btn primary" id="gStart">Start</button>
+                <button class="btn" id="gClose">Back</button>
+              </div>
+            </div>
+
+            <div class="gameBody">
+              <div class="canvasWrap">
+                <canvas id="snakeCanvas" width="420" height="420"></canvas>
+                <canvas id="tetrisCanvas" width="240" height="480" style="display:none"></canvas>
+                <canvas id="runnerCanvas" width="560" height="260" style="display:none"></canvas>
+              </div>
+
+              <div class="gameSide">
+                <div class="scoreBox" id="snakeScoreBox">
+                  <div class="r">Score <span id="snakeScore">0</span></div>
+                  <div class="r">Best <span id="snakeBest">0</span></div>
+                  <div class="smallHint">Move: <kbd>WASD</kbd> / <kbd>Arrows</kbd> · Boost: <kbd>Shift</kbd></div>
+                </div>
+
+                <div class="scoreBox" id="tetrisScoreBox" style="display:none">
+                  <div class="r">Score <span id="tScore">0</span></div>
+                  <div class="r">Best <span id="tBest">0</span></div>
+                  <div class="r">Level <span id="tLevel">1</span></div>
+                  <div class="r">Lines <span id="tLines">0</span></div>
+                  <div class="smallHint">Rotate <kbd>↑</kbd> · Drop <kbd>Space</kbd></div>
+                </div>
+
+                <div class="scoreBox" id="runnerScoreBox" style="display:none">
+                  <div class="r">Distance <span id="rDist">0</span></div>
+                  <div class="r">Best <span id="rBest">0</span></div>
+                  <div class="smallHint">Jump: <kbd>Space</kbd> / <kbd>↑</kbd> · Dash: <kbd>Shift</kbd></div>
+                </div>
+
+                <div class="cheatBox">
+                  <div class="h">Game tweaks (saved)</div>
+
+                  <div id="snakeCheats">
+                    <label>Snake No-Die <input type="checkbox" id="cSnakeNoDie"></label>
+                    <label>Snake Speed <input type="range" id="cSnakeSpeed" min="40" max="200" step="5"></label>
+                    <label>Snake Boost <input type="checkbox" id="cSnakeBoost"></label>
+                    <div class="smallHint">Speed: <span id="cSnakeSpeedV" style="color:rgba(255,210,170,.95);font-weight:950"></span></div>
+                  </div>
+
+                  <div id="tetrisCheats" style="display:none">
+                    <label>No Game Over <input type="checkbox" id="cTNoOver"></label>
+                    <label>Start Level <input type="number" id="cTLevel" min="1" max="20"></label>
+                  </div>
+
+                  <div id="runnerCheats" style="display:none">
+                    <label>No Crash <input type="checkbox" id="cRNoCrash"></label>
+                    <label>Slow Obstacles <input type="checkbox" id="cRSlow"></label>
+                  </div>
+
+                </div>
+
+                <div class="card">
+                  <div class="cardhead">
+                    <div class="h">Tip</div>
+                  </div>
+                  <div class="smallHint">Use <kbd>Break+Game</kbd> to instantly swap into games while your break timer runs.</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+const SUPABASE_URL='https://cgmazcvmpcgistoimqlw.supabase.co'
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNnbWF6Y3ZtcGNnaXN0b2ltcWx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjI2NjMsImV4cCI6MjA4NTc5ODY2M30.iIoIyb4bBnOR1zEjZ6ORpLsfJX77YWM1LyYoo_NrUuc'
+const supabase=createClient(SUPABASE_URL,SUPABASE_KEY)
+
+marked.setOptions({
+  breaks:true,
+  highlight:(code,lang)=>{
+    try{
+      if(lang && hljs.getLanguage(lang)) return hljs.highlight(code,{language:lang}).value
+      return hljs.highlightAuto(code).value
+    }catch(e){
+      return code
+    }
   }
-}
-
-const el = (id) => document.getElementById(id)
-const toastWrap = el("toastWrap")
-const supabase = (window.supabase && typeof window.supabase.createClient === "function") ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null
-
-let activeView = "notesView"
-let user = null
-let notes = []
-let links = new Set()
-let selectedId = null
-let focusedId = null
-
-let settings = {
-  current_school: SCHOOLS[0],
-  ui: { theme: "Aurora Neon" },
-  timer: { preset: 25, notes: "" },
-  game: { sfx: true },
-  audio: { unlocked: false, enabled: false, track: 0, volume: 0.35, loop: true, quickMute: true }
-}
-
-let audioEl = new Audio()
-audioEl.crossOrigin = "anonymous"
-
-function toast(title, msg) {
-  const d = document.createElement("div")
-  d.className = "toast"
-  d.innerHTML = '<div class="t">'+escapeHtml(title)+'</div><div class="m">'+escapeHtml(msg)+'</div>'
-  toastWrap.appendChild(d)
-  setTimeout(() => {
-    d.style.opacity = "0"
-    d.style.transform = "translateY(6px)"
-    setTimeout(() => d.remove(), 240)
-  }, 2600)
-}
-
-function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))
-}
-
-function setTabs() {
-  document.querySelectorAll(".tab").forEach(t => {
-    t.classList.toggle("active", t.dataset.view === activeView)
-  })
-  document.querySelectorAll(".view").forEach(v => {
-    v.style.display = (v.id === activeView) ? "" : "none"
-  })
-}
-
-document.querySelectorAll(".tab").forEach(t => {
-  t.addEventListener("click", () => {
-    activeView = t.dataset.view
-    setTabs()
-    if (activeView === "graphView") requestAnimationFrame(drawGraph)
-  })
 })
 
-function applyTheme() {
-  const themeName = settings.ui?.theme || "Aurora Neon"
-  const th = THEMES[themeName] || THEMES["Aurora Neon"]
-  document.documentElement.style.setProperty("--bg0", th.bg0)
-  document.documentElement.style.setProperty("--bg1", th.bg1)
-  document.documentElement.style.setProperty("--a", th.a)
-  document.documentElement.style.setProperty("--b", th.b)
-  document.documentElement.style.setProperty("--c", th.c)
-  document.documentElement.style.setProperty("--d", th.d)
+const $=id=>document.getElementById(id)
+const gradeLabels={ '':'', '8th':'8th', '9th':'9th', '10th':'10th', '11th':'11th', '12th':'12th' }
+const gradeOrder={ '':99, '8th':0, '9th':1, '10th':2, '11th':3, '12th':4 }
+
+let user=null
+let notes=[]
+let links=[]
+let activeId=null
+
+let uiPrefs={sort:'updated_desc',previewFull:false,sidebarHidden:false,lastOpenNoteId:null}
+let timerPresets={focus:25,break:5,long:15}
+let gameCheats={snake:{highScore:0,noDie:false,speed:110,boost:false},tetris:{highScore:0,noGameOver:false,startLevel:1},runner:{best:0,noCrash:false,slow:false}}
+let currentSchool='Salesianum'
+let nerdUnlocked=false
+let nerdPrefs={musicMode:'off',sfxMode:'on'}
+
+let autosaveT=null
+let autosaveDirty=false
+let timerInterval=null
+let timeLeft=25*60
+
+let splitMode='split'
+let splitSizes=[50,50]
+let draggingDivider=false
+
+let graphCanvas=null
+let graphCtx=null
+let graphNodes=[]
+let graphEdges=[]
+let graphPhysics=true
+let gView={x:0,y:0,scale:1}
+let gPan=false
+let gPanStart=null
+let gDragNode=null
+let gAnim=null
+
+let snakeCanvas=null
+let snakeCtx=null
+let snake=[]
+let food=null
+let dir={x:0,y:0}
+let snakeScore=0
+let snakeRunning=false
+let snakeInterval=null
+const S_TILE=21
+
+let tetrisCanvas=null
+let tetrisCtx=null
+let tBoard=null
+let tPiece=null
+let tScore=0
+let tLines=0
+let tLevel=1
+let tRunning=false
+let tDrop=0
+let tLast=0
+const TC=12,TR=24,TS=20
+const T_COLORS=[null,'#ff6a00','#ffb100','#ff7e2b','#ff3b3b','#ff9a00','#ffcc00','#ff5500']
+const T_SHAPES=[null,[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]]]
+
+let runnerCanvas=null
+let runnerCtx=null
+let rRunning=false
+let rAnim=0
+let rLast=0
+let rDist=0
+let rSpeed=220
+let rPlayer={x:70,y:0,v:0,ground:210,rad:16,canDash:true,dashing:false}
+let rObstacles=[]
+let rSpawn=0
+
+const audio = new Audio()
+audio.loop=true
+audio.preload='auto'
+audio.volume=0.35
+const MUSIC_URLS={
+  amb1:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes%20%20convenience%20(fixed%20instrumental).mp3',
+  amb2:'https://cgmazcvmpcgistoimqlw.supabase.co/storage/v1/object/public/assets/jaydes%20-%20entry%20four%20(instrumental)%20(prod.%20khozy).mp3'
 }
 
-function setAuthUI() {
-  el("authLabel").textContent = user ? (user.email || "Signed in") : "Guest"
-  el("dotAuth").className = "dot " + (user ? "good" : "")
-  el("signOutBtn").style.display = user ? "" : "none"
-  el("acctStatus").textContent = user ? "Sync is on for this account." : "Guest mode: saves locally in this browser."
-  el("schoolLabel").textContent = "School: " + (settings.current_school || "—")
+const sfx = (()=> {
+  const ctx = new (window.AudioContext||window.webkitAudioContext)()
+  const tone=(f=440,d=0.05,g=0.15)=>{
+    if(nerdPrefs.sfxMode!=='on') return
+    const o=ctx.createOscillator()
+    const a=ctx.createGain()
+    o.type='sine'
+    o.frequency.value=f
+    a.gain.value=g
+    o.connect(a);a.connect(ctx.destination)
+    o.start()
+    o.stop(ctx.currentTime+d)
+  }
+  return {ctx,tone,unlock:()=>{try{if(ctx.state!=='running') ctx.resume()}catch(e){}}}
+})()
+
+function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
+function orderedPair(a,b){return a<b?[a,b]:[b,a]}
+function nowIso(){return new Date().toISOString()}
+
+function toast(title,body,type='ok'){
+  const wrap=$('toastWrap')
+  const el=document.createElement('div')
+  el.className='toast '+(type==='ok'?'ok':type==='warn'?'warn':'bad')
+  el.innerHTML='<div class="t1"></div><div class="t2"></div>'
+  el.querySelector('.t1').textContent=title
+  el.querySelector('.t2').textContent=body
+  wrap.appendChild(el)
+  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(6px)'},2400)
+  setTimeout(()=>{el.remove()},2900)
 }
 
-function seedDropdowns() {
-  const subjectSel = el("noteSubject")
-  const filterSel = el("filterSubject")
-  subjectSel.innerHTML = ""
-  filterSel.innerHTML = ""
-  SUBJECTS.forEach((s,i) => {
-    const o1 = document.createElement("option")
-    o1.value = s
-    o1.textContent = s
-    subjectSel.appendChild(o1)
-    const o2 = document.createElement("option")
-    o2.value = s
-    o2.textContent = s
-    filterSel.appendChild(o2)
+function fmtTime(d){try{return new Date(d).toLocaleString(undefined,{hour:'numeric',minute:'2-digit'})}catch(e){return ''}}
+function fmtShort(d){try{return new Date(d).toLocaleString(undefined,{month:'short',day:'numeric'})}catch(e){return ''}}
+function relTime(iso){
+  if(!iso) return ''
+  const t=new Date(iso).getTime()
+  const diff=Math.max(0,Date.now()-t)
+  const m=Math.floor(diff/60000)
+  if(m<1) return 'just now'
+  if(m<60) return m+'m ago'
+  const h=Math.floor(m/60)
+  if(h<24) return h+'h ago'
+  const d=Math.floor(h/24)
+  if(d<7) return d+'d ago'
+  return fmtShort(iso)
+}
+function escapeHtml(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
+}
+
+function setStatus(mode){
+  const el=$('saveStatus')
+  const dot=el.querySelector('.dot')
+  const txt=el.querySelectorAll('span')[1]
+  el.classList.remove('is-saving','is-saved','is-error')
+  if(mode==='saving'){
+    dot.className='dot warn'; txt.textContent='Saving…'; el.classList.add('is-saving')
+  }else if(mode==='saved'){
+    dot.className='dot ok'; txt.textContent='Saved '+fmtTime(Date.now()); el.classList.add('is-saved')
+  }else if(mode==='error'){
+    dot.className='dot bad'; txt.textContent='Save failed'; el.classList.add('is-error')
+  }else if(mode==='offline'){
+    dot.className='dot bad'; txt.textContent='Offline'; el.classList.add('is-error')
+  }else{
+    dot.className='dot warn'; txt.textContent='Not saved'
+  }
+}
+
+async function ensureTables(){
+  const t1=await supabase.from('notes').select('id').limit(1)
+  if(t1.error) throw new Error(t1.error.message)
+  const t2=await supabase.from('note_links').select('note_a').limit(1)
+  if(t2.error) throw new Error(t2.error.message)
+  const t3=await supabase.from('user_settings').select('user_id').limit(1)
+  if(t3.error) throw new Error(t3.error.message)
+}
+
+function applySettingsRow(s){
+  currentSchool=s.current_school||currentSchool
+  uiPrefs=s.ui||uiPrefs
+  timerPresets=s.timer||timerPresets
+  gameCheats=s.game||gameCheats
+  nerdPrefs=s.nerd||nerdPrefs
+
+  $('sort').value=uiPrefs.sort||'updated_desc'
+  $('setSidebar').value=uiPrefs.sidebarHidden? '1':'0'
+  $('setPreviewFull').value=uiPrefs.previewFull? '1':'0'
+  $('setFocus').value=timerPresets.focus||25
+  $('setBreak').value=timerPresets.break||5
+  $('setLong').value=timerPresets.long||15
+
+  $('schoolSelect').value=currentSchool
+  if(uiPrefs.previewFull) document.body.classList.add('previewFull')
+  else document.body.classList.remove('previewFull')
+
+  if(nerdUnlocked){
+    $('nerdBox').style.display='block'
+    $('nerdLockRow').style.display='none'
+  }else{
+    $('nerdBox').style.display='none'
+    $('nerdLockRow').style.display='flex'
+  }
+  $('musicMode').value=nerdPrefs.musicMode||'off'
+  $('sfxMode').value=nerdPrefs.sfxMode||'on'
+
+  syncCheatUI()
+  updateTimerDisplay()
+}
+
+let settingsT=null
+function saveSettingsDebounced(){
+  if(!user) return
+  clearTimeout(settingsT)
+  settingsT=setTimeout(async ()=>{
+    const payload={user_id:user.id,current_school:currentSchool,ui:uiPrefs,timer:timerPresets,game:gameCheats,nerd:nerdPrefs}
+    const {error}=await supabase.from('user_settings').upsert(payload,{onConflict:'user_id'})
+    if(error) console.warn('saveSettings error:',error.message)
+  },260)
+}
+
+async function ensureSettings(){
+  const {data,error}=await supabase.from('user_settings').select('*').eq('user_id',user.id).maybeSingle()
+  if(error) throw new Error(error.message)
+  if(!data){
+    const ins=await supabase.from('user_settings').insert({user_id:user.id,current_school:currentSchool,ui:uiPrefs,timer:timerPresets,game:gameCheats,nerd:nerdPrefs}).select().single()
+    if(ins.error) throw new Error(ins.error.message)
+    applySettingsRow(ins.data)
+  }else{
+    applySettingsRow(data)
+  }
+}
+
+async function fetchLinks(){
+  const {data,error}=await supabase.from('note_links').select('note_a,note_b').eq('user_id',user.id)
+  if(error){ console.warn('fetchLinks error:',error.message); links=[]; return }
+  links=data||[]
+}
+
+function rebuildLinkedOnClient(){
+  const map={}
+  notes.forEach(n=>map[n.id]=[])
+  links.forEach(l=>{
+    if(map[l.note_a]) map[l.note_a].push(l.note_b)
+    if(map[l.note_b]) map[l.note_b].push(l.note_a)
   })
-  el("noteGrade").innerHTML = GRADES.map(g => '<option value="'+escapeHtml(g)+'">'+escapeHtml(g)+'</option>').join("")
-  el("noteSchool").innerHTML = SCHOOLS.map(s => '<option value="'+escapeHtml(s)+'">'+escapeHtml(s)+'</option>').join("")
-  el("currentSchool").innerHTML = SCHOOLS.map(s => '<option value="'+escapeHtml(s)+'">'+escapeHtml(s)+'</option>').join("")
-  el("themeSelect").innerHTML = Object.keys(THEMES).map(n => '<option value="'+escapeHtml(n)+'">'+escapeHtml(n)+'</option>').join("")
+  notes=notes.map(n=>({...n,linked_notes:map[n.id]||[]}))
 }
 
-seedDropdowns()
-
-function loadLocal() {
-  try {
-    const raw = localStorage.getItem("studyos_local")
-    if (!raw) return
-    const obj = JSON.parse(raw)
-    if (obj.notes && Array.isArray(obj.notes)) notes = obj.notes
-    if (obj.links && Array.isArray(obj.links)) links = new Set(obj.links)
-    if (obj.settings) settings = deepMerge(settings, obj.settings)
-  } catch (e) {}
-}
-
-function saveLocal() {
-  try {
-    localStorage.setItem("studyos_local", JSON.stringify({notes, links:[...links], settings}))
-  } catch (e) {}
-}
-
-function deepMerge(base, next) {
-  const out = Array.isArray(base) ? [...base] : {...base}
-  for (const k in next) {
-    const a = base?.[k]
-    const b = next?.[k]
-    if (a && b && typeof a === "object" && typeof b === "object" && !Array.isArray(a) && !Array.isArray(b)) out[k] = deepMerge(a,b)
-    else out[k] = b
-  }
-  return out
-}
-
-function fmtTime(ts) {
-  try {
-    const d = new Date(ts)
-    return d.toLocaleString()
-  } catch (e) {
-    return ""
-  }
-}
-
-function tagClass(subject) {
-  const s = String(subject || "").toLowerCase()
-  if (s.includes("math")) return "a"
-  if (s.includes("science")) return "c"
-  if (s.includes("english") || s.includes("language")) return "b"
-  if (s.includes("history")) return "d"
-  return ""
-}
-
-function renderNotesList() {
-  const q = el("noteSearch").value.trim().toLowerCase()
-  const f = el("filterSubject").value
-  const wrap = el("notesList")
-  wrap.innerHTML = ""
-  const items = notes
-    .filter(n => (f === "All" || (n.subject || "Other") === f))
-    .filter(n => !q || (n.title||"").toLowerCase().includes(q) || (n.content||"").toLowerCase().includes(q))
-    .sort((a,b) => new Date(b.updated_at||b.created_at||0) - new Date(a.updated_at||a.created_at||0))
-
-  if (!items.length) {
-    const empty = document.createElement("div")
-    empty.className = "small"
-    empty.textContent = "No notes yet. Hit New."
-    wrap.appendChild(empty)
+async function fetchNotes(){
+  const {data,error}=await supabase.from('notes').select('*').eq('user_id',user.id).order('updated_at',{ascending:false})
+  if(error){
+    console.error('fetchNotes error:',error)
+    toast('Could not load notes',error.message,'bad')
     return
   }
-
-  items.forEach(n => {
-    const d = document.createElement("div")
-    d.className = "noteItem" + (n.id === selectedId ? " active" : "")
-    const subj = n.subject || "Other"
-    d.innerHTML = '<div class="noteTop"><div style="font-weight:900">'+escapeHtml(n.title||"Untitled")+'</div><div class="tag '+tagClass(subj)+'">'+escapeHtml(subj)+'</div></div><div class="small" style="margin-top:6px">'+escapeHtml((n.school||settings.current_school||"") + (n.grade && n.grade!=="—" ? " • "+n.grade : ""))+'</div>'
-    d.addEventListener("click", () => {
-      openNote(n.id)
-    })
-    wrap.appendChild(d)
-  })
-}
-
-function setEditor(note) {
-  el("noteTitle").value = note?.title || ""
-  el("noteContent").value = note?.content || ""
-  el("noteSubject").value = note?.subject || "Other"
-  el("noteGrade").value = note?.grade || "—"
-  el("noteSchool").value = note?.school || settings.current_school || SCHOOLS[0]
-  if (!note) {
-    el("noteMeta").textContent = ""
-    return
-  }
-  const meta = []
-  if (note.created_at) meta.push("Created: " + fmtTime(note.created_at))
-  if (note.updated_at) meta.push("Updated: " + fmtTime(note.updated_at))
-  el("noteMeta").textContent = meta.join(" • ")
-}
-
-function openNote(id) {
-  selectedId = id
-  const n = notes.find(x => x.id === id)
-  setEditor(n)
-  renderNotesList()
-  setFocused(id)
-}
-
-function newNote() {
-  const id = crypto.randomUUID()
-  const now = new Date().toISOString()
-  const n = {
-    id,
-    user_id: user?.id || null,
-    title: "Untitled",
-    subject: el("filterSubject").value !== "All" ? el("filterSubject").value : "Other",
-    grade: "—",
-    school: settings.current_school || SCHOOLS[0],
-    content: "",
-    created_at: now,
-    updated_at: now
-  }
-  notes.unshift(n)
-  selectedId = id
-  setEditor(n)
-  renderNotesList()
-  saveLocal()
-  toast("New note", "Made a fresh note.")
-}
-
-function duplicateNote() {
-  const src = notes.find(n => n.id === selectedId)
-  if (!src) return
-  const id = crypto.randomUUID()
-  const now = new Date().toISOString()
-  const copy = {...src, id, title: (src.title||"Untitled") + " (copy)", created_at: now, updated_at: now}
-  notes.unshift(copy)
-  selectedId = id
-  setEditor(copy)
-  renderNotesList()
-  saveLocal()
-  toast("Duplicated", "Copied your note.")
-}
-
-function deleteNote() {
-  const id = selectedId
-  if (!id) return
-  const idx = notes.findIndex(n => n.id === id)
-  if (idx === -1) return
-  notes.splice(idx,1)
-  const toRemove = []
-  links.forEach(k => {
-    const [a,b] = k.split("|")
-    if (a === id || b === id) toRemove.push(k)
-  })
-  toRemove.forEach(k => links.delete(k))
-  selectedId = notes[0]?.id || null
-  setEditor(notes.find(n => n.id === selectedId) || null)
-  renderNotesList()
-  saveLocal()
-  if (user) deleteNoteRemote(id)
-  toast("Deleted", "Gone.")
-}
-
-function readEditorIntoNote() {
-  const id = selectedId
-  if (!id) return null
-  const n = notes.find(x => x.id === id)
-  if (!n) return null
-  n.title = el("noteTitle").value.trim() || "Untitled"
-  n.content = el("noteContent").value
-  n.subject = el("noteSubject").value || "Other"
-  n.grade = el("noteGrade").value || "—"
-  n.school = el("noteSchool").value || settings.current_school || SCHOOLS[0]
-  n.updated_at = new Date().toISOString()
-  return n
-}
-
-async function saveNote() {
-  const n = readEditorIntoNote()
-  if (!n) return
-  renderNotesList()
-  saveLocal()
-  if (!user) {
-    toast("Saved locally", "Sign in to sync across devices.")
-    return
-  }
-  const payload = {
-    id: n.id,
-    user_id: user.id,
-    title: n.title,
-    content: n.content,
-    subject: n.subject,
-    grade: n.grade,
-    school: n.school,
-    updated_at: n.updated_at
-  }
-  const { error } = await supabase.from("notes").upsert(payload, { onConflict: "id" })
-  if (error) {
-    toast("Sync failed", String(error.message || error))
-    return
-  }
-  toast("Saved", "Synced to your account.")
-  await fetchNotes()
-}
-
-async function deleteNoteRemote(id) {
-  const { error } = await supabase.from("notes").delete().eq("id", id)
-  if (error) toast("Remote delete failed", String(error.message || error))
-  const r = await supabase.from("note_links").delete().eq("user_id", user.id).or("note_a.eq."+id+",note_b.eq."+id)
-  if (r.error) toast("Links delete failed", String(r.error.message || r.error))
-}
-
-async function fetchNotes() {
-  if (!user) return
-  const { data, error } = await supabase.from("notes")
-    .select("id,title,content,subject,grade,school,created_at,updated_at")
-    .order("updated_at", { ascending:false })
-  if (error) {
-    toast("Fetch failed", String(error.message || error))
-    return
-  }
-  notes = (data || []).map(n => ({
-    ...n,
-    user_id: user.id
-  }))
+  notes=(data||[]).map(n=>({...n,linked_notes:[]}))
   await fetchLinks()
-  selectedId = notes[0]?.id || null
-  setEditor(notes.find(n => n.id === selectedId) || null)
-  renderNotesList()
-  saveLocal()
-  requestAnimationFrame(drawGraph)
+  rebuildLinkedOnClient()
+  renderList()
+  const last=uiPrefs.lastOpenNoteId
+  if(last && notes.some(n=>n.id===last)) loadNote(last)
+  else if(notes.length) loadNote(notes[0].id)
+  else setEmptyState()
 }
 
-async function fetchLinks() {
-  if (!user) return
-  const { data, error } = await supabase.from("note_links").select("note_a,note_b")
-  if (error) {
-    toast("Links fetch failed", String(error.message || error))
+function sortNotes(arr){
+  const mode=uiPrefs.sort||'updated_desc'
+  const copy=[...arr]
+  if(mode==='title_asc'){
+    copy.sort((a,b)=>((a.title||'').toLowerCase()).localeCompare((b.title||'').toLowerCase()))
+  }else if(mode==='grade_asc'){
+    copy.sort((a,b)=>(gradeOrder[a.grade||'']-gradeOrder[b.grade||''])||(((b.updated_at||'')>(a.updated_at||''))?1:-1))
+  }else{
+    copy.sort((a,b)=>((b.updated_at||'')>(a.updated_at||''))?1:-1)
+  }
+  return copy
+}
+
+function noteSnippet(n){
+  const s=(n.content||'').replace(/\\s+/g,' ').trim()
+  if(!s) return 'No content yet.'
+  return s.length>90? s.slice(0,90)+'…' : s
+}
+
+function renderList(){
+  const q=($('search').value||'').trim().toLowerCase()
+  const sorted=sortNotes(notes)
+  const groups={}
+  sorted.forEach(n=>{
+    const title=(n.title||'').toLowerCase()
+    const body=(n.content||'').toLowerCase()
+    if(q && !(title.includes(q)||body.includes(q))) return
+    const g=n.grade||''
+    if(!groups[g]) groups[g]=[]
+    groups[g].push(n)
+  })
+
+  const order=['8th','9th','10th','11th','12th','']
+  const wrap=$('noteList')
+  let html=''
+  let total=0
+  order.forEach(g=>{
+    const arr=groups[g]||[]
+    if(!arr.length) return
+    total+=arr.length
+    const head=g?('Grade '+gradeLabels[g]):'Ungraded'
+    html+='<div class="group"><div class="group-head"><div>'+head+'</div><div class="count">'+arr.length+'</div></div>'
+    arr.forEach(n=>{
+      const t=(n.title&&n.title.trim()?n.title:'Untitled')
+      const tag=n.grade?('<div class="tag">'+gradeLabels[n.grade]+'</div>'):''
+      const linked=(n.linked_notes||[]).length>0
+      const draft=(!n.title && !n.content)
+      const badges=[]
+      if(linked) badges.push('<div class="badge link">LINK</div>')
+      if(draft) badges.push('<div class="badge draft">DRAFT</div>')
+      const isActive=n.id===activeId
+      html+='<div class="note-card '+(isActive?'active':'')+'" data-id="'+n.id+'">'
+      html+='<div class="note-title"><div class="t">'+escapeHtml(t)+'</div>'+tag+'</div>'
+      html+='<div class="note-snippet">'+escapeHtml(noteSnippet(n))+'</div>'
+      html+='<div class="note-meta"><div>'+escapeHtml(relTime(n.updated_at||n.created_at))+'</div><div class="badges">'+badges.join('')+'</div></div>'
+      html+='</div>'
+    })
+    html+='</div>'
+  })
+
+  if(total===0){
+    wrap.innerHTML='<div style="padding:22px 12px;color:rgba(238,242,255,.55);font-weight:850;line-height:1.7">No notes found.<br><span style="color:rgba(255,220,200,.95)">Try another search</span> or press <span style="font-family:var(--mono)">Ctrl+K</span>.</div>'
+  }else{
+    wrap.innerHTML=html
+    wrap.querySelectorAll('.note-card').forEach(c=>{
+      c.onclick=()=>loadNote(c.getAttribute('data-id'))
+    })
+  }
+}
+
+function setEmptyState(){
+  activeId=null
+  $('crumbTitle').textContent='No notes yet'
+  $('crumbSub').innerHTML=''
+  $('title').value=''
+  $('body').value=''
+  $('grade').value=''
+  $('pTitle').textContent='Untitled'
+  $('pMeta').innerHTML=''
+  $('pBody').innerHTML='<div style="color:rgba(238,242,255,.55);font-weight:850;line-height:1.7">Create your first note using <span style="font-family:var(--mono)">New Note</span>.</div>'
+  hideLinkCards()
+}
+
+function setView(v){
+  $('viewEditor').classList.toggle('active',v==='editor')
+  $('viewPreview').classList.toggle('active',v==='preview')
+  $('viewGraph').classList.toggle('active',v==='graph')
+  $('viewGames').classList.toggle('active',v==='games')
+
+  $('modeEdit').classList.toggle('active',v==='editor')
+  $('modePreview').classList.toggle('active',v==='preview')
+  $('modeGraph').classList.toggle('active',v==='graph')
+
+  if(v==='preview') updatePreview()
+  if(v==='graph') drawGraph()
+}
+
+function setSplit(mode){
+  splitMode=mode
+  const split=$('split')
+  split.classList.remove('singleEditor','singlePreview')
+  $('divider').style.display='flex'
+  $('paneRight').style.display='block'
+  $('paneLeft').style.display='block'
+
+  if(mode==='editor'){
+    split.classList.add('singleEditor')
+    $('paneRight').style.display='none'
+    $('divider').style.display='none'
+  }else if(mode==='preview'){
+    split.classList.add('singlePreview')
+    $('paneLeft').style.display='none'
+    $('divider').style.display='none'
+    setView('preview')
+  }else{
+    applySplitSizes()
+  }
+  $('toggleSplit').classList.toggle('active',mode==='split')
+}
+
+function applySplitSizes(){
+  const split=$('split')
+  const a=clamp(splitSizes[0],20,80)
+  const b=100-a
+  split.style.gridTemplateColumns=a+'% 12px '+b+'%'
+}
+
+async function createNote(){
+  if(!user){ toast('Not signed in','Please sign in','bad'); return }
+  const r=await supabase.from('notes').insert({user_id:user.id,title:'',content:'',grade:'',school:currentSchool}).select().single()
+  if(r.error){toast('Create failed',r.error.message,'bad');return}
+  notes.unshift({...r.data,linked_notes:[]})
+  uiPrefs.lastOpenNoteId=r.data.id
+  saveSettingsDebounced()
+  renderList()
+  loadNote(r.data.id)
+  toast('New note','Created','ok')
+}
+
+function loadNote(id){
+  const n=notes.find(x=>x.id===id)
+  if(!n) return
+  activeId=id
+  uiPrefs.lastOpenNoteId=id
+  saveSettingsDebounced()
+
+  $('title').value=n.title||''
+  $('body').value=n.content||''
+  $('grade').value=n.grade||''
+
+  updateCrumb()
+  renderList()
+  updatePreview()
+  refreshLinksUI()
+  setStatus('saved')
+}
+
+function updateCrumb(){
+  const n=notes.find(x=>x.id===activeId)
+  const title=(n?.title&&n.title.trim()?n.title:'Untitled')
+  $('crumbTitle').textContent=title
+  const chips=[]
+  if(n?.grade) chips.push('<span class="chip">Grade '+escapeHtml(gradeLabels[n.grade]||n.grade)+'</span>')
+  chips.push('<span class="chip">'+escapeHtml(currentSchool)+'</span>')
+  if(n?.updated_at) chips.push('<span class="chip">'+escapeHtml(relTime(n.updated_at))+'</span>')
+  $('crumbSub').innerHTML=chips.join('')
+}
+
+function autosave(){
+  if(!activeId) return
+  if(!navigator.onLine){setStatus('offline');return}
+  autosaveDirty=true
+  setStatus('saving')
+  clearTimeout(autosaveT)
+  autosaveT=setTimeout(async ()=>{
+    if(!autosaveDirty) return
+    autosaveDirty=false
+    await saveNote()
+  },750)
+}
+
+async function saveNote(){
+  if(!activeId) return
+  if(!user){ toast('Not signed in','Please sign in','bad'); return }
+  if(!navigator.onLine){setStatus('offline');return}
+  const n=notes.find(x=>x.id===activeId)
+  if(!n) return
+
+  setStatus('saving')
+  const title=$('title').value
+  const content=$('body').value
+  const grade=$('grade').value||''
+  const updated_at=nowIso()
+
+  const r=await supabase.from('notes').update({title,content,grade,school:currentSchool,updated_at}).eq('id',activeId).eq('user_id',user.id)
+  if(r.error){
+    setStatus('error')
+    toast('Save failed',r.error.message,'bad')
+    console.error(r.error)
     return
   }
-  links = new Set((data||[]).map(x => (x.note_a < x.note_b ? x.note_a+"|"+x.note_b : x.note_b+"|"+x.note_a)))
-  saveLocal()
+
+  n.title=title
+  n.content=content
+  n.grade=grade
+  n.school=currentSchool
+  n.updated_at=updated_at
+
+  setStatus('saved')
+  updateCrumb()
+  renderList()
+  updatePreview()
+  refreshLinksUI()
 }
 
-async function upsertLink(a,b) {
-  if (!user) {
-    saveLocal()
+async function deleteNote(){
+  if(!activeId) return
+  const n=notes.find(x=>x.id===activeId)
+  const t=(n?.title&&n.title.trim()?n.title:'Untitled')
+  if(!confirm('Delete \"'+t+'\"?')) return
+  await supabase.from('note_links').delete().eq('user_id',user.id).or('note_a.eq.'+activeId+',note_b.eq.'+activeId)
+  const r=await supabase.from('notes').delete().eq('id',activeId).eq('user_id',user.id)
+  if(r.error){toast('Delete failed',r.error.message,'bad');return}
+  notes=notes.filter(x=>x.id!==activeId)
+  links=links.filter(l=>l.note_a!==activeId && l.note_b!==activeId)
+  rebuildLinkedOnClient()
+  renderList()
+  toast('Deleted',t,'warn')
+  if(notes.length) loadNote(notes[0].id)
+  else setEmptyState()
+}
+
+function updatePreview(){
+  const n=notes.find(x=>x.id===activeId)
+  const title=( $('title').value || (n?.title||'') || 'Untitled' ).trim() || 'Untitled'
+  $('pTitle').textContent=title
+  const meta=[]
+  const g=$('grade').value||n?.grade||''
+  if(g) meta.push('<span class="chip">Grade '+escapeHtml(gradeLabels[g]||g)+'</span>')
+  meta.push('<span class="chip">'+escapeHtml(currentSchool)+'</span>')
+  if(n?.updated_at) meta.push('<span class="chip">Updated '+escapeHtml(new Date(n.updated_at).toLocaleString())+'</span>')
+  $('pMeta').innerHTML=meta.join('')
+  const md=$('body').value||n?.content||''
+  $('pBody').innerHTML=marked.parse(md)
+  $('pBody').querySelectorAll('pre code').forEach(b=>{try{hljs.highlightElement(b)}catch(e){}})
+  updatePreviewLinks()
+}
+
+function updatePreviewLinks(){
+  const n=notes.find(x=>x.id===activeId)
+  const ids=(n?.linked_notes||[])
+  if(ids.length){
+    $('pLinksCard').style.display='block'
+    $('pLinks').innerHTML=ids.map(id=>{
+      const ln=notes.find(x=>x.id===id)
+      if(!ln) return ''
+      const t=(ln.title&&ln.title.trim()?ln.title:'Untitled')
+      return '<div class="pillnote" data-open="'+id+'">'+escapeHtml(t)+'</div>'
+    }).join('')
+    $('pLinks').querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>loadNote(p.getAttribute('data-open')))
+  }else{
+    $('pLinksCard').style.display='none'
+  }
+}
+
+function getBacklinks(id){
+  const res=[]
+  notes.forEach(n=>{
+    if(n.id===id) return
+    if((n.linked_notes||[]).includes(id)) res.push(n.id)
+  })
+  return res
+}
+
+function getUnlinkedMentions(){
+  const cur=notes.find(x=>x.id===activeId)
+  if(!cur) return []
+  const content=($('body').value||'').toLowerCase()
+  const linked=new Set(cur.linked_notes||[])
+  const out=[]
+  notes.forEach(o=>{
+    if(o.id===activeId) return
+    const t=(o.title||'').trim()
+    if(!t) return
+    if(t.length<4) return
+    if(linked.has(o.id)) return
+    if(content.includes(t.toLowerCase())) out.push(o.id)
+  })
+  return out.slice(0,18)
+}
+
+function hideLinkCards(){
+  $('cardLinks').style.display='none'
+  $('cardBack').style.display='none'
+  $('cardMentions').style.display='none'
+  $('cardDrop').style.display='none'
+}
+
+function refreshLinksUI(){
+  const cur=notes.find(x=>x.id===activeId)
+  if(!cur){hideLinkCards();return}
+  const linked=cur.linked_notes||[]
+  if(linked.length){
+    $('cardLinks').style.display='block'
+    $('linksPills').innerHTML=linked.map(id=>{
+      const ln=notes.find(x=>x.id===id)
+      if(!ln) return ''
+      const t=(ln.title&&ln.title.trim()?ln.title:'Untitled')
+      return '<div class="pillnote" data-open="'+id+'" data-id="'+id+'">'+escapeHtml(t)+'<div class="x" data-x="'+id+'">×</div></div>'
+    }).join('')
+    $('linksPills').querySelectorAll('.pillnote').forEach(p=>{
+      p.onclick=e=>{
+        const xid=e.target?.getAttribute?.('data-x')
+        if(xid){unlinkNote(xid);return}
+        loadNote(p.getAttribute('data-open'))
+      }
+    })
+  }else{
+    $('cardLinks').style.display='none'
+  }
+
+  const bl=getBacklinks(activeId)
+  if(bl.length){
+    $('cardBack').style.display='block'
+    $('backPills').innerHTML=bl.map(id=>{
+      const ln=notes.find(x=>x.id===id)
+      if(!ln) return ''
+      const t=(ln.title&&ln.title.trim()?ln.title:'Untitled')
+      return '<div class="pillnote" data-open="'+id+'">'+escapeHtml(t)+'</div>'
+    }).join('')
+    $('backPills').querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>loadNote(p.getAttribute('data-open')))
+  }else{
+    $('cardBack').style.display='none'
+  }
+
+  const men=getUnlinkedMentions()
+  if(men.length){
+    $('cardMentions').style.display='block'
+    $('menPills').innerHTML=men.map(id=>{
+      const ln=notes.find(x=>x.id===id)
+      if(!ln) return ''
+      const t=(ln.title&&ln.title.trim()?ln.title:'Untitled')
+      return '<div class="pillnote" data-link="'+id+'">'+escapeHtml(t)+'</div>'
+    }).join('')
+    $('menPills').querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>linkNote(p.getAttribute('data-link')))
+  }else{
+    $('cardMentions').style.display='none'
+  }
+}
+
+function showLinkDrop(list){
+  $('cardDrop').style.display='block'
+  const wrap=$('dropList')
+  if(!list.length){
+    wrap.innerHTML='<div style="padding:10px;color:rgba(238,242,255,.55);font-weight:850">No matches</div>'
     return
   }
-  const note_a = a < b ? a : b
-  const note_b = a < b ? b : a
-  const { error } = await supabase.from("note_links").upsert({ user_id: user.id, note_a, note_b }, { onConflict: "user_id,note_a,note_b" })
-  if (error) toast("Link sync failed", String(error.message || error))
+  wrap.innerHTML=list.map(n=>{
+    const t=(n.title&&n.title.trim()?n.title:'Untitled')
+    const g=n.grade?(' · '+gradeLabels[n.grade]):''
+    return '<div class="pillnote" style="width:100%;justify-content:space-between" data-pick="'+n.id+'"><span>'+escapeHtml(t)+'</span><span style="color:rgba(238,242,255,.45);font-weight:950;font-size:11px">'+escapeHtml(g)+'</span></div>'
+  }).join('')
+  wrap.querySelectorAll('.pillnote').forEach(p=>p.onclick=()=>linkNote(p.getAttribute('data-pick')))
 }
 
-async function clearLinks() {
-  links.clear()
-  saveLocal()
-  if (user) {
-    const { error } = await supabase.from("note_links").delete().neq("user_id", "00000000-0000-0000-0000-000000000000")
-    if (error) toast("Clear failed", String(error.message || error))
+function searchLinkCandidates(){
+  if(!activeId) return
+  const cur=notes.find(x=>x.id===activeId)
+  if(!cur) return
+  const q=($('linkSearch').value||'').trim().toLowerCase()
+  if(!q){$('cardDrop').style.display='none';return}
+  const already=new Set(cur.linked_notes||[])
+  const list=notes.filter(n=>n.id!==activeId)
+    .filter(n=>!already.has(n.id))
+    .filter(n=>((n.title||'').toLowerCase().includes(q)))
+    .slice(0,8)
+  showLinkDrop(list)
+}
+
+async function linkNote(lid){
+  if(!activeId || !lid || activeId===lid) return
+  const [a,b]=orderedPair(activeId,lid)
+  const {error}=await supabase.from('note_links').upsert({user_id:user.id,note_a:a,note_b:b},{onConflict:'user_id,note_a,note_b'})
+  if(error){toast('Link failed',error.message,'bad');return}
+  $('linkSearch').value=''
+  $('cardDrop').style.display='none'
+  await fetchLinks()
+  rebuildLinkedOnClient()
+  refreshLinksUI()
+  renderList()
+  toast('Linked','Notes connected','ok')
+}
+
+async function unlinkNote(lid){
+  if(!activeId || !lid) return
+  const [a,b]=orderedPair(activeId,lid)
+  const {error}=await supabase.from('note_links').delete().eq('user_id',user.id).eq('note_a',a).eq('note_b',b)
+  if(error){toast('Unlink failed',error.message,'bad');return}
+  await fetchLinks()
+  rebuildLinkedOnClient()
+  refreshLinksUI()
+  renderList()
+  toast('Unlinked','Connection removed','warn')
+}
+
+async function unlinkAll(){
+  if(!activeId) return
+  if(!confirm('Unlink all?')) return
+  await supabase.from('note_links').delete().eq('user_id',user.id).or('note_a.eq.'+activeId+',note_b.eq.'+activeId)
+  await fetchLinks()
+  rebuildLinkedOnClient()
+  refreshLinksUI()
+  renderList()
+  toast('Unlinked','All connections removed','warn')
+}
+
+async function linkAllMentions(){
+  const ids=getUnlinkedMentions()
+  for(const id of ids) await linkNote(id)
+}
+
+function applyMd(action){
+  const ta=$('body')
+  const start=ta.selectionStart
+  const end=ta.selectionEnd
+  const sel=ta.value.slice(start,end)
+  const before=ta.value.slice(0,start)
+  const after=ta.value.slice(end)
+  let rep=''
+  if(action==='bold') rep='**'+(sel||'bold')+'**'
+  if(action==='italic') rep='*'+(sel||'italic')+'*'
+  if(action==='h1') rep='# '+(sel||'Heading')
+  if(action==='h2') rep='## '+(sel||'Heading')
+  if(action==='ul') rep='- '+(sel||'Item')
+  if(action==='ol') rep='1. '+(sel||'Item')
+  if(action==='quote') rep='> '+(sel||'Quote')
+  if(action==='code') rep='```\\n'+(sel||'code')+'\\n```'
+  if(action==='link') rep='['+(sel||'text')+'](https://)'
+  ta.value=before+rep+after
+  const pos=before.length+rep.length
+  ta.setSelectionRange(pos,pos)
+  ta.focus()
+  autosave()
+  updatePreview()
+  refreshLinksUI()
+}
+
+function openPdfModal(){ $('modalPdf').style.display='flex' }
+function closePdfModal(){ $('modalPdf').style.display='none' }
+
+async function exportPdf(){
+  if(!activeId) return
+  const n=notes.find(x=>x.id===activeId)
+  if(!n) return
+  const includeLinks=$('pdfIncludeLinks').value==='1'
+  const includeDates=$('pdfIncludeDates').value==='1'
+
+  const wrap=document.createElement('div')
+  wrap.style.width='820px'
+  wrap.style.padding='34px'
+  wrap.style.background='#ffffff'
+  wrap.style.color='#111111'
+  wrap.style.fontFamily='Inter,Arial,sans-serif'
+  wrap.style.lineHeight='1.7'
+
+  const h=document.createElement('div')
+  h.style.fontSize='34px'
+  h.style.fontWeight='900'
+  h.style.marginBottom='10px'
+  h.textContent=(n.title&&n.title.trim()?n.title:'Untitled')
+  wrap.appendChild(h)
+
+  const meta=document.createElement('div')
+  meta.style.display='flex'
+  meta.style.flexWrap='wrap'
+  meta.style.gap='8px'
+  meta.style.marginBottom='18px'
+  const chip=(txt)=>{
+    const s=document.createElement('span')
+    s.textContent=txt
+    s.style.fontSize='12px'
+    s.style.fontWeight='800'
+    s.style.padding='6px 10px'
+    s.style.borderRadius='999px'
+    s.style.border='1px solid #e7e7e7'
+    s.style.background='#fafafa'
+    return s
   }
-  requestAnimationFrame(drawGraph)
+  if(n.grade) meta.appendChild(chip('Grade: '+(gradeLabels[n.grade]||n.grade)))
+  meta.appendChild(chip('School: '+(n.school||currentSchool)))
+  if(includeDates && n.created_at) meta.appendChild(chip('Created: '+new Date(n.created_at).toLocaleDateString()))
+  if(includeDates && n.updated_at) meta.appendChild(chip('Updated: '+new Date(n.updated_at).toLocaleString()))
+  wrap.appendChild(meta)
+
+  const body=document.createElement('div')
+  body.innerHTML=marked.parse(n.content||'')
+  body.querySelectorAll('pre').forEach(p=>{
+    p.style.background='#0f1117'
+    p.style.color='#f5f5f5'
+    p.style.padding='14px'
+    p.style.borderRadius='12px'
+    p.style.overflowX='auto'
+  })
+  body.querySelectorAll('code').forEach(c=>{
+    c.style.fontFamily='JetBrains Mono,Consolas,monospace'
+    c.style.fontSize='12px'
+  })
+  wrap.appendChild(body)
+
+  if(includeLinks && (n.linked_notes||[]).length){
+    const tt=document.createElement('div')
+    tt.style.marginTop='22px'
+    tt.style.fontWeight='900'
+    tt.style.fontSize='16px'
+    tt.textContent='Linked Notes'
+    wrap.appendChild(tt)
+    const ul=document.createElement('ul')
+    ul.style.marginTop='8px'
+    ul.style.paddingLeft='18px'
+    ;(n.linked_notes||[]).forEach(id=>{
+      const ln=notes.find(x=>x.id===id)
+      if(!ln) return
+      const li=document.createElement('li')
+      li.textContent=(ln.title&&ln.title.trim()?ln.title:'Untitled')
+      li.style.fontWeight='750'
+      li.style.margin='6px 0'
+      ul.appendChild(li)
+    })
+    wrap.appendChild(ul)
+  }
+
+  const {jsPDF}=window.jspdf
+  const doc=new jsPDF('p','pt','a4')
+  toast('Exporting','Rendering PDF…','warn')
+  try{
+    await doc.html(wrap,{
+      x:24,
+      y:24,
+      width:547,
+      windowWidth:820,
+      html2canvas:{scale:1.35,backgroundColor:'#ffffff',useCORS:true}
+    })
+    doc.save(((n.title&&n.title.trim()?n.title:'note')+'.pdf').replace(/[\\/:*?"<>|]+/g,'_'))
+    closePdfModal()
+    toast('Exported','PDF saved','ok')
+  }catch(e){
+    console.error(e)
+    toast('PDF failed','Try again after reloading the page','bad')
+  }
 }
 
-function setFocused(id) {
-  focusedId = id
-  const n = notes.find(x => x.id === id)
-  el("focusTitle").textContent = n ? (n.title || "Untitled") : "—"
-  el("focusSub").textContent = n ? ((n.subject||"Other") + " • " + (n.school||settings.current_school||"")) : ""
-  el("focusText").textContent = n ? (String(n.content||"").slice(0, 1400) + (String(n.content||"").length>1400 ? "…" : "")) : ""
+function openSettings(){ $('modalSettings').style.display='flex' }
+function closeSettings(){ $('modalSettings').style.display='none' }
+function saveSettingsFromModal(){
+  uiPrefs.sidebarHidden=$('setSidebar').value==='1'
+  uiPrefs.previewFull=$('setPreviewFull').value==='1'
+  timerPresets.focus=clamp(parseInt($('setFocus').value||25,10),1,180)
+  timerPresets.break=clamp(parseInt($('setBreak').value||5,10),1,60)
+  timerPresets.long=clamp(parseInt($('setLong').value||15,10),1,120)
+  nerdPrefs.musicMode=$('musicMode').value
+  nerdPrefs.sfxMode=$('sfxMode').value
+
+  if(uiPrefs.previewFull) document.body.classList.add('previewFull')
+  else document.body.classList.remove('previewFull')
+
+  applyMusicMode()
+  syncCheatUI()
+  updateTimerDisplay()
+  saveSettingsDebounced()
+  closeSettings()
+  toast('Saved','Settings synced','ok')
 }
 
-el("openFocusedBtn").addEventListener("click", () => {
-  if (!focusedId) return
-  activeView = "notesView"
+function toggleFullPreview(){
+  uiPrefs.previewFull=!uiPrefs.previewFull
+  if(uiPrefs.previewFull) document.body.classList.add('previewFull')
+  else document.body.classList.remove('previewFull')
+  saveSettingsDebounced()
+}
+
+function openPalette(){
+  $('paletteBack').style.display='flex'
+  $('paletteQ').value=''
+  renderPalette('')
+  setTimeout(()=>$('paletteQ').focus(),0)
+}
+function closePalette(){ $('paletteBack').style.display='none' }
+
+function renderPalette(q){
+  const query=(q||'').toLowerCase().trim()
+  const items=[]
+  const add=(ico,a,b,k,fn)=>items.push({ico,a,b,k,fn})
+
+  add('✏','New note','Create a new note','Enter',()=>createNote())
+  add('📝','Edit','Go to editor','Enter',()=>setView('editor'))
+  add('👁','Preview','Go to preview','Enter',()=>setView('preview'))
+  add('🕸','Graph','Open graph view','Enter',()=>setView('graph'))
+  add('🎮','Games','Open break games','Enter',()=>setView('games'))
+  add('⛶','Toggle full preview','Full-screen preview','Enter',()=>toggleFullPreview())
+  add('📄','Export PDF','Export current note','Enter',()=>openPdfModal())
+  add('⚙','Settings','Open settings','Enter',()=>openSettings())
+  if(activeId) add('💾','Save now','Force save','Enter',()=>saveNote())
+
+  const noteHits=notes
+    .map(n=>({id:n.id,title:(n.title&&n.title.trim()?n.title:'Untitled'),body:(n.content||'')}))
+    .filter(n=>{
+      if(!query) return false
+      return n.title.toLowerCase().includes(query) || n.body.toLowerCase().includes(query)
+    })
+    .slice(0,10)
+  noteHits.forEach(n=>add('📌',n.title,'Open note','Enter',()=>loadNote(n.id)))
+
+  const filtered=items.filter(it=>{
+    if(!query) return true
+    return it.a.toLowerCase().includes(query) || it.b.toLowerCase().includes(query)
+  })
+
+  const list=$('paletteList')
+  list.innerHTML=filtered.map((it,i)=>{
+    return '<div class="pItem" data-i="'+i+'"><div class="l"><div class="pIco">'+it.ico+'</div><div class="pTxt"><div class="pA">'+escapeHtml(it.a)+'</div><div class="pB">'+escapeHtml(it.b)+'</div></div></div><div class="pK">'+escapeHtml(it.k)+'</div></div>'
+  }).join('')
+
+  list.querySelectorAll('.pItem').forEach(row=>{
+    row.onclick=()=>{
+      const idx=parseInt(row.getAttribute('data-i'),10)
+      closePalette()
+      filtered[idx].fn()
+    }
+  })
+}
+
+function setTimer(min){
+  pauseTimer()
+  timeLeft=min*60
+  updateTimerDisplay()
+}
+function updateTimerDisplay(){
+  const m=Math.floor(timeLeft/60).toString().padStart(2,'0')
+  const s=(timeLeft%60).toString().padStart(2,'0')
+  $('timerText').textContent=m+':'+s
+}
+function startTimer(){
+  if(timerInterval) return
+  timerInterval=setInterval(()=>{
+    if(timeLeft>0){timeLeft--;updateTimerDisplay()}
+    else{
+      pauseTimer()
+      toast('Timer',"Time's up",'ok')
+      try{sfx.unlock();sfx.tone(880,0.08,0.12)}catch(e){}
+    }
+  },1000)
+}
+function pauseTimer(){clearInterval(timerInterval);timerInterval=null}
+function resetTimer(){pauseTimer();setTimer(timerPresets.focus||25)}
+
+function openMobileSidebar(){
+  $('sidebar').classList.add('open')
+  $('backdrop').classList.add('show')
+}
+function closeMobileSidebar(){
+  $('sidebar').classList.remove('open')
+  $('backdrop').classList.remove('show')
+}
+
+function maybeMobileUI(){
+  const isMobile=window.innerWidth<=900
+  $('mobileMenu').style.display=isMobile?'flex':'none'
+}
+
+function initSplitResize(){
+  const div=$('divider')
+  div.addEventListener('mousedown',e=>{
+    draggingDivider=true
+    document.body.style.cursor='col-resize'
+  })
+  window.addEventListener('mouseup',e=>{
+    if(!draggingDivider) return
+    draggingDivider=false
+    document.body.style.cursor=''
+  })
+  window.addEventListener('mousemove',e=>{
+    if(!draggingDivider) return
+    const split=$('split')
+    const rect=split.getBoundingClientRect()
+    const x=e.clientX-rect.left
+    const pct=clamp((x/rect.width)*100,20,80)
+    splitSizes=[pct,100-pct]
+    applySplitSizes()
+  })
+}
+
+function initGraph(){
+  graphCanvas=$('graph')
+  graphCtx=graphCanvas.getContext('2d')
+  resizeGraph()
+  window.addEventListener('resize',()=>{resizeGraph();renderGraph()})
+  graphCanvas.addEventListener('mousedown',gDown)
+  graphCanvas.addEventListener('mousemove',gMove)
+  graphCanvas.addEventListener('mouseup',gUp)
+  graphCanvas.addEventListener('wheel',gWheel,{passive:false})
+}
+
+function resizeGraph(){
+  const r=graphCanvas.getBoundingClientRect()
+  graphCanvas.width=Math.floor(r.width*devicePixelRatio)
+  graphCanvas.height=Math.floor(r.height*devicePixelRatio)
+  graphCtx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)
+}
+
+function buildGraph(){
+  const W=graphCanvas.getBoundingClientRect().width
+  const H=graphCanvas.getBoundingClientRect().height
+  const N=notes.length||1
+  graphNodes=notes.map((n,i)=>{
+    const a=(i/N)*Math.PI*2
+    const rad=Math.min(W,H)*0.25
+    return{
+      id:n.id,
+      label:(n.title&&n.title.trim()?n.title:'Untitled'),
+      x:Math.cos(a)*rad,
+      y:Math.sin(a)*rad,
+      vx:0,vy:0,
+      hue: (i*37)%360
+    }
+  })
+  graphEdges=links.map(l=>({a:l.note_a,b:l.note_b}))
+  gView={x:0,y:0,scale:1}
+}
+
+function screenToWorld(sx,sy){
+  const r=graphCanvas.getBoundingClientRect()
+  const cx=r.width/2, cy=r.height/2
+  return { x:(sx - cx - gView.x)/gView.scale, y:(sy - cy - gView.y)/gView.scale }
+}
+function hitNode(wx,wy){
+  for(const n of graphNodes){
+    const dx=n.x-wx
+    const dy=n.y-wy
+    if(Math.sqrt(dx*dx+dy*dy) < 22) return n
+  }
+  return null
+}
+
+function renderGraph(){
+  const r=graphCanvas.getBoundingClientRect()
+  const W=r.width,H=r.height
+  graphCtx.clearRect(0,0,W,H)
+
+  graphCtx.save()
+  graphCtx.translate(W/2+gView.x, H/2+gView.y)
+  graphCtx.scale(gView.scale,gView.scale)
+
+  graphCtx.lineWidth=2/gView.scale
+  graphEdges.forEach(e=>{
+    const a=graphNodes.find(n=>n.id===e.a)
+    const b=graphNodes.find(n=>n.id===e.b)
+    if(!a||!b) return
+    graphCtx.strokeStyle='rgba(255,106,0,.18)'
+    graphCtx.beginPath()
+    graphCtx.moveTo(a.x,a.y)
+    graphCtx.lineTo(b.x,b.y)
+    graphCtx.stroke()
+  })
+
+  graphNodes.forEach(n=>{
+    const isActive=n.id===activeId
+    const isLinked=graphEdges.some(e=>(e.a===activeId && e.b===n.id)||(e.b===activeId && e.a===n.id))
+    const r=22
+    graphCtx.fillStyle=isActive?'#ff6a00':(isLinked?'#22c55e':'hsla('+n.hue+',95%,60%,0.22)')
+    graphCtx.beginPath()
+    graphCtx.arc(n.x,n.y,r,0,Math.PI*2)
+    graphCtx.fill()
+
+    graphCtx.lineWidth=2/gView.scale
+    graphCtx.strokeStyle='rgba(0,0,0,.35)'
+    graphCtx.stroke()
+
+    if(isActive||isLinked){
+      graphCtx.shadowBlur=24/gView.scale
+      graphCtx.shadowColor=isActive?'rgba(255,106,0,.55)':'rgba(34,197,94,.45)'
+      graphCtx.beginPath()
+      graphCtx.arc(n.x,n.y,r,0,Math.PI*2)
+      graphCtx.strokeStyle='rgba(255,255,255,.22)'
+      graphCtx.stroke()
+      graphCtx.shadowBlur=0
+    }
+
+    graphCtx.fillStyle='rgba(238,242,255,.92)'
+    graphCtx.font=(900/gView.scale)+'px Inter'
+    graphCtx.textAlign='center'
+    const label=n.label.length>18?n.label.slice(0,18)+'…':n.label
+    graphCtx.fillText(label,n.x,n.y+46)
+  })
+
+  graphCtx.restore()
+}
+
+function stepGraph(){
+  if(!graphPhysics){renderGraph();gAnim=requestAnimationFrame(stepGraph);return}
+  const nodes=graphNodes
+  const edges=graphEdges
+  for(const n of nodes){
+    let fx=0,fy=0
+    for(const o of nodes){
+      if(o===n) continue
+      const dx=n.x-o.x
+      const dy=n.y-o.y
+      const d=Math.sqrt(dx*dx+dy*dy)||1
+      const f=1150/(d*d)
+      fx+=(dx/d)*f
+      fy+=(dy/d)*f
+    }
+    for(const e of edges){
+      if(e.a!==n.id && e.b!==n.id) continue
+      const oid=(e.a===n.id?e.b:e.a)
+      const o=nodes.find(x=>x.id===oid)
+      if(!o) continue
+      fx+=(o.x-n.x)*0.012
+      fy+=(o.y-n.y)*0.012
+    }
+    n.vx=(n.vx+fx)*0.88
+    n.vy=(n.vy+fy)*0.88
+  }
+  for(const n of nodes){
+    n.x+=n.vx
+    n.y+=n.vy
+  }
+  renderGraph()
+  gAnim=requestAnimationFrame(stepGraph)
+}
+
+function drawGraph(){
+  if(!graphCanvas) return
+  buildGraph()
+  renderGraph()
+  if(gAnim) cancelAnimationFrame(gAnim)
+  gAnim=requestAnimationFrame(stepGraph)
+}
+
+function gDown(e){
+  const rect=graphCanvas.getBoundingClientRect()
+  const sx=e.clientX-rect.left
+  const sy=e.clientY-rect.top
+  const w=screenToWorld(sx,sy)
+  const node=hitNode(w.x,w.y)
+  if(node){
+    gDragNode=node
+    graphPhysics=false
+    return
+  }
+  gPan=true
+  gPanStart={sx,sy,ox:gView.x,oy:gView.y}
+}
+function gMove(e){
+  const rect=graphCanvas.getBoundingClientRect()
+  const sx=e.clientX-rect.left
+  const sy=e.clientY-rect.top
+  if(gDragNode){
+    const w=screenToWorld(sx,sy)
+    gDragNode.x=w.x
+    gDragNode.y=w.y
+    renderGraph()
+    return
+  }
+  if(gPan && gPanStart){
+    gView.x=gPanStart.ox+(sx-gPanStart.sx)
+    gView.y=gPanStart.oy+(sy-gPanStart.sy)
+    renderGraph()
+  }
+}
+function gUp(e){
+  const rect=graphCanvas.getBoundingClientRect()
+  const sx=e.clientX-rect.left
+  const sy=e.clientY-rect.top
+  if(gDragNode){
+    const w=screenToWorld(sx,sy)
+    const id=gDragNode.id
+    gDragNode=null
+    graphPhysics=true
+    renderGraph()
+    const clickNode=hitNode(w.x,w.y)
+    if(clickNode && clickNode.id===id){
+      loadNote(id)
+      setView('editor')
+    }
+    return
+  }
+  gPan=false
+  gPanStart=null
+}
+function gWheel(e){
+  e.preventDefault()
+  const rect=graphCanvas.getBoundingClientRect()
+  const sx=e.clientX-rect.left
+  const sy=e.clientY-rect.top
+  const before=screenToWorld(sx,sy)
+  const delta=Math.sign(e.deltaY)
+  const f=delta>0?0.92:1.08
+  gView.scale=clamp(gView.scale*f,0.45,2.8)
+  const after=screenToWorld(sx,sy)
+  gView.x+=(after.x-before.x)*gView.scale
+  gView.y+=(after.y-before.y)*gView.scale
+  renderGraph()
+}
+
+function initGames(){
+  snakeCanvas=$('snakeCanvas')
+  snakeCtx=snakeCanvas.getContext('2d')
+  tetrisCanvas=$('tetrisCanvas')
+  tetrisCtx=tetrisCanvas.getContext('2d')
+  runnerCanvas=$('runnerCanvas')
+  runnerCtx=runnerCanvas.getContext('2d')
+  resetSnake()
+  resetTetris()
+  resetRunner()
+  syncCheatUI()
+}
+
+function syncCheatUI(){
+  $('snakeBest').textContent=String(gameCheats.snake?.highScore||0)
+  $('tBest').textContent=String(gameCheats.tetris?.highScore||0)
+  $('rBest').textContent=String(gameCheats.runner?.best||0)
+
+  $('cSnakeNoDie').checked=!!gameCheats.snake?.noDie
+  $('cSnakeSpeed').value=gameCheats.snake?.speed??110
+  $('cSnakeSpeedV').textContent=(gameCheats.snake?.speed??110)+'ms'
+  $('cSnakeBoost').checked=!!gameCheats.snake?.boost
+
+  $('cTNoOver').checked=!!gameCheats.tetris?.noGameOver
+  $('cTLevel').value=gameCheats.tetris?.startLevel??1
+
+  $('cRNoCrash').checked=!!gameCheats.runner?.noCrash
+  $('cRSlow').checked=!!gameCheats.runner?.slow
+}
+
+function resetSnake(){
+  snake=[{x:10,y:10}]
+  dir={x:0,y:0}
+  snakeScore=0
+  spawnFood()
+  $('snakeScore').textContent='0'
+  drawSnake()
+}
+function spawnFood(){
+  food={x:Math.floor(Math.random()*S_TILE),y:Math.floor(Math.random()*S_TILE)}
+  if(snake.some(s=>s.x===food.x&&s.y===food.y)) spawnFood()
+}
+function startSnake(){
+  stopSnake()
+  resetSnake()
+  snakeRunning=true
+  dir={x:1,y:0}
+  const sp=gameCheats.snake?.speed??110
+  snakeInterval=setInterval(tickSnake,sp)
+}
+function stopSnake(){
+  snakeRunning=false
+  if(snakeInterval){clearInterval(snakeInterval);snakeInterval=null}
+}
+function tickSnake(){
+  const head={x:(snake[0].x+dir.x+S_TILE)%S_TILE, y:(snake[0].y+dir.y+S_TILE)%S_TILE}
+  if(!gameCheats.snake?.noDie){
+    if(snake.some(s=>s.x===head.x&&s.y===head.y)){gameOverSnake();return}
+  }else{
+    if(snake.some(s=>s.x===head.x&&s.y===head.y)){sfx.unlock();sfx.tone(220,0.04,0.08)}
+  }
+  snake.unshift(head)
+  if(head.x===food.x&&head.y===food.y){
+    snakeScore++
+    $('snakeScore').textContent=String(snakeScore)
+    sfx.unlock();sfx.tone(660,0.05,0.12)
+    spawnFood()
+    if(snakeScore>(gameCheats.snake?.highScore||0)){
+      gameCheats.snake.highScore=snakeScore
+      $('snakeBest').textContent=String(snakeScore)
+      saveSettingsDebounced()
+    }
+  }else{
+    snake.pop()
+  }
+  drawSnake()
+}
+function drawSnake(){
+  const W=snakeCanvas.width,H=snakeCanvas.height
+  snakeCtx.fillStyle='#050505'
+  snakeCtx.fillRect(0,0,W,H)
+  snakeCtx.strokeStyle='rgba(255,106,0,0.06)'
+  snakeCtx.lineWidth=0.5
+  const gs=W/S_TILE
+  for(let i=0;i<=S_TILE;i++){
+    snakeCtx.beginPath();snakeCtx.moveTo(i*gs,0);snakeCtx.lineTo(i*gs,H);snakeCtx.stroke()
+    snakeCtx.beginPath();snakeCtx.moveTo(0,i*gs);snakeCtx.lineTo(W,i*gs);snakeCtx.stroke()
+  }
+  snake.forEach((seg,idx)=>{
+    const x=seg.x*gs,y=seg.y*gs
+    snakeCtx.fillStyle=idx===0?'#ff6a00':'rgba(255,177,0,'+(0.65-(idx/snake.length)*0.40)+')'
+    snakeCtx.fillRect(x+1,y+1,gs-2,gs-2)
+  })
+  snakeCtx.fillStyle='#ffb100'
+  snakeCtx.beginPath()
+  snakeCtx.arc(food.x*gs+gs/2,food.y*gs+gs/2,gs/2-3,0,Math.PI*2)
+  snakeCtx.fill()
+}
+function gameOverSnake(){
+  stopSnake()
+  drawSnake()
+  sfx.unlock();sfx.tone(180,0.10,0.12)
+  const W=snakeCanvas.width,H=snakeCanvas.height
+  snakeCtx.fillStyle='rgba(0,0,0,.75)'
+  snakeCtx.fillRect(0,0,W,H)
+  snakeCtx.fillStyle='#ff6a00'
+  snakeCtx.font='900 28px Inter'
+  snakeCtx.textAlign='center'
+  snakeCtx.fillText('GAME OVER',W/2,H/2-10)
+  snakeCtx.fillStyle='#ffb100'
+  snakeCtx.font='900 16px Inter'
+  snakeCtx.fillText('Score: '+snakeScore,W/2,H/2+18)
+}
+
+function resetTetris(){
+  tBoard=Array.from({length:TR},()=>Array(TC).fill(0))
+  tScore=0
+  tLines=0
+  tLevel=Math.max(1,gameCheats.tetris?.startLevel??1)
+  $('tScore').textContent='0'
+  $('tLines').textContent='0'
+  $('tLevel').textContent=String(tLevel)
+  $('tBest').textContent=String(gameCheats.tetris?.highScore||0)
+  tPiece=makePiece()
+  drawTetris()
+}
+function makePiece(){
+  const t=Math.floor(Math.random()*7)+1
+  const s=T_SHAPES[t]
+  return{type:t,shape:s.map(r=>[...r]),x:Math.floor(TC/2)-Math.floor(s[0].length/2),y:0}
+}
+function tCollide(){
+  for(let r=0;r<tPiece.shape.length;r++){
+    for(let c=0;c<tPiece.shape[r].length;c++){
+      if(!tPiece.shape[r][c]) continue
+      const nx=tPiece.x+c
+      const ny=tPiece.y+r
+      if(nx<0||nx>=TC||ny>=TR) return true
+      if(ny>=0 && tBoard[ny][nx]) return true
+    }
+  }
+  return false
+}
+function tMove(dx,dy){
+  tPiece.x+=dx
+  tPiece.y+=dy
+  if(tCollide()){
+    tPiece.x-=dx
+    tPiece.y-=dy
+    if(dy>0) tLock()
+  }else{
+    if(dx!==0) {sfx.unlock();sfx.tone(420,0.02,0.06)}
+  }
+}
+function tRotate(){
+  const orig=tPiece.shape
+  tPiece.shape=tPiece.shape[0].map((_,ci)=>tPiece.shape.map(row=>row[ci]).reverse())
+  if(tCollide()) tPiece.shape=orig
+  else {sfx.unlock();sfx.tone(520,0.03,0.07)}
+}
+function tHardDrop(){
+  while(!tCollide()) tPiece.y++
+  tPiece.y--
+  tLock()
+}
+function tLock(){
+  for(let r=0;r<tPiece.shape.length;r++){
+    for(let c=0;c<tPiece.shape[r].length;c++){
+      if(!tPiece.shape[r][c]) continue
+      const ny=tPiece.y+r
+      if(ny<0){
+        if(gameCheats.tetris?.noGameOver){
+          resetTetris()
+          tRunning=true
+          requestAnimationFrame(tLoop)
+          return
+        }
+        tGameOver()
+        return
+      }
+      tBoard[ny][tPiece.x+c]=tPiece.type
+    }
+  }
+  clearLines()
+  tPiece=makePiece()
+  if(tCollide()){
+    if(gameCheats.tetris?.noGameOver){
+      resetTetris()
+      tRunning=true
+      requestAnimationFrame(tLoop)
+      return
+    }
+    tGameOver()
+  }
+}
+function clearLines(){
+  let cleared=0
+  for(let r=TR-1;r>=0;r--){
+    if(tBoard[r].every(v=>v!==0)){
+      tBoard.splice(r,1)
+      tBoard.unshift(Array(TC).fill(0))
+      cleared++
+      r++
+    }
+  }
+  if(cleared){
+    tScore+=[0,100,300,500,800][cleared]*tLevel
+    tLines+=cleared
+    tLevel=Math.max(tLevel,Math.floor(tLines/10)+1)
+    $('tScore').textContent=String(tScore)
+    $('tLines').textContent=String(tLines)
+    $('tLevel').textContent=String(tLevel)
+    sfx.unlock();sfx.tone(720,0.06,0.10)
+    if(tScore>(gameCheats.tetris?.highScore||0)){
+      gameCheats.tetris.highScore=tScore
+      $('tBest').textContent=String(tScore)
+      saveSettingsDebounced()
+    }
+  }
+}
+function drawCell(c,r,col){
+  const x=c*TS,y=r*TS
+  tetrisCtx.fillStyle=col
+  tetrisCtx.fillRect(x+1,y+1,TS-2,TS-2)
+  tetrisCtx.fillStyle='rgba(255,255,255,.12)'
+  tetrisCtx.fillRect(x+2,y+2,TS-6,3)
+}
+function drawTetris(){
+  const W=tetrisCanvas.width,H=tetrisCanvas.height
+  tetrisCtx.fillStyle='#050505'
+  tetrisCtx.fillRect(0,0,W,H)
+  tetrisCtx.strokeStyle='rgba(255,106,0,0.06)'
+  tetrisCtx.lineWidth=0.5
+  for(let r=0;r<=TR;r++){tetrisCtx.beginPath();tetrisCtx.moveTo(0,r*TS);tetrisCtx.lineTo(W,r*TS);tetrisCtx.stroke()}
+  for(let c=0;c<=TC;c++){tetrisCtx.beginPath();tetrisCtx.moveTo(c*TS,0);tetrisCtx.lineTo(c*TS,H);tetrisCtx.stroke()}
+
+  for(let r=0;r<TR;r++) for(let c=0;c<TC;c++) if(tBoard[r][c]) drawCell(c,r,T_COLORS[tBoard[r][c]])
+
+  if(!tPiece) return
+  for(let r=0;r<tPiece.shape.length;r++){
+    for(let c=0;c<tPiece.shape[r].length;c++){
+      if(!tPiece.shape[r][c]) continue
+      drawCell(tPiece.x+c,tPiece.y+r,T_COLORS[tPiece.type])
+    }
+  }
+}
+function startTetris(){
+  stopTetris()
+  resetTetris()
+  tRunning=true
+  tDrop=0
+  tLast=0
+  requestAnimationFrame(tLoop)
+}
+function stopTetris(){tRunning=false}
+function tLoop(time=0){
+  if(!tRunning) return
+  const dt=time-tLast
+  tLast=time
+  tDrop+=dt
+  const speed=Math.max(85,700-(tLevel-1)*60)
+  if(tDrop>=speed){
+    tMove(0,1)
+    tDrop=0
+  }
+  drawTetris()
+  requestAnimationFrame(tLoop)
+}
+function tGameOver(){
+  tRunning=false
+  drawTetris()
+  sfx.unlock();sfx.tone(140,0.12,0.12)
+  const W=tetrisCanvas.width,H=tetrisCanvas.height
+  tetrisCtx.fillStyle='rgba(0,0,0,.75)'
+  tetrisCtx.fillRect(0,0,W,H)
+  tetrisCtx.fillStyle='#ff6a00'
+  tetrisCtx.font='900 22px Inter'
+  tetrisCtx.textAlign='center'
+  tetrisCtx.fillText('GAME OVER',W/2,H/2-12)
+  tetrisCtx.fillStyle='#ffb100'
+  tetrisCtx.font='900 14px Inter'
+  tetrisCtx.fillText('Score: '+tScore,W/2,H/2+14)
+}
+
+function resetRunner(){
+  rRunning=false
+  cancelAnimationFrame(rAnim)
+  rLast=0
+  rDist=0
+  rSpeed=220
+  rPlayer={x:70,y:210,v:0,ground:210,rad:16,canDash:true,dashing:false}
+  rObstacles=[]
+  rSpawn=0
+  $('rDist').textContent='0'
+  drawRunner(0)
+}
+function startRunner(){
+  resetRunner()
+  rRunning=true
+  rLast=0
+  rAnim=requestAnimationFrame(rLoop)
+}
+function stopRunner(){
+  rRunning=false
+  cancelAnimationFrame(rAnim)
+}
+function rLoop(t){
+  if(!rRunning) return
+  if(!rLast) rLast=t
+  const dt=(t-rLast)/1000
+  rLast=t
+  const slow=gameCheats.runner?.slow
+  const speed=(slow? rSpeed*0.72 : rSpeed)
+  rDist += speed*dt
+  $('rDist').textContent=String(Math.floor(rDist/10))
+  if(Math.floor(rDist/10)>(gameCheats.runner?.best||0)){
+    gameCheats.runner.best=Math.floor(rDist/10)
+    $('rBest').textContent=String(gameCheats.runner.best)
+    saveSettingsDebounced()
+  }
+
+  rPlayer.v += 1200*dt
+  rPlayer.y += rPlayer.v*dt
+  if(rPlayer.y>rPlayer.ground){rPlayer.y=rPlayer.ground;rPlayer.v=0;rPlayer.canDash=true;rPlayer.dashing=false}
+
+  rSpawn -= dt
+  if(rSpawn<=0){
+    const gap = clamp(1.05 - (rDist/8000), 0.48, 1.05)
+    rSpawn = gap
+    const h = 18 + Math.random()*26
+    const w = 14 + Math.random()*22
+    rObstacles.push({x:runnerCanvas.width+40,y:rPlayer.ground-h,w,h})
+  }
+  rObstacles.forEach(o=>o.x -= speed*dt)
+  rObstacles = rObstacles.filter(o=>o.x>-80)
+
+  if(!gameCheats.runner?.noCrash){
+    for(const o of rObstacles){
+      const px=rPlayer.x, py=rPlayer.y, pr=rPlayer.rad
+      const cx=clamp(px, o.x, o.x+o.w)
+      const cy=clamp(py, o.y, o.y+o.h)
+      const dx=px-cx, dy=py-cy
+      if(dx*dx+dy*dy < pr*pr){
+        rGameOver()
+        return
+      }
+    }
+  }
+
+  drawRunner(t)
+  rAnim=requestAnimationFrame(rLoop)
+}
+function drawRunner(t){
+  const W=runnerCanvas.width,H=runnerCanvas.height
+  runnerCtx.fillStyle='#050505'
+  runnerCtx.fillRect(0,0,W,H)
+
+  const g=runnerCtx.createLinearGradient(0,0,0,H)
+  g.addColorStop(0,'rgba(255,106,0,0.05)')
+  g.addColorStop(1,'rgba(255,177,0,0.02)')
+  runnerCtx.fillStyle=g
+  runnerCtx.fillRect(0,0,W,H)
+
+  runnerCtx.strokeStyle='rgba(255,106,0,0.12)'
+  runnerCtx.lineWidth=2
+  runnerCtx.beginPath()
+  runnerCtx.moveTo(0,rPlayer.ground+18)
+  runnerCtx.lineTo(W,rPlayer.ground+18)
+  runnerCtx.stroke()
+
+  const stars = 30
+  for(let i=0;i<stars;i++){
+    const x=(i*97 + Math.floor((t||0)/8))%W
+    const y=(i*41)%140
+    runnerCtx.fillStyle='rgba(255,255,255,0.06)'
+    runnerCtx.fillRect(x,y,2,2)
+  }
+
+  rObstacles.forEach(o=>{
+    runnerCtx.fillStyle='rgba(255,177,0,0.85)'
+    runnerCtx.fillRect(o.x,o.y,o.w,o.h)
+    runnerCtx.fillStyle='rgba(0,0,0,0.28)'
+    runnerCtx.fillRect(o.x+2,o.y+2,o.w-4,4)
+  })
+
+  runnerCtx.fillStyle=rPlayer.dashing?'rgba(34,197,94,0.95)':'rgba(255,106,0,0.95)'
+  runnerCtx.beginPath()
+  runnerCtx.arc(rPlayer.x,rPlayer.y,rPlayer.rad,0,Math.PI*2)
+  runnerCtx.fill()
+  runnerCtx.fillStyle='rgba(255,255,255,0.12)'
+  runnerCtx.beginPath()
+  runnerCtx.arc(rPlayer.x-5,rPlayer.y-6,5,0,Math.PI*2)
+  runnerCtx.fill()
+}
+function rJump(){
+  if(!rRunning) return
+  if(rPlayer.y>=rPlayer.ground-0.5){
+    rPlayer.v=-520
+    sfx.unlock();sfx.tone(560,0.05,0.10)
+  }
+}
+function rDash(){
+  if(!rRunning) return
+  if(rPlayer.canDash){
+    rPlayer.canDash=false
+    rPlayer.dashing=true
+    rPlayer.v=-240
+    sfx.unlock();sfx.tone(900,0.03,0.10)
+    setTimeout(()=>{rPlayer.dashing=false},180)
+  }
+}
+function rGameOver(){
+  rRunning=false
+  sfx.unlock();sfx.tone(150,0.12,0.14)
+  drawRunner(0)
+  runnerCtx.fillStyle='rgba(0,0,0,.75)'
+  runnerCtx.fillRect(0,0,runnerCanvas.width,runnerCanvas.height)
+  runnerCtx.fillStyle='#ff6a00'
+  runnerCtx.font='900 28px Inter'
+  runnerCtx.textAlign='center'
+  runnerCtx.fillText('CRASHED',runnerCanvas.width/2,runnerCanvas.height/2-8)
+  runnerCtx.fillStyle='#ffb100'
+  runnerCtx.font='900 14px Inter'
+  runnerCtx.fillText('Distance: '+Math.floor(rDist/10),runnerCanvas.width/2,runnerCanvas.height/2+18)
+}
+
+function switchGame(mode){
+  const snake=mode==='snake'
+  const tetris=mode==='tetris'
+  const runner=mode==='runner'
+
+  $('tabSnake').classList.toggle('active',snake)
+  $('tabTetris').classList.toggle('active',tetris)
+  $('tabRunner').classList.toggle('active',runner)
+
+  $('snakeCanvas').style.display=snake?'block':'none'
+  $('tetrisCanvas').style.display=tetris?'block':'none'
+  $('runnerCanvas').style.display=runner?'block':'none'
+
+  $('snakeScoreBox').style.display=snake?'block':'none'
+  $('tetrisScoreBox').style.display=tetris?'block':'none'
+  $('runnerScoreBox').style.display=runner?'block':'none'
+
+  $('snakeCheats').style.display=snake?'block':'none'
+  $('tetrisCheats').style.display=tetris?'block':'none'
+  $('runnerCheats').style.display=runner?'block':'none'
+
+  $('gTitle').textContent=snake?'Snake Break':''
+  if(tetris) $('gTitle').textContent='Tetris Break'
+  if(runner) $('gTitle').textContent='Pulse Runner'
+}
+
+function applyMusicMode(){
+  const mode=nerdPrefs.musicMode||'off'
+  if(mode==='off'){
+    audio.pause()
+    audio.src=''
+    return
+  }
+  const url=MUSIC_URLS[mode]
+  if(!url) return
+  if(audio.src!==url) audio.src=url
+  const play=()=>audio.play().catch(()=>{})
+  if(document.visibilityState==='visible') play()
+}
+
+function tryQuickMute(){
+  if(audio.paused) return
+  audio.pause()
+  toast('Audio','Muted','warn')
+}
+
+function initAuth(){
+  let mode='signin'
+  const setTabs=()=>{
+    $('tabSignIn').classList.toggle('active',mode==='signin')
+    $('tabSignUp').classList.toggle('active',mode==='signup')
+    $('authGo').textContent=mode==='signin'?'Enter':'Create'
+    $('authErr').textContent=''
+  }
+  $('tabSignIn').onclick=()=>{mode='signin';setTabs()}
+  $('tabSignUp').onclick=()=>{mode='signup';setTabs()}
+
+  $('authGo').onclick=async ()=>{
+    const email=$('authEmail').value.trim()
+    const pass=$('authPass').value
+    if(!email||!pass){$('authErr').textContent='Enter email + password';return}
+    $('authErr').textContent=''
+    try{
+      if(mode==='signup'){
+        const {error}=await supabase.auth.signUp({email,password:pass})
+        if(error){$('authErr').textContent=error.message;return}
+        toast('Check email','Confirm your account then sign in','ok')
+      }else{
+        const {error}=await supabase.auth.signInWithPassword({email,password:pass})
+        if(error){$('authErr').textContent=error.message;return}
+      }
+    }catch(e){
+      $('authErr').textContent='Auth failed'
+    }
+  }
+
+  $('authMagic').onclick=async ()=>{
+    const email=$('authEmail').value.trim()
+    if(!email){$('authErr').textContent='Enter email';return}
+    const {error}=await supabase.auth.signInWithOtp({email,options:{emailRedirectTo:location.href}})
+    if(error){$('authErr').textContent=error.message;return}
+    toast('Magic link sent','Check your email','ok')
+  }
+
+  $('authReset').onclick=async ()=>{
+    const email=$('authEmail').value.trim()
+    if(!email){$('authErr').textContent='Enter email';return}
+    const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.href})
+    if(error){$('authErr').textContent=error.message;return}
+    toast('Reset sent','Check your email','ok')
+  }
+
   setTabs()
-  openNote(focusedId)
-})
-
-el("newNoteBtn").addEventListener("click", newNote)
-el("saveNoteBtn").addEventListener("click", saveNote)
-el("deleteNoteBtn").addEventListener("click", deleteNote)
-el("duplicateNoteBtn").addEventListener("click", duplicateNote)
-el("refreshBtn").addEventListener("click", () => user ? fetchNotes() : toast("Guest", "Sign in to sync, or keep using local mode."))
-el("noteSearch").addEventListener("input", renderNotesList)
-el("filterSubject").addEventListener("change", renderNotesList)
-
-document.addEventListener("keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
-    e.preventDefault()
-    saveNote()
-  }
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") {
-    e.preventDefault()
-    exportPDF()
-  }
-  if (settings.audio?.unlocked && (e.altKey && e.key.toLowerCase() === "m")) {
-    e.preventDefault()
-    quickMute()
-  }
-})
-
-function exportPDF() {
-  const n = readEditorIntoNote()
-  if (!n) return
-  el("pdfTitle").textContent = n.title || "Untitled"
-  el("pdfMeta").textContent = (n.subject||"Other") + " • " + (n.school||settings.current_school||"") + (n.grade && n.grade!=="—" ? " • " + n.grade : "")
-  el("pdfBody").textContent = n.content || ""
-  const opt = {
-    margin: 0.4,
-    filename: (n.title || "note").replace(/[^a-z0-9\- _]+/gi,"").slice(0,60) + ".pdf",
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
-  }
-  if (typeof html2pdf === "undefined") { toast("PDF export unavailable", "The PDF library didn’t load."); return }
-  html2pdf().set(opt).from(el("pdfPrint")).save()
 }
 
-el("pdfBtn").addEventListener("click", exportPDF)
-
-async function ensureSettingsRow() {
-  if (!user) return
-  const { data, error } = await supabase.from("user_settings").select("*").eq("user_id", user.id).maybeSingle()
-  if (error) {
-    toast("Settings error", String(error.message || error))
-    return
-  }
-  if (!data) {
-    const payload = {
-      user_id: user.id,
-      current_school: settings.current_school,
-      ui: settings.ui,
-      timer: settings.timer,
-      game: settings.game,
-      audio: settings.audio
-    }
-    const r = await supabase.from("user_settings").insert(payload)
-    if (r.error) toast("Settings init failed", String(r.error.message || r.error))
-    return
-  }
-  settings = deepMerge(settings, data)
-  applyTheme()
-  setAuthUI()
-  el("currentSchool").value = settings.current_school || SCHOOLS[0]
-  el("themeSelect").value = settings.ui?.theme || "Aurora Neon"
-  el("timerNotes").value = settings.timer?.notes || ""
-  settings.audio = deepMerge(settings.audio || {}, data.audio || {})
-  applyAudioPrefs()
-  saveLocal()
-}
-
-async function saveSettingsRemote() {
-  if (!user) {
-    saveLocal()
-    toast("Saved locally", "Sign in to sync settings.")
-    return
-  }
-  const payload = {
-    user_id: user.id,
-    current_school: settings.current_school,
-    ui: settings.ui,
-    timer: settings.timer,
-    game: settings.game,
-    audio: settings.audio,
-    updated_at: new Date().toISOString()
-  }
-  const { error } = await supabase.from("user_settings").upsert(payload, { onConflict: "user_id" })
-  if (error) {
-    toast("Save failed", String(error.message || error))
-    return
-  }
-  toast("Saved", "Preferences synced.")
-}
-
-el("saveSettingsBtn").addEventListener("click", () => {
-  settings.current_school = el("currentSchool").value
-  settings.ui.theme = el("themeSelect").value
-  settings.timer.notes = el("timerNotes").value
-  applyTheme()
-  setAuthUI()
-  saveLocal()
-  saveSettingsRemote()
-})
-
-el("currentSchool").addEventListener("change", () => {
-  el("schoolLabel").textContent = "School: " + el("currentSchool").value
-})
-
-async function signIn() {
-  if (!supabase) { toast("Sync unavailable", "Sign-in is disabled (sync library blocked/offline)."); return }
-
-  const email = el("emailInput").value.trim()
-  const password = el("passInput").value
-  if (!email || !password) {
-    toast("Missing", "Add email + password.")
-    return
-  }
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-  if (error) {
-    toast("Sign in failed", String(error.message || error))
-    return
-  }
-  user = data.user
-  toast("Signed in", "Sync is on.")
-  await ensureSettingsRow()
-  await fetchNotes()
-  setAuthUI()
-}
-
-async function signUp() {
-  if (!supabase) { toast("Sync unavailable", "Sign-up is disabled (sync library blocked/offline)."); return }
-
-  const email = el("emailInput").value.trim()
-  const password = el("passInput").value
-  if (!email || !password) {
-    toast("Missing", "Add email + password.")
-    return
-  }
-  const { data, error } = await supabase.auth.signUp({ email, password })
-  if (error) {
-    toast("Sign up failed", String(error.message || error))
-    return
-  }
-  toast("Signed up", "If email confirmation is on, check your inbox.")
-  user = data.user
-  await ensureSettingsRow()
-  setAuthUI()
-}
-
-async function signOut() {
-  if (!supabase) { user = null; setAuthUI(); toast("Signed out", "Back to guest mode."); return }
-
+async function signOut(){
+  tryQuickMute()
   await supabase.auth.signOut()
-  user = null
-  setAuthUI()
-  toast("Signed out", "Back to guest mode.")
+  location.reload()
 }
 
-el("signInBtn").addEventListener("click", signIn)
-el("signUpBtn").addEventListener("click", signUp)
-el("signOutBtn").addEventListener("click", signOut)
+function wireUI(){
+  $('btnNew').onclick=createNote
+  $('saveNow').onclick=saveNote
+  $('delNote').onclick=deleteNote
 
-el("importLocalBtn").addEventListener("click", async () => {
-  if (!user) {
-    toast("Sign in first", "This imports local notes into your account.")
-    return
+  $('modeEdit').onclick=()=>setView('editor')
+  $('modePreview').onclick=()=>setView('preview')
+  $('modeGraph').onclick=()=>setView('graph')
+
+  $('toggleFull').onclick=toggleFullPreview
+  $('toggleSplit').onclick=()=>{
+    if(splitMode==='split') setSplit('editor')
+    else setSplit('split')
   }
-  const localRaw = localStorage.getItem("studyos_local")
-  if (!localRaw) {
-    toast("No local notes", "Nothing to import.")
-    return
+
+  $('doPdf').onclick=openPdfModal
+  $('pdfClose').onclick=closePdfModal
+  $('pdfCancel').onclick=closePdfModal
+  $('pdfGo').onclick=exportPdf
+
+  $('openSettings').onclick=openSettings
+  $('setClose').onclick=closeSettings
+  $('setCancel').onclick=closeSettings
+  $('setSave').onclick=saveSettingsFromModal
+
+  $('search').oninput=renderList
+  $('sort').onchange=()=>{
+    uiPrefs.sort=$('sort').value
+    saveSettingsDebounced()
+    renderList()
   }
-  let obj = null
-  try { obj = JSON.parse(localRaw) } catch (e) {}
-  const localNotes = (obj?.notes || []).filter(n => n && n.id && n.title !== undefined)
-  if (!localNotes.length) {
-    toast("No local notes", "Nothing to import.")
-    return
-  }
-  const rows = localNotes.map(n => ({
-    id: n.id,
-    user_id: user.id,
-    title: n.title || "Untitled",
-    content: n.content || "",
-    subject: n.subject || "Other",
-    grade: n.grade || "—",
-    school: n.school || settings.current_school || SCHOOLS[0],
-    updated_at: n.updated_at || new Date().toISOString()
-  }))
-  const { error } = await supabase.from("notes").upsert(rows, { onConflict: "id" })
-  if (error) {
-    toast("Import failed", String(error.message || error))
-    return
-  }
-  toast("Imported", "Local notes moved into your account.")
-  await fetchNotes()
-})
 
-el("exportLocalBtn").addEventListener("click", () => {
-  const blob = new Blob([JSON.stringify({notes, links:[...links], settings}, null, 2)], {type:"application/json"})
-  const a = document.createElement("a")
-  a.href = URL.createObjectURL(blob)
-  a.download = "studyos_backup.json"
-  a.click()
-  setTimeout(() => URL.revokeObjectURL(a.href), 800)
-})
-
-function initSession() {
-  loadLocal()
-  applyTheme()
-  el("currentSchool").value = settings.current_school || SCHOOLS[0]
-  el("themeSelect").value = settings.ui?.theme || "Aurora Neon"
-  el("timerNotes").value = settings.timer?.notes || ""
-  setAuthUI()
-  renderNotesList()
-  setEditor(notes.find(n => n.id === selectedId) || null)
-
-  if (!supabase) { toast("Sync unavailable", "Using local mode (sync library blocked/offline)."); return }
-
-    supabase.auth.getSession().then(async (r) => {
-    user = r.data?.session?.user || null
-    setAuthUI()
-    if (user) {
-      await ensureSettingsRow()
-      await fetchNotes()
-    }
-  })
-
-  supabase.auth.onAuthStateChange(async (evt, sess) => {
-    user = sess?.user || null
-    setAuthUI()
-    if (user) {
-      await ensureSettingsRow()
-      await fetchNotes()
-    }
-  })
-}
-
-initSession()
-
-const canvas = el("graphCanvas")
-const ctx = canvas.getContext("2d")
-let nodes = []
-let nodePos = new Map()
-let dragging = null
-let dragOff = {x:0,y:0}
-let shiftLinkFrom = null
-
-function rebuildGraph() {
-  nodes = notes.map(n => ({
-    id: n.id,
-    title: n.title || "Untitled",
-    subject: n.subject || "Other"
-  }))
-  const w = canvas.width
-  const h = canvas.height
-  nodes.forEach((n,i) => {
-    if (!nodePos.has(n.id)) {
-      const ang = (i / Math.max(1,nodes.length)) * Math.PI * 2
-      nodePos.set(n.id, {
-        x: w*0.5 + Math.cos(ang)*Math.min(w,h)*0.26 + (Math.random()-0.5)*30,
-        y: h*0.5 + Math.sin(ang)*Math.min(w,h)*0.22 + (Math.random()-0.5)*30,
-        vx:0, vy:0
-      })
-    }
-  })
-}
-
-function colorFor(subject) {
-  const s = String(subject||"").toLowerCase()
-  if (s.includes("math")) return getCss("--a")
-  if (s.includes("science")) return getCss("--c")
-  if (s.includes("english") || s.includes("language")) return getCss("--b")
-  if (s.includes("history")) return getCss("--d")
-  return "rgba(255,255,255,.85)"
-}
-
-function getCss(v) {
-  return getComputedStyle(document.documentElement).getPropertyValue(v).trim()
-}
-
-function toRgba(col, a) {
-  col = String(col || "").trim()
-  if (!col) return "rgba(255,255,255," + a + ")"
-  if (col[0] === "#") {
-    const hex = col.length === 4 ? ("#" + col[1] + col[1] + col[2] + col[2] + col[3] + col[3]) : col
-    const n = parseInt(hex.slice(1), 16)
-    const r = (n >> 16) & 255
-    const g = (n >> 8) & 255
-    const b = n & 255
-    return "rgba(" + r + "," + g + "," + b + "," + a + ")"
-  }
-  const m = col.match(/rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i)
-  if (m) return "rgba(" + m[1] + "," + m[2] + "," + m[3] + "," + a + ")"
-  return col
-}
-
-function tickPhysics() {
-  rebuildGraph()
-  const w = canvas.width
-  const h = canvas.height
-  const center = {x:w*0.5,y:h*0.5}
-  const k = Math.min(w,h) * 0.22
-  const damp = 0.86
-
-  nodes.forEach(a => {
-    const pa = nodePos.get(a.id)
-    const dx = center.x - pa.x
-    const dy = center.y - pa.y
-    pa.vx += dx * 0.00035
-    pa.vy += dy * 0.00035
-  })
-
-  for (let i=0;i<nodes.length;i++) {
-    for (let j=i+1;j<nodes.length;j++) {
-      const a = nodes[i], b = nodes[j]
-      const pa = nodePos.get(a.id), pb = nodePos.get(b.id)
-      const dx = pb.x - pa.x
-      const dy = pb.y - pa.y
-      const dist = Math.hypot(dx,dy) || 1
-      const rep = (k*k) / dist
-      const nx = dx / dist
-      const ny = dy / dist
-      pa.vx -= nx * rep * 0.00008
-      pa.vy -= ny * rep * 0.00008
-      pb.vx += nx * rep * 0.00008
-      pb.vy += ny * rep * 0.00008
+  $('openPalette').onclick=openPalette
+  $('paletteBack').onclick=e=>{if(e.target.id==='paletteBack') closePalette()}
+  $('paletteQ').oninput=()=>renderPalette($('paletteQ').value)
+  $('paletteQ').onkeydown=e=>{
+    if(e.key==='Escape'){closePalette();return}
+    if(e.key==='Enter'){
+      const first=$('paletteList').querySelector('.pItem')
+      if(first) first.click()
     }
   }
 
-  links.forEach(kv => {
-    const [a,b] = kv.split("|")
-    const pa = nodePos.get(a), pb = nodePos.get(b)
-    if (!pa || !pb) return
-    const dx = pb.x - pa.x
-    const dy = pb.y - pa.y
-    const dist = Math.hypot(dx,dy) || 1
-    const target = k * 1.1
-    const pull = (dist - target) * 0.0011
-    const nx = dx / dist
-    const ny = dy / dist
-    pa.vx += nx * pull
-    pa.vy += ny * pull
-    pb.vx -= nx * pull
-    pb.vy -= ny * pull
-  })
-
-  nodes.forEach(n => {
-    const p = nodePos.get(n.id)
-    if (dragging === n.id) {
-      p.vx *= 0.35
-      p.vy *= 0.35
-    } else {
-      p.x += p.vx
-      p.y += p.vy
-      p.vx *= damp
-      p.vy *= damp
-      p.x = Math.max(28, Math.min(w-28, p.x))
-      p.y = Math.max(28, Math.min(h-28, p.y))
-    }
-  })
-}
-
-function drawGraph() {
-  if (activeView !== "graphView") return
-  tickPhysics()
-  ctx.clearRect(0,0,canvas.width,canvas.height)
-
-  const glowA = getCss("--a")
-  ctx.fillStyle = "rgba(0,0,0,.15)"
-  ctx.fillRect(0,0,canvas.width,canvas.height)
-
-  links.forEach(kv => {
-    const [a,b] = kv.split("|")
-    const pa = nodePos.get(a), pb = nodePos.get(b)
-    if (!pa || !pb) return
-    const isFocus = (a === focusedId || b === focusedId)
-    ctx.lineWidth = isFocus ? 2.2 : 1.2
-    ctx.strokeStyle = isFocus ? "rgba(255,255,255,.38)" : "rgba(255,255,255,.18)"
-    ctx.beginPath()
-    ctx.moveTo(pa.x, pa.y)
-    ctx.lineTo(pb.x, pb.y)
-    ctx.stroke()
-  })
-
-  nodes.forEach(n => {
-    const p = nodePos.get(n.id)
-    const r = n.id === focusedId ? 16 : 13
-    const col = colorFor(n.subject)
-    ctx.beginPath()
-    ctx.arc(p.x, p.y, r+7, 0, Math.PI*2)
-    ctx.fillStyle = "rgba(0,0,0,.35)"
-    ctx.fill()
-    ctx.beginPath()
-    ctx.arc(p.x, p.y, r+3, 0, Math.PI*2)
-    ctx.fillStyle = toRgba(col, 0.18)
-    ctx.fill()
-    ctx.beginPath()
-    ctx.arc(p.x, p.y, r, 0, Math.PI*2)
-    ctx.fillStyle = "rgba(255,255,255,.92)"
-    ctx.fill()
-    ctx.beginPath()
-    ctx.arc(p.x, p.y, r, 0, Math.PI*2)
-    ctx.strokeStyle = "rgba(0,0,0,.22)"
-    ctx.lineWidth = 1
-    ctx.stroke()
-
-    ctx.font = "900 12px Inter"
-    ctx.fillStyle = "rgba(238,242,255,.92)"
-    ctx.textAlign = "center"
-    const title = n.title.length > 16 ? n.title.slice(0,16) + "…" : n.title
-    ctx.fillText(title, p.x, p.y + r + 18)
-  })
-
-  requestAnimationFrame(drawGraph)
-}
-
-function hitNode(x,y) {
-  let best = null
-  let bestD = 1e9
-  nodes.forEach(n => {
-    const p = nodePos.get(n.id)
-    if (!p) return
-    const d = Math.hypot(x-p.x, y-p.y)
-    if (d < 18 && d < bestD) {
-      best = n.id
-      bestD = d
-    }
-  })
-  return best
-}
-
-function canvasPos(e) {
-  const r = canvas.getBoundingClientRect()
-  return {
-    x: (e.clientX - r.left) * (canvas.width / r.width),
-    y: (e.clientY - r.top) * (canvas.height / r.height)
+  $('schoolSelect').onchange=()=>{
+    currentSchool=$('schoolSelect').value
+    saveSettingsDebounced()
+    autosave()
+    updateCrumb()
+    toast('School',currentSchool,'ok')
   }
-}
 
-canvas.addEventListener("mousedown", (e) => {
-  const p = canvasPos(e)
-  const id = hitNode(p.x,p.y)
-  if (!id) return
-  dragging = id
-  dragOff = {x:p.x - nodePos.get(id).x, y:p.y - nodePos.get(id).y}
-})
+  $('title').oninput=()=>{autosave();updatePreview();updateCrumb();renderList()}
+  $('body').oninput=()=>{autosave();updatePreview();refreshLinksUI()}
+  $('grade').onchange=()=>{autosave();updateCrumb();renderList();refreshLinksUI()}
 
-window.addEventListener("mouseup", () => {
-  dragging = null
-})
+  document.querySelectorAll('.tool').forEach(t=>{
+    t.onclick=()=>applyMd(t.getAttribute('data-md'))
+  })
 
-canvas.addEventListener("mousemove", (e) => {
-  if (!dragging) return
-  const p = canvasPos(e)
-  const pos = nodePos.get(dragging)
-  pos.x = p.x - dragOff.x
-  pos.y = p.y - dragOff.y
-})
+  $('linkSearch').oninput=searchLinkCandidates
+  $('closeDrop').onclick=()=>{$('cardDrop').style.display='none';$('linkSearch').value=''}
+  $('unlinkAll').onclick=unlinkAll
+  $('jumpPreview').onclick=()=>setView('preview')
+  $('jumpGraph').onclick=()=>setView('graph')
+  $('linkAllMentions').onclick=linkAllMentions
+  $('backToEdit').onclick=()=>setView('editor')
 
-canvas.addEventListener("click", async (e) => {
-  const p = canvasPos(e)
-  const id = hitNode(p.x,p.y)
-  if (!id) return
-  if (e.shiftKey) {
-    if (!shiftLinkFrom) {
-      shiftLinkFrom = id
-      setFocused(id)
-      toast("Link mode", "Pick another note to link.")
+  $('tStart').onclick=startTimer
+  $('tPause').onclick=pauseTimer
+  $('tReset').onclick=resetTimer
+  $('mFocus').onclick=()=>setTimer(timerPresets.focus||25)
+  $('mBreak').onclick=()=>setTimer(timerPresets.break||5)
+  $('mLong').onclick=()=>setTimer(timerPresets.long||15)
+  $('mBreakGame').onclick=()=>{setTimer(timerPresets.break||5);setView('games')}
+
+  $('btnGames').onclick=()=>setView('games')
+
+  $('tabSnake').onclick=()=>{switchGame('snake');resetSnake()}
+  $('tabTetris').onclick=()=>{switchGame('tetris');resetTetris()}
+  $('tabRunner').onclick=()=>{switchGame('runner');resetRunner()}
+  $('gStart').onclick=()=>{
+    const snake=$('snakeCanvas').style.display!=='none'
+    const tetris=$('tetrisCanvas').style.display!=='none'
+    const runner=$('runnerCanvas').style.display!=='none'
+    if(snake) startSnake()
+    else if(tetris) startTetris()
+    else if(runner) startRunner()
+  }
+  $('gClose').onclick=()=>{
+    stopSnake()
+    stopTetris()
+    stopRunner()
+    setView('editor')
+  }
+
+  $('cSnakeNoDie').onchange=()=>{
+    gameCheats.snake.noDie=$('cSnakeNoDie').checked
+    saveSettingsDebounced()
+    toast('Snake','No-Die '+(gameCheats.snake.noDie?'ON':'OFF'),'warn')
+  }
+  $('cSnakeSpeed').oninput=()=>{
+    const v=parseInt($('cSnakeSpeed').value,10)
+    gameCheats.snake.speed=v
+    $('cSnakeSpeedV').textContent=v+'ms'
+    saveSettingsDebounced()
+    if(snakeRunning){
+      clearInterval(snakeInterval)
+      snakeInterval=setInterval(tickSnake,v)
+    }
+  }
+  $('cSnakeBoost').onchange=()=>{
+    gameCheats.snake.boost=$('cSnakeBoost').checked
+    saveSettingsDebounced()
+    toast('Snake','Boost '+(gameCheats.snake.boost?'ON':'OFF'),'warn')
+  }
+
+  $('cTNoOver').onchange=()=>{
+    gameCheats.tetris.noGameOver=$('cTNoOver').checked
+    saveSettingsDebounced()
+    toast('Tetris','No Game Over '+(gameCheats.tetris.noGameOver?'ON':'OFF'),'warn')
+  }
+  $('cTLevel').onchange=()=>{
+    const v=clamp(parseInt($('cTLevel').value||1,10),1,20)
+    gameCheats.tetris.startLevel=v
+    $('cTLevel').value=v
+    saveSettingsDebounced()
+    toast('Tetris','Start Level '+v,'warn')
+  }
+
+  $('cRNoCrash').onchange=()=>{
+    gameCheats.runner.noCrash=$('cRNoCrash').checked
+    saveSettingsDebounced()
+    toast('Runner','No Crash '+(gameCheats.runner.noCrash?'ON':'OFF'),'warn')
+  }
+  $('cRSlow').onchange=()=>{
+    gameCheats.runner.slow=$('cRSlow').checked
+    saveSettingsDebounced()
+    toast('Runner','Slow Obstacles '+(gameCheats.runner.slow?'ON':'OFF'),'warn')
+  }
+
+  $('gReset').onclick=()=>{buildGraph();renderGraph()}
+  $('gPhys').onclick=()=>{graphPhysics=!graphPhysics;toast('Graph','Physics '+(graphPhysics?'ON':'OFF'),'warn')}
+  $('gCenter').onclick=()=>{gView={x:0,y:0,scale:1};renderGraph()}
+
+  $('signOut').onclick=signOut
+
+  $('nerdUnlock').onclick=()=>{
+    const p=($('nerdPass').value||'').trim()
+    if(p==='9999'){
+      nerdUnlocked=true
+      $('nerdBox').style.display='block'
+      $('nerdLockRow').style.display='none'
+      $('nerdPass').value=''
+      toast('Unlocked','Advanced settings enabled','ok')
+    }else{
+      toast('Nope','Wrong password','bad')
+    }
+  }
+
+  $('musicMode').onchange=()=>{nerdPrefs.musicMode=$('musicMode').value;saveSettingsDebounced();applyMusicMode()}
+  $('sfxMode').onchange=()=>{nerdPrefs.sfxMode=$('sfxMode').value;saveSettingsDebounced()}
+
+  document.addEventListener('keydown',e=>{
+    if((e.altKey && e.key.toLowerCase()==='m') || e.key==='`') { tryQuickMute(); return }
+
+    if(e.key==='Escape'){
+      if($('paletteBack').style.display==='flex') closePalette()
+      if($('modalPdf').style.display==='flex') closePdfModal()
+      if($('modalSettings').style.display==='flex') closeSettings()
+      if(document.body.classList.contains('previewFull')) toggleFullPreview()
+      closeMobileSidebar()
       return
     }
-    if (shiftLinkFrom === id) {
-      shiftLinkFrom = null
-      return
-    }
-    const a = shiftLinkFrom
-    const b = id
-    shiftLinkFrom = null
-    const key = a < b ? a+"|"+b : b+"|"+a
-    if (links.has(key)) {
-      links.delete(key)
-      saveLocal()
-      if (user) {
-        const note_a = a < b ? a : b
-        const note_b = a < b ? b : a
-        await supabase.from("note_links").delete().eq("user_id", user.id).eq("note_a", note_a).eq("note_b", note_b)
-      }
-      toast("Unlinked", "Removed the connection.")
-    } else {
-      links.add(key)
-      saveLocal()
-      await upsertLink(a,b)
-      toast("Linked", "Connected those notes.")
-      sfx("link")
-    }
-    return
-  }
-  setFocused(id)
-})
+    const k=e.key.toLowerCase()
+    if((e.ctrlKey||e.metaKey) && k==='k'){e.preventDefault();openPalette();return}
+    if((e.ctrlKey||e.metaKey) && k==='s'){e.preventDefault();saveNote();return}
 
-el("layoutBtn").addEventListener("click", () => {
-  nodePos.clear()
-  rebuildGraph()
-  toast("Auto layout", "Re-centered the graph.")
-})
+    if($('viewGames').classList.contains('active')){
+      const snake=$('snakeCanvas').style.display!=='none'
+      const tetris=$('tetrisCanvas').style.display!=='none'
+      const runner=$('runnerCanvas').style.display!=='none'
 
-el("clearLinksBtn").addEventListener("click", () => {
-  clearLinks()
-  toast("Cleared", "All links removed.")
-})
-
-function showModal(title, bodyNode) {
-  el("modalTitle").textContent = title
-  const mb = el("modalBody")
-  mb.innerHTML = ""
-  mb.appendChild(bodyNode)
-  el("modalBack").style.display = "flex"
-}
-
-function closeModal() {
-  el("modalBack").style.display = "none"
-  el("modalBody").innerHTML = ""
-}
-
-el("modalClose").addEventListener("click", closeModal)
-el("modalBack").addEventListener("click", (e) => {
-  if (e.target === el("modalBack")) closeModal()
-})
-
-let audioUnlocked = false
-function openNerd() {
-  el("nerdBack").style.display = "flex"
-  el("nerdPass").value = ""
-  el("nerdMsg").textContent = ""
-  el("nerdLocked").style.display = settings.audio?.unlocked ? "none" : ""
-  el("nerdUnlocked").style.display = settings.audio?.unlocked ? "" : "none"
-  if (settings.audio?.unlocked) {
-    audioUnlocked = true
-    syncAudioUI()
-  }
-}
-
-function closeNerd() {
-  el("nerdBack").style.display = "none"
-}
-
-el("openNerdBtn").addEventListener("click", openNerd)
-el("nerdClose").addEventListener("click", closeNerd)
-el("nerdBack").addEventListener("click", (e) => {
-  if (e.target === el("nerdBack")) closeNerd()
-})
-
-el("nerdUnlockBtn").addEventListener("click", () => {
-  const v = el("nerdPass").value.trim()
-  if (v === "9999") {
-    settings.audio.unlocked = true
-    audioUnlocked = true
-    el("nerdLocked").style.display = "none"
-    el("nerdUnlocked").style.display = ""
-    el("nerdMsg").textContent = ""
-    syncAudioUI()
-    saveLocal()
-    saveSettingsRemote()
-    toast("Unlocked", "Nerd settings opened.")
-  } else {
-    el("nerdMsg").textContent = "Nope."
-    toast("Wrong passcode", "Try again.")
-  }
-})
-
-function applyAudioPrefs() {
-  if (!settings.audio) settings.audio = { unlocked:false, enabled:false, track:0, volume:0.35, loop:true, quickMute:true }
-  audioEl.loop = !!settings.audio.loop
-  audioEl.volume = Math.max(0, Math.min(1, Number(settings.audio.volume ?? 0.35)))
-  const track = AUDIO_TRACKS[Math.max(0, Math.min(AUDIO_TRACKS.length-1, Number(settings.audio.track ?? 0)))]
-  if (track) audioEl.src = track.url
-}
-
-function syncAudioUI() {
-  el("audioTrack").innerHTML = AUDIO_TRACKS.map((t,i) => '<option value="'+i+'">'+escapeHtml(t.name)+'</option>').join("")
-  el("audioTrack").value = String(settings.audio.track ?? 0)
-  el("audioVol").value = String(settings.audio.volume ?? 0.35)
-  el("audioLoopBtn").textContent = "Loop: " + (settings.audio.loop ? "On" : "Off")
-  el("audioToggle").textContent = audioEl.paused ? "Play" : "Pause"
-  el("toggleSfxBtn").textContent = "SFX: " + (settings.game?.sfx ? "On" : "Off")
-  el("sfxToggleBtn").textContent = "Game SFX: " + (settings.game?.sfx ? "On" : "Off")
-}
-
-function quickMute() {
-  if (!audioUnlocked) return
-  if (audioEl.paused) {
-    audioEl.play().then(() => {
-      el("audioToggle").textContent = "Pause"
-      toast("Audio", "Playing.")
-    }).catch(() => {
-      toast("Audio blocked", "Tap Play in the nerd settings once.")
-    })
-  } else {
-    audioEl.pause()
-    el("audioToggle").textContent = "Play"
-    toast("Audio", "Muted.")
-  }
-}
-
-el("audioToggle").addEventListener("click", quickMute)
-
-el("audioMute").addEventListener("click", () => {
-  if (!audioUnlocked) return
-  audioEl.pause()
-  el("audioToggle").textContent = "Play"
-  toast("Audio", "Muted.")
-})
-
-el("audioTrack").addEventListener("change", () => {
-  if (!audioUnlocked) return
-  settings.audio.track = Number(el("audioTrack").value || 0)
-  applyAudioPrefs()
-  if (!audioEl.paused) {
-    audioEl.play().then(() => {
-      el("audioToggle").textContent = "Pause"
-    }).catch(() => {
-      audioEl.pause()
-      el("audioToggle").textContent = "Play"
-    })
-  }
-})
-
-el("audioVol").addEventListener("input", () => {
-  if (!audioUnlocked) return
-  const v = Number(el("audioVol").value)
-  settings.audio.volume = Math.max(0, Math.min(1, v))
-  audioEl.volume = settings.audio.volume
-})
-
-el("audioLoopBtn").addEventListener("click", () => {
-  if (!audioUnlocked) return
-  settings.audio.loop = !settings.audio.loop
-  audioEl.loop = settings.audio.loop
-  el("audioLoopBtn").textContent = "Loop: " + (settings.audio.loop ? "On" : "Off")
-})
-
-el("audioSaveBtn").addEventListener("click", () => {
-  if (!audioUnlocked) return
-  saveLocal()
-  saveSettingsRemote()
-  toast("Saved", "Audio prefs saved.")
-})
-
-el("sfxToggleBtn").addEventListener("click", () => {
-  settings.game.sfx = !settings.game.sfx
-  syncAudioUI()
-  saveLocal()
-  saveSettingsRemote()
-})
-
-el("toggleSfxBtn").addEventListener("click", () => {
-  settings.game.sfx = !settings.game.sfx
-  syncAudioUI()
-  saveLocal()
-})
-
-applyAudioPrefs()
-syncAudioUI()
-
-let audioCtx = null
-function sfx(kind) {
-  if (!settings.game?.sfx) return
-  if (!audioCtx) {
-    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)() } catch (e) { return }
-  }
-  const now = audioCtx.currentTime
-  const osc = audioCtx.createOscillator()
-  const gain = audioCtx.createGain()
-  const freq = kind === "eat" ? 640 : kind === "line" ? 520 : kind === "hit" ? 220 : kind === "link" ? 780 : 440
-  osc.frequency.setValueAtTime(freq, now)
-  osc.type = "triangle"
-  gain.gain.setValueAtTime(0.0001, now)
-  gain.gain.exponentialRampToValueAtTime(0.08, now + 0.01)
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12)
-  osc.connect(gain)
-  gain.connect(audioCtx.destination)
-  osc.start(now)
-  osc.stop(now + 0.14)
-}
-
-document.querySelectorAll("[data-game]").forEach(b => {
-  b.addEventListener("click", () => openGame(b.dataset.game))
-})
-
-function openGame(id) {
-  if (id === "snake") return showModal("Neon Snake+", buildSnake())
-  if (id === "tetris") return showModal("Mini Tetris", buildTetris())
-  if (id === "runner") return showModal("Runner", buildRunner())
-  if (id === "memory") return showModal("Memory Match", buildMemory())
-  if (id === "click") return showModal("Rapid Click", buildClicker())
-  if (id === "zen") return showModal("Zen Break", buildZen())
-}
-
-function wrapCanvas(w=520,h=420) {
-  const wrap = document.createElement("div")
-  wrap.className = "canvasWrap"
-  wrap.style.width = "100%"
-  const c = document.createElement("canvas")
-  c.width = w
-  c.height = h
-  c.style.width = "100%"
-  c.style.height = "420px"
-  wrap.appendChild(c)
-  return {wrap, c, ctx: c.getContext("2d")}
-}
-
-function buildSnake() {
-  const root = document.createElement("div")
-  const top = document.createElement("div")
-  top.className = "row"
-  top.style.justifyContent = "space-between"
-  top.innerHTML = '<div style="font-weight:900">Score: <span id="snScore">0</span> <span class="small">Combo <span id="snCombo">x1</span></span></div><div class="small">Keys: WASD / Arrows</div>'
-  const {wrap,c,ctx} = wrapCanvas(520,420)
-  const row = document.createElement("div")
-  row.className = "row"
-  row.style.marginTop = "10px"
-  row.innerHTML = '<button class="btn primary" id="snStart">Start</button><button class="btn" id="snBoost">Boost</button><button class="btn bad" id="snStop">Stop</button><div class="small">Boost recharges on apples.</div>'
-  root.appendChild(top)
-  root.appendChild(wrap)
-  root.appendChild(row)
-
-  const tile = 20
-  const cols = Math.floor(c.width / tile)
-  const rows = Math.floor(c.height / tile)
-  let snake = [{x:Math.floor(cols/2), y:Math.floor(rows/2)}]
-  let dir = {x:1,y:0}
-  let nextDir = {x:1,y:0}
-  let apple = {x:5,y:5}
-  let tick = 0
-  let running = false
-  let score = 0
-  let combo = 1
-  let boost = 2
-  let speed = 7
-  let raf = null
-
-  function randCell() {
-    while (true) {
-      const x = Math.floor(Math.random()*cols)
-      const y = Math.floor(Math.random()*rows)
-      if (!snake.some(s => s.x===x && s.y===y)) return {x,y}
-    }
-  }
-
-  function reset() {
-    snake = [{x:Math.floor(cols/2), y:Math.floor(rows/2)}]
-    dir = {x:1,y:0}
-    nextDir = {x:1,y:0}
-    apple = randCell()
-    score = 0
-    combo = 1
-    boost = 2
-    speed = 7
-    el("snScore").textContent = "0"
-    el("snCombo").textContent = "x1"
-    draw()
-  }
-
-  function draw() {
-    ctx.clearRect(0,0,c.width,c.height)
-    ctx.fillStyle = "rgba(0,0,0,.20)"
-    ctx.fillRect(0,0,c.width,c.height)
-    ctx.strokeStyle = "rgba(255,255,255,.06)"
-    for (let x=0;x<cols;x++) {
-      ctx.beginPath()
-      ctx.moveTo(x*tile,0)
-      ctx.lineTo(x*tile,c.height)
-      ctx.stroke()
-    }
-    for (let y=0;y<rows;y++) {
-      ctx.beginPath()
-      ctx.moveTo(0,y*tile)
-      ctx.lineTo(c.width,y*tile)
-      ctx.stroke()
-    }
-
-    const a = apple
-    const grad = ctx.createRadialGradient(a.x*tile+tile/2, a.y*tile+tile/2, 2, a.x*tile+tile/2, a.y*tile+tile/2, 14)
-    grad.addColorStop(0, "rgba(255,122,217,.95)")
-    grad.addColorStop(1, "rgba(255,122,217,.05)")
-    ctx.fillStyle = grad
-    ctx.beginPath()
-    ctx.arc(a.x*tile+tile/2, a.y*tile+tile/2, 10, 0, Math.PI*2)
-    ctx.fill()
-
-    for (let i=snake.length-1;i>=0;i--) {
-      const s = snake[i]
-      const p = i / Math.max(1, snake.length-1)
-      ctx.fillStyle = "rgba(112,240,255," + (0.15 + 0.75*(1-p)) + ")"
-      ctx.fillRect(s.x*tile+2, s.y*tile+2, tile-4, tile-4)
-    }
-    const head = snake[0]
-    ctx.fillStyle = "rgba(255,255,255,.85)"
-    ctx.fillRect(head.x*tile+4, head.y*tile+4, tile-8, tile-8)
-  }
-
-  function step(mult=1) {
-    dir = nextDir
-    for (let k=0;k<mult;k++) {
-      const head = snake[0]
-      const nx = head.x + dir.x
-      const ny = head.y + dir.y
-      if (nx<0 || ny<0 || nx>=cols || ny>=rows) {
-        end()
-        return
-      }
-      if (snake.some((s,idx)=>idx>0 && s.x===nx && s.y===ny)) {
-        end()
-        return
-      }
-      snake.unshift({x:nx,y:ny})
-      if (nx===apple.x && ny===apple.y) {
-        score += 10 * combo
-        combo = Math.min(9, combo + 1)
-        boost = Math.min(3, boost + 1)
-        speed = Math.min(14, speed + 0.3)
-        apple = randCell()
-        el("snScore").textContent = String(score)
-        el("snCombo").textContent = "x"+String(combo)
-        sfx("eat")
-      } else {
-        snake.pop()
-        combo = Math.max(1, combo - 0.06)
-        el("snCombo").textContent = "x"+String(Math.round(combo))
+      if(snake && snakeRunning){
+        if((k==='arrowup'||k==='w') && dir.y===0) dir={x:0,y:-1}
+        else if((k==='arrowdown'||k==='s') && dir.y===0) dir={x:0,y:1}
+        else if((k==='arrowleft'||k==='a') && dir.x===0) dir={x:-1,y:0}
+        else if((k==='arrowright'||k==='d') && dir.x===0) dir={x:1,y:0}
+        else if(k==='shift' && gameCheats.snake?.boost){
+          if(snakeRunning){
+            clearInterval(snakeInterval)
+            snakeInterval=setInterval(tickSnake, Math.max(35,(gameCheats.snake.speed||110)*0.55))
+            setTimeout(()=>{ if(snakeRunning){ clearInterval(snakeInterval); snakeInterval=setInterval(tickSnake,gameCheats.snake.speed||110)} },260)
+          }
+        }
+      }else if(tetris && tRunning){
+        if(e.key==='ArrowLeft') tMove(-1,0)
+        else if(e.key==='ArrowRight') tMove(1,0)
+        else if(e.key==='ArrowDown') tMove(0,1)
+        else if(e.key==='ArrowUp') tRotate()
+        else if(e.key===' '){tHardDrop();e.preventDefault()}
+      }else if(runner && rRunning){
+        if(e.key===' ' || e.key==='ArrowUp') {rJump();e.preventDefault()}
+        else if(e.key==='Shift') {rDash();e.preventDefault()}
       }
     }
-  }
-
-  function end() {
-    running = false
-    cancelAnimationFrame(raf)
-    toast("Snake", "Game over. Score " + score)
-    sfx("hit")
-  }
-
-  function loop() {
-    if (!running) return
-    tick++
-    const base = 60 / speed
-    if (tick % Math.max(1, Math.floor(base)) === 0) step(1)
-    draw()
-    raf = requestAnimationFrame(loop)
-  }
-
-  function start() {
-    if (running) return
-    running = true
-    tick = 0
-    loop()
-  }
-
-  function stop() {
-    running = false
-    cancelAnimationFrame(raf)
-    draw()
-  }
-
-  function boostNow() {
-    if (!running) return
-    if (boost <= 0) return
-    boost -= 1
-    step(2)
-    draw()
-  }
-
-  root.querySelector("#snStart").addEventListener("click", () => {
-    reset()
-    start()
-  })
-  root.querySelector("#snStop").addEventListener("click", stop)
-  root.querySelector("#snBoost").addEventListener("click", boostNow)
-
-  function setDir(x,y) {
-    if (dir.x + x === 0 && dir.y + y === 0) return
-    nextDir = {x,y}
-  }
-
-  window.addEventListener("keydown", (e) => {
-    if (el("modalBack").style.display !== "flex") return
-    if (el("modalTitle").textContent !== "Neon Snake+") return
-    const k = e.key.toLowerCase()
-    if (k === "arrowup" || k === "w") setDir(0,-1)
-    if (k === "arrowdown" || k === "s") setDir(0,1)
-    if (k === "arrowleft" || k === "a") setDir(-1,0)
-    if (k === "arrowright" || k === "d") setDir(1,0)
-    if (k === " ") boostNow()
   })
 
-  reset()
-  return root
-}
+  document.addEventListener('click',()=>{try{sfx.unlock()}catch(e){}})
 
-function buildTetris() {
-  const root = document.createElement("div")
-  const top = document.createElement("div")
-  top.className = "row"
-  top.style.justifyContent = "space-between"
-  top.innerHTML = '<div style="font-weight:900">Lines: <span id="ttLines">0</span></div><div class="small">Keys: ← → ↓ rotate: ↑</div>'
-  const {wrap,c,ctx} = wrapCanvas(360,420)
-  const row = document.createElement("div")
-  row.className = "row"
-  row.style.marginTop = "10px"
-  row.innerHTML = '<button class="btn primary" id="ttStart">Start</button><button class="btn bad" id="ttStop">Stop</button>'
-  root.appendChild(top)
-  root.appendChild(wrap)
-  root.appendChild(row)
+  $('backdrop').onclick=closeMobileSidebar
+  $('mobileMenu').onclick=openMobileSidebar
 
-  const W=10,H=20, S=20
-  let grid = Array.from({length:H}, () => Array.from({length:W}, () => 0))
-  const pieces = [
-    {m:[[1,1,1,1]], c:"rgba(112,240,255,.85)"},
-    {m:[[1,1],[1,1]], c:"rgba(255,211,107,.85)"},
-    {m:[[0,1,0],[1,1,1]], c:"rgba(255,122,217,.85)"},
-    {m:[[1,0,0],[1,1,1]], c:"rgba(124,255,134,.85)"},
-    {m:[[0,0,1],[1,1,1]], c:"rgba(160,180,255,.85)"},
-    {m:[[0,1,1],[1,1,0]], c:"rgba(255,160,122,.85)"},
-    {m:[[1,1,0],[0,1,1]], c:"rgba(200,255,160,.85)"}
-  ]
-  let cur=null
-  let x=0,y=0
-  let drop=0
-  let running=false
-  let lines=0
-  let raf=null
+  window.addEventListener('resize',maybeMobileUI)
+  maybeMobileUI()
 
-  function newPiece() {
-    cur = pieces[Math.floor(Math.random()*pieces.length)]
-    x = Math.floor(W/2) - Math.floor(cur.m[0].length/2)
-    y = 0
-    if (collide(x,y,cur.m)) end()
-  }
+  window.addEventListener('online',()=>{if(activeId) setStatus('saved')})
+  window.addEventListener('offline',()=>setStatus('offline'))
 
-  function rotate(m) {
-    const h=m.length,w=m[0].length
-    const out = Array.from({length:w}, (_,i) => Array.from({length:h}, (_,j) => m[h-1-j][i]))
-    return out
-  }
-
-  function collide(px,py,m) {
-    for (let r=0;r<m.length;r++) for (let c2=0;c2<m[0].length;c2++) {
-      if (!m[r][c2]) continue
-      const gx = px + c2
-      const gy = py + r
-      if (gx<0 || gx>=W || gy<0 || gy>=H) return true
-      if (grid[gy][gx]) return true
-    }
-    return false
-  }
-
-  function merge() {
-    for (let r=0;r<cur.m.length;r++) for (let c2=0;c2<cur.m[0].length;c2++) {
-      if (!cur.m[r][c2]) continue
-      const gx = x + c2
-      const gy = y + r
-      if (gy>=0 && gy<H && gx>=0 && gx<W) grid[gy][gx] = cur.c
-    }
-  }
-
-  function clearLines() {
-    let cleared=0
-    grid = grid.filter(row => {
-      if (row.every(v => v)) {
-        cleared++
-        return false
-      }
-      return true
-    })
-    while (grid.length < H) grid.unshift(Array.from({length:W},()=>0))
-    if (cleared) {
-      lines += cleared
-      el("ttLines").textContent = String(lines)
-      sfx("line")
-    }
-  }
-
-  function draw() {
-    ctx.clearRect(0,0,c.width,c.height)
-    ctx.fillStyle="rgba(0,0,0,.18)"
-    ctx.fillRect(0,0,c.width,c.height)
-    for (let r=0;r<H;r++) for (let c2=0;c2<W;c2++) {
-      const v = grid[r][c2]
-      if (v) {
-        ctx.fillStyle = v
-        ctx.fillRect(c2*S+1,r*S+1,S-2,S-2)
-      } else {
-        ctx.strokeStyle="rgba(255,255,255,.06)"
-        ctx.strokeRect(c2*S+0.5,r*S+0.5,S-1,S-1)
-      }
-    }
-    if (cur) {
-      for (let r=0;r<cur.m.length;r++) for (let c2=0;c2<cur.m[0].length;c2++) {
-        if (!cur.m[r][c2]) continue
-        ctx.fillStyle = cur.c
-        ctx.fillRect((x+c2)*S+1,(y+r)*S+1,S-2,S-2)
-      }
-    }
-  }
-
-  function step() {
-    if (!running) return
-    drop++
-    const sp = Math.max(10, 42 - Math.floor(lines*1.5))
-    if (drop % sp === 0) {
-      if (!collide(x,y+1,cur.m)) y++
-      else {
-        merge()
-        clearLines()
-        newPiece()
-      }
-    }
-    draw()
-    raf = requestAnimationFrame(step)
-  }
-
-  function start() {
-    grid = Array.from({length:H}, () => Array.from({length:W}, () => 0))
-    lines = 0
-    el("ttLines").textContent = "0"
-    newPiece()
-    running = true
-    drop = 0
-    step()
-  }
-
-  function stop() {
-    running = false
-    cancelAnimationFrame(raf)
-    draw()
-  }
-
-  function end() {
-    running = false
-    cancelAnimationFrame(raf)
-    toast("Tetris", "Game over. Lines " + lines)
-    sfx("hit")
-  }
-
-  root.querySelector("#ttStart").addEventListener("click", start)
-  root.querySelector("#ttStop").addEventListener("click", stop)
-
-  window.addEventListener("keydown", (e) => {
-    if (el("modalBack").style.display !== "flex") return
-    if (el("modalTitle").textContent !== "Mini Tetris") return
-    if (!running) return
-    if (e.key === "ArrowLeft" && !collide(x-1,y,cur.m)) x--
-    if (e.key === "ArrowRight" && !collide(x+1,y,cur.m)) x++
-    if (e.key === "ArrowDown" && !collide(x,y+1,cur.m)) y++
-    if (e.key === "ArrowUp") {
-      const rm = rotate(cur.m)
-      if (!collide(x,y,rm)) cur.m = rm
-    }
-    draw()
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState!=='visible'){audio.pause();return}
+    if(nerdPrefs.musicMode && nerdPrefs.musicMode!=='off') applyMusicMode()
   })
-
-  draw()
-  return root
 }
 
-function buildRunner() {
-  const root = document.createElement("div")
-  const top = document.createElement("div")
-  top.className = "row"
-  top.style.justifyContent = "space-between"
-  top.innerHTML = '<div style="font-weight:900">Distance: <span id="rnDist">0</span></div><div class="small">Jump: Space / ↑</div>'
-  const {wrap,c,ctx} = wrapCanvas(520,420)
-  const row = document.createElement("div")
-  row.className = "row"
-  row.style.marginTop = "10px"
-  row.innerHTML = '<button class="btn primary" id="rnStart">Start</button><button class="btn bad" id="rnStop">Stop</button>'
-  root.appendChild(top)
-  root.appendChild(wrap)
-  root.appendChild(row)
+async function boot(){
+  initAuth()
+  initSplitResize()
+  initGraph()
+  initGames()
+  wireUI()
 
-  let running=false
-  let t=0
-  let speed=3.2
-  let dist=0
-  let y=0
-  let vy=0
-  let onGround=true
-  let obs=[]
-  let raf=null
-
-  function reset() {
-    t=0
-    speed=3.2
-    dist=0
-    y=0
-    vy=0
-    onGround=true
-    obs=[]
-    el("rnDist").textContent="0"
-    draw()
-  }
-
-  function spawn() {
-    const h = 22 + Math.random()*26
-    const w = 18 + Math.random()*22
-    obs.push({x:c.width+20, y:c.height-70-h, w, h})
-  }
-
-  function jump() {
-    if (!running) return
-    if (!onGround) return
-    vy = -11.5
-    onGround = false
-    sfx("eat")
-  }
-
-  function step() {
-    if (!running) return
-    t++
-    dist += speed
-    el("rnDist").textContent = String(Math.floor(dist/10))
-    speed = Math.min(8.5, speed + 0.0009*dist/10)
-
-    if (Math.random() < 0.02 + speed*0.002) spawn()
-    obs.forEach(o => o.x -= speed*1.7)
-    obs = obs.filter(o => o.x + o.w > -20)
-
-    vy += 0.55
-    y += vy
-    if (y > 0) {
-      y = 0
-      vy = 0
-      onGround = true
+  const sess=await supabase.auth.getSession()
+  if(sess.data?.session){
+    user=sess.data.session.user
+    $('authBack').style.display='none'
+    $('userEmail').textContent=user.email||'Signed in'
+    $('avatar').textContent=((user.email||'U')[0]||'U').toUpperCase()
+    try{
+      await ensureTables()
+      await ensureSettings()
+      await fetchNotes()
+      setSplit('split')
+      setStatus(navigator.onLine?'saved':'offline')
+    }catch(e){
+      console.error(e)
+      toast('Supabase setup needed',String(e.message||e),'bad')
     }
+  }else{
+    $('authBack').style.display='flex'
+  }
 
-    const px = 90
-    const py = c.height - 70 - 34 + y
-    const pw = 28, ph = 34
-
-    for (const o of obs) {
-      if (px < o.x+o.w && px+pw > o.x && py < o.y+o.h && py+ph > o.y) {
-        end()
-        return
+  supabase.auth.onAuthStateChange(async (ev,session)=>{
+    if(session){
+      user=session.user
+      $('authBack').style.display='none'
+      $('userEmail').textContent=user.email||'Signed in'
+      $('avatar').textContent=((user.email||'U')[0]||'U').toUpperCase()
+      try{
+        await ensureTables()
+        await ensureSettings()
+        await fetchNotes()
+        setSplit('split')
+        setStatus(navigator.onLine?'saved':'offline')
+      }catch(e){
+        console.error(e)
+        toast('Supabase setup needed',String(e.message||e),'bad')
       }
-    }
-
-    draw()
-    raf = requestAnimationFrame(step)
-  }
-
-  function draw() {
-    ctx.clearRect(0,0,c.width,c.height)
-    ctx.fillStyle="rgba(0,0,0,.16)"
-    ctx.fillRect(0,0,c.width,c.height)
-
-    const groundY = c.height - 70
-    ctx.strokeStyle="rgba(255,255,255,.10)"
-    ctx.lineWidth=2
-    ctx.beginPath()
-    ctx.moveTo(0, groundY)
-    ctx.lineTo(c.width, groundY)
-    ctx.stroke()
-
-    ctx.fillStyle="rgba(112,240,255,.22)"
-    ctx.fillRect(0, groundY, c.width, 70)
-
-    const px = 90
-    const py = groundY - 34 + y
-    ctx.fillStyle="rgba(255,255,255,.86)"
-    ctx.fillRect(px, py, 28, 34)
-    ctx.fillStyle="rgba(112,240,255,.55)"
-    ctx.fillRect(px+4, py+4, 20, 26)
-
-    obs.forEach(o => {
-      ctx.fillStyle="rgba(255,122,217,.70)"
-      ctx.fillRect(o.x, o.y, o.w, o.h)
-      ctx.fillStyle="rgba(255,122,217,.18)"
-      ctx.fillRect(o.x-6, o.y-6, o.w+12, o.h+12)
-    })
-  }
-
-  function start() {
-    reset()
-    running=true
-    step()
-  }
-  function stop() {
-    running=false
-    cancelAnimationFrame(raf)
-    draw()
-  }
-  function end() {
-    running=false
-    cancelAnimationFrame(raf)
-    toast("Runner", "Crashed. Distance " + Math.floor(dist/10))
-    sfx("hit")
-  }
-
-  root.querySelector("#rnStart").addEventListener("click", start)
-  root.querySelector("#rnStop").addEventListener("click", stop)
-
-  window.addEventListener("keydown", (e) => {
-    if (el("modalBack").style.display !== "flex") return
-    if (el("modalTitle").textContent !== "Runner") return
-    if (e.key === " " || e.key === "ArrowUp") jump()
-  })
-
-  draw()
-  return root
-}
-
-function buildMemory() {
-  const root = document.createElement("div")
-  const top = document.createElement("div")
-  top.className = "row"
-  top.style.justifyContent = "space-between"
-  top.innerHTML = '<div style="font-weight:900">Time: <span id="mmTime">0.0</span>s</div><div class="small">Match all pairs.</div>'
-  root.appendChild(top)
-
-  const grid = document.createElement("div")
-  grid.style.display="grid"
-  grid.style.gridTemplateColumns="repeat(4,1fr)"
-  grid.style.gap="10px"
-  grid.style.marginTop="12px"
-  root.appendChild(grid)
-
-  const row = document.createElement("div")
-  row.className = "row"
-  row.style.marginTop="12px"
-  row.innerHTML = '<button class="btn primary" id="mmStart">Start</button><button class="btn bad" id="mmReset">Reset</button>'
-  root.appendChild(row)
-
-  const icons = ["★","◆","●","▲","■","☀","☾","✦"]
-  let deck=[]
-  let open=[]
-  let matched=new Set()
-  let startAt=0
-  let timer=null
-  let running=false
-
-  function buildDeck() {
-    deck = [...icons, ...icons].sort(() => Math.random()-0.5).map((v,i) => ({v,i}))
-  }
-
-  function draw() {
-    grid.innerHTML=""
-    deck.forEach(card => {
-      const b = document.createElement("button")
-      b.className="btn"
-      b.style.height="70px"
-      b.style.borderRadius="16px"
-      b.style.fontSize="22px"
-      b.style.fontWeight="900"
-      b.style.background="rgba(255,255,255,.05)"
-      const isOpen = open.includes(card.i) || matched.has(card.i)
-      b.textContent = isOpen ? card.v : " "
-      b.addEventListener("click", () => flip(card.i))
-      grid.appendChild(b)
-    })
-  }
-
-  function flip(i) {
-    if (!running) return
-    if (matched.has(i)) return
-    if (open.includes(i)) return
-    if (open.length >= 2) return
-    open.push(i)
-    sfx("eat")
-    draw()
-    if (open.length === 2) {
-      const a = deck.find(c => c.i === open[0])
-      const b = deck.find(c => c.i === open[1])
-      if (a.v === b.v) {
-        matched.add(a.i); matched.add(b.i)
-        open=[]
-        sfx("line")
-        draw()
-        if (matched.size === deck.length) win()
-      } else {
-        setTimeout(() => {
-          open=[]
-          draw()
-        }, 520)
-      }
-    }
-  }
-
-  function tick() {
-    const t = (performance.now()-startAt)/1000
-    el("mmTime").textContent = t.toFixed(1)
-  }
-
-  function start() {
-    running=true
-    matched.clear()
-    open=[]
-    buildDeck()
-    draw()
-    startAt=performance.now()
-    clearInterval(timer)
-    timer=setInterval(tick, 100)
-  }
-
-  function reset() {
-    running=false
-    clearInterval(timer)
-    el("mmTime").textContent="0.0"
-    matched.clear()
-    open=[]
-    buildDeck()
-    draw()
-  }
-
-  function win() {
-    running=false
-    clearInterval(timer)
-    toast("Memory", "Cleared in " + el("mmTime").textContent + "s")
-  }
-
-  root.querySelector("#mmStart").addEventListener("click", start)
-  root.querySelector("#mmReset").addEventListener("click", reset)
-
-  reset()
-  return root
-}
-
-function buildClicker() {
-  const root = document.createElement("div")
-  root.innerHTML = '<div class="row" style="justify-content:space-between"><div style="font-weight:900">Clicks: <span id="ckCount">0</span></div><div class="small">30 seconds</div></div>'
-  const big = document.createElement("button")
-  big.className="btn primary"
-  big.style.width="100%"
-  big.style.height="220px"
-  big.style.fontSize="28px"
-  big.style.marginTop="12px"
-  big.textContent="CLICK"
-  root.appendChild(big)
-  const row = document.createElement("div")
-  row.className="row"
-  row.style.marginTop="10px"
-  row.innerHTML = '<button class="btn" id="ckStart">Start</button><button class="btn bad" id="ckReset">Reset</button><div class="small" id="ckTime">Ready</div>'
-  root.appendChild(row)
-
-  let running=false
-  let count=0
-  let endAt=0
-  let timer=null
-
-  function render() {
-    el("ckCount").textContent=String(count)
-  }
-
-  function start() {
-    running=true
-    count=0
-    render()
-    endAt = performance.now() + 30000
-    el("ckTime").textContent="30.0s"
-    clearInterval(timer)
-    timer=setInterval(() => {
-      const left = Math.max(0, endAt - performance.now())
-      el("ckTime").textContent=(left/1000).toFixed(1)+"s"
-      if (left<=0) finish()
-    }, 60)
-  }
-
-  function finish() {
-    running=false
-    clearInterval(timer)
-    el("ckTime").textContent="Done"
-    toast("Rapid Click", "Score " + count)
-    sfx("line")
-  }
-
-  function reset() {
-    running=false
-    clearInterval(timer)
-    count=0
-    render()
-    el("ckTime").textContent="Ready"
-  }
-
-  big.addEventListener("click", () => {
-    if (!running) return
-    count++
-    render()
-    sfx("eat")
-  })
-
-  row.querySelector("#ckStart").addEventListener("click", start)
-  row.querySelector("#ckReset").addEventListener("click", reset)
-
-  reset()
-  return root
-}
-
-function buildZen() {
-  const root = document.createElement("div")
-  const small = document.createElement("div")
-  small.className="small"
-  small.textContent="Tap bubbles. No score. Just a little brain break."
-  root.appendChild(small)
-  const {wrap,c,ctx} = wrapCanvas(520,420)
-  root.appendChild(wrap)
-  const row = document.createElement("div")
-  row.className="row"
-  row.style.marginTop="10px"
-  row.innerHTML='<button class="btn primary" id="znSpawn">Spawn</button><button class="btn" id="znClear">Clear</button>'
-  root.appendChild(row)
-
-  let bubbles=[]
-  function spawn(n=8) {
-    for (let i=0;i<n;i++) {
-      bubbles.push({
-        x: Math.random()*c.width,
-        y: Math.random()*c.height,
-        r: 14 + Math.random()*22,
-        vx: (Math.random()-0.5)*1.2,
-        vy: (Math.random()-0.5)*1.2
-      })
-    }
-  }
-  function step() {
-    ctx.clearRect(0,0,c.width,c.height)
-    ctx.fillStyle="rgba(0,0,0,.16)"
-    ctx.fillRect(0,0,c.width,c.height)
-    bubbles.forEach(b => {
-      b.x += b.vx
-      b.y += b.vy
-      if (b.x<b.r || b.x>c.width-b.r) b.vx *= -1
-      if (b.y<b.r || b.y>c.height-b.r) b.vy *= -1
-      const g = ctx.createRadialGradient(b.x,b.y,2,b.x,b.y,b.r)
-      g.addColorStop(0,"rgba(112,240,255,.55)")
-      g.addColorStop(1,"rgba(255,122,217,.05)")
-      ctx.fillStyle=g
-      ctx.beginPath()
-      ctx.arc(b.x,b.y,b.r,0,Math.PI*2)
-      ctx.fill()
-    })
-    requestAnimationFrame(step)
-  }
-  c.addEventListener("click", (e) => {
-    const r = c.getBoundingClientRect()
-    const x = (e.clientX - r.left) * (c.width / r.width)
-    const y = (e.clientY - r.top) * (c.height / r.height)
-    const idx = bubbles.findIndex(b => Math.hypot(x-b.x,y-b.y) <= b.r)
-    if (idx>=0) {
-      bubbles.splice(idx,1)
-      sfx("eat")
-    } else {
-      bubbles.push({x,y,r:16+Math.random()*18,vx:(Math.random()-0.5)*1.2,vy:(Math.random()-0.5)*1.2})
-      sfx("link")
+    }else{
+      $('authBack').style.display='flex'
     }
   })
-  row.querySelector("#znSpawn").addEventListener("click", () => spawn(10))
-  row.querySelector("#znClear").addEventListener("click", () => {bubbles=[]})
-  spawn(12)
-  step()
-  return root
 }
 
-let timerSeconds = 25*60
-let timerRunning = false
-let timerInt = null
-
-function timerRender() {
-  const m = Math.floor(timerSeconds/60)
-  const s = timerSeconds%60
-  el("timerDisplay").textContent = String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
-}
-
-function timerSetPreset(mins) {
-  timerSeconds = mins*60
-  timerRender()
-}
-
-document.querySelectorAll("[data-preset]").forEach(b => {
-  b.addEventListener("click", () => {
-    const mins = Number(b.dataset.preset)
-    timerSetPreset(mins)
-  })
-})
-
-function timerStart() {
-  if (timerRunning) return
-  timerRunning = true
-  timerInt = setInterval(() => {
-    if (!timerRunning) return
-    timerSeconds = Math.max(0, timerSeconds - 1)
-    timerRender()
-    if (timerSeconds === 0) {
-      timerRunning = false
-      clearInterval(timerInt)
-      toast("Timer", "Done.")
-      sfx("line")
-    }
-  }, 1000)
-}
-
-function timerPause() {
-  timerRunning = false
-  clearInterval(timerInt)
-}
-
-function timerReset() {
-  timerRunning = false
-  clearInterval(timerInt)
-  timerSetPreset(Number(settings.timer?.preset || 25))
-}
-
-el("timerStart").addEventListener("click", timerStart)
-el("timerPause").addEventListener("click", timerPause)
-el("timerReset").addEventListener("click", timerReset)
-el("timerLogBtn").addEventListener("click", () => {
-  const n = readEditorIntoNote()
-  if (!n) {
-    toast("No note", "Open a note first.")
-    return
-  }
-  const stamp = new Date().toLocaleString()
-  el("timerNotes").value += (el("timerNotes").value ? "\n\n" : "") + "["+stamp+"] " + (n.title||"Untitled") + ": " + (String(n.content||"").slice(0,220).replace(/\s+/g," ").trim()) 
-  toast("Logged", "Added a quick snippet.")
-})
-
-document.addEventListener("keydown", (e) => {
-  if (activeView !== "timerView") return
-  if (e.key === " ") {
-    e.preventDefault()
-    if (timerRunning) timerPause()
-    else timerStart()
-  }
-  if (e.key.toLowerCase() === "r") timerReset()
-})
-
-timerSetPreset(Number(settings.timer?.preset || 25))
-timerRender()
-
-renderNotesList()
+boot()
 </script>
+
 </body>
 </html>
