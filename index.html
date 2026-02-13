@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Soundboard • Dashboard</title>
+  <title>Kenneth Study Hub • Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,17 +14,16 @@
       --ink:#122033;
       --muted:#6f7d93;
       --card:#ffffff;
-      --stroke:#e7eef9;
+      --stroke:rgba(16,40,80,.10);
       --shadow:0 24px 70px rgba(15,32,67,.22);
       --softshadow:0 10px 22px rgba(15,32,67,.12);
       --blue1:#0a2f63;
       --blue2:#1677ff;
       --blue3:#1b5fe6;
-      --pill:#1c64ff;
       --green:#24c16a;
       --orange:#ff9f2d;
-      --radius:18px;
-      --radius2:22px;
+      --r1:18px;
+      --r2:24px;
     }
     *{box-sizing:border-box}
     body{
@@ -37,29 +36,22 @@
         linear-gradient(145deg,var(--bg1),var(--bg2));
       min-height:100vh;
       display:flex;
-      align-items:flex-start;
       justify-content:center;
-      padding:42px 18px 70px;
+      padding:42px 18px 64px;
     }
-    .wrap{
+    .app{
       width:min(1120px,100%);
-      display:grid;
-      gap:28px;
-    }
-
-    .desktop{
       border-radius:26px;
       box-shadow:var(--shadow);
-      background:linear-gradient(180deg,#f8fbff,#eef5ff);
       overflow:hidden;
       border:1px solid rgba(255,255,255,.55);
+      background:linear-gradient(180deg,#f8fbff,#eef5ff);
     }
-    .desktop-inner{
+    .shell{
       display:grid;
       grid-template-columns: 260px 1fr;
-      min-height:540px;
+      min-height:560px;
     }
-
     .sidebar{
       position:relative;
       padding:22px 18px;
@@ -75,59 +67,43 @@
       color:#fff;
       font-weight:800;
       letter-spacing:.2px;
-      font-size:20px;
+      font-size:18px;
+      line-height:1.1;
     }
-    .brand .logo{
+    .logo{
       width:28px;height:28px;border-radius:8px;
       display:grid;place-items:center;
       background:rgba(255,255,255,.12);
       border:1px solid rgba(255,255,255,.18);
+      flex:0 0 auto;
     }
     .nav{
       margin-top:18px;
+      padding:6px;
       display:flex;
       flex-direction:column;
       gap:10px;
-      padding:6px;
     }
     .nav a{
       text-decoration:none;
-      color:rgba(255,255,255,.90);
+      color:rgba(255,255,255,.92);
       display:flex;
       align-items:center;
       gap:12px;
       padding:12px 12px;
       border-radius:14px;
-      font-weight:600;
+      font-weight:700;
       font-size:14px;
-      background:transparent;
       border:1px solid rgba(255,255,255,0);
       transition:.18s ease;
       user-select:none;
     }
-    .nav a svg{opacity:.95}
     .nav a.active{
       background:linear-gradient(180deg, rgba(63,150,255,.55), rgba(34,120,255,.32));
       border:1px solid rgba(255,255,255,.22);
       box-shadow:0 10px 18px rgba(0,0,0,.14);
     }
     .nav a:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.18)}
-    .sidebar-bottom{
-      position:absolute;
-      left:0; right:0; bottom:16px;
-      padding:0 22px;
-      display:flex;
-      gap:14px;
-      opacity:.95;
-    }
-    .sb-ic{
-      width:34px;height:34px;
-      border-radius:12px;
-      display:grid;place-items:center;
-      background:rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.14);
-    }
-
     .content{
       position:relative;
       background:linear-gradient(180deg,#f7fbff 0%, #f0f6ff 55%, #eaf2ff 100%);
@@ -138,14 +114,16 @@
       align-items:center;
       justify-content:space-between;
       padding:18px 22px 12px;
+      gap:16px;
     }
     .search{
-      width:min(460px, 62%);
+      flex:1 1 auto;
+      max-width:520px;
       display:flex;
       align-items:center;
       gap:10px;
       background:#ffffff;
-      border:1px solid rgba(16,40,80,.10);
+      border:1px solid var(--stroke);
       border-radius:14px;
       padding:10px 14px;
       box-shadow:0 8px 18px rgba(18,35,70,.06);
@@ -157,30 +135,25 @@
       font:600 13px/1 Inter,system-ui;
       color:#35455f;
     }
-    .search input::placeholder{color:#a2afc2; font-weight:600}
+    .search input::placeholder{color:#a2afc2; font-weight:700}
     .rightbar{
       display:flex;
       align-items:center;
       gap:14px;
       color:#6e7b92;
-      font-weight:600;
+      font-weight:700;
       font-size:13px;
+      flex:0 0 auto;
     }
-    .bell{
-      width:34px;height:34px;border-radius:12px;
-      display:grid;place-items:center;
-      background:rgba(255,255,255,.75);
-      border:1px solid rgba(16,40,80,.10);
-      box-shadow:0 8px 16px rgba(18,35,70,.06);
-    }
-    .user{
+    .pill{
+      height:34px;
+      padding:0 12px;
+      border-radius:14px;
       display:flex;
       align-items:center;
       gap:10px;
-      padding:8px 10px;
-      border-radius:14px;
       background:rgba(255,255,255,.65);
-      border:1px solid rgba(16,40,80,.10);
+      border:1px solid var(--stroke);
       box-shadow:0 8px 16px rgba(18,35,70,.06);
     }
     .avatar{
@@ -188,10 +161,9 @@
       background:linear-gradient(180deg,#ffd2a8,#ff9fb8);
       display:grid;place-items:center;
       color:#1b1f2a;
-      font-weight:800;
+      font-weight:900;
       font-size:12px;
     }
-
     .wave{
       position:absolute;
       left:0; right:0;
@@ -209,116 +181,89 @@
       -webkit-mask-image: radial-gradient(380px 140px at 65% 50%, #000 55%, transparent 68%),
                           radial-gradient(460px 160px at 80% 60%, #000 55%, transparent 70%),
                           radial-gradient(560px 190px at 95% 60%, #000 55%, transparent 73%);
-      filter:blur(.2px);
     }
-
     .main{
       position:relative;
-      padding:12px 22px 22px;
+      padding:12px 22px 26px;
     }
     .hero{
       margin-top:6px;
       display:flex;
       flex-direction:column;
       gap:6px;
-      padding:4px 4px 10px;
+      padding:4px 4px 14px;
     }
     .hero h1{
       margin:0;
       font-size:32px;
       letter-spacing:-.6px;
-      font-weight:800;
+      font-weight:850;
     }
     .hero p{
       margin:0;
       color:#5f6e86;
-      font-weight:600;
+      font-weight:650;
     }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1.05fr .95fr;
-      gap:16px;
-      align-items:start;
-      margin-top:14px;
-    }
-
-    .section-title{
-      color:#3e4e67;
-      font-weight:800;
-      font-size:13px;
-      letter-spacing:.2px;
-      margin:14px 6px 10px;
-    }
-
     .card{
       background:var(--card);
-      border:1px solid rgba(16,40,80,.10);
-      border-radius:var(--radius2);
+      border:1px solid var(--stroke);
+      border-radius:var(--r2);
       box-shadow:var(--softshadow);
       overflow:hidden;
+      max-width:720px;
     }
     .card-h{
       display:flex;
       align-items:center;
       justify-content:space-between;
       padding:14px 16px;
-      font-weight:800;
+      font-weight:850;
       color:#2a3b56;
       background:linear-gradient(180deg,#ffffff,#fbfdff);
       border-bottom:1px solid rgba(16,40,80,.06);
     }
-    .card-h .chip{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      color:#2a3b56;
-      font-size:13px;
-    }
-    .chip .ic{
-      width:22px;height:22px;border-radius:10px;
-      display:grid;place-items:center;
-      background:rgba(28,100,255,.10);
-      border:1px solid rgba(28,100,255,.18);
-    }
-
-    .task{
+    .note{
       padding:14px 16px 16px;
       display:flex;
       flex-direction:column;
       gap:12px;
     }
-    .task-row{
+    .note-row{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
       gap:12px;
     }
-    .task-left{
+    .note-left{
       display:flex;
       gap:10px;
       align-items:flex-start;
+      min-width:0;
     }
     .doc{
-      width:22px;height:22px;border-radius:6px;
+      width:22px;height:22px;border-radius:7px;
       display:grid;place-items:center;
       background:rgba(36,193,106,.14);
       border:1px solid rgba(36,193,106,.22);
       flex:0 0 auto;
     }
-    .task-title{
-      font-weight:800;
+    .note-title{
+      font-weight:850;
       font-size:14px;
       color:#253750;
       margin-top:1px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:420px;
     }
-    .task-sub{
+    .note-sub{
       font-size:12px;
       color:#93a1b6;
-      font-weight:600;
+      font-weight:650;
       margin-top:3px;
     }
-    .due{
+    .tag{
       font-size:12px;
       font-weight:900;
       color:var(--orange);
@@ -335,7 +280,7 @@
     .bar > span{
       display:block;
       height:100%;
-      width:34%;
+      width:42%;
       background:linear-gradient(90deg, rgba(36,193,106,.95), rgba(36,193,106,.72));
       border-radius:999px;
     }
@@ -357,693 +302,98 @@
       user-select:none;
     }
     .btn:active{transform:translateY(1px)}
-
-    .list{
-      padding:10px 12px 12px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:10px 10px;
-      border-radius:16px;
-      border:1px solid rgba(16,40,80,.06);
-      background:linear-gradient(180deg,#ffffff,#fbfdff);
-    }
-    .row-left{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-    .mini{
-      width:28px;height:28px;border-radius:10px;
-      display:grid;place-items:center;
-      border:1px solid rgba(16,40,80,.10);
-      background:rgba(255,255,255,.85);
-      flex:0 0 auto;
-    }
-    .row-title{
-      font-weight:900;
-      font-size:13px;
-      color:#273a55;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .row-sub{
-      font-size:11px;
-      font-weight:700;
-      color:#9aa8bd;
-      margin-top:2px;
-    }
-    .row-right{
-      text-align:right;
-      flex:0 0 auto;
-      min-width:62px;
-      font-weight:900;
-      color:#3b4b64;
-      font-size:12px;
-    }
-
-    .courses{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      padding:12px 12px 14px;
-    }
-    .course{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:12px 12px;
-      border-radius:18px;
-      border:1px solid rgba(16,40,80,.06);
-      background:linear-gradient(180deg,#ffffff,#fbfdff);
-    }
-    .thumb{
-      width:44px;height:44px;border-radius:14px;
-      border:1px solid rgba(16,40,80,.10);
-      background:
-        radial-gradient(20px 20px at 30% 30%, rgba(255,255,255,.7), rgba(255,255,255,0) 60%),
-        linear-gradient(145deg,#b6d6ff,#4ea1ff);
-      box-shadow:0 10px 18px rgba(18,35,70,.10);
-      flex:0 0 auto;
-    }
-    .thumb.alt{
-      background:
-        radial-gradient(20px 20px at 30% 30%, rgba(255,255,255,.65), rgba(255,255,255,0) 60%),
-        linear-gradient(145deg,#ffd6b6,#ff8a7a);
-    }
-    .course-mid{
-      min-width:0;
-      flex:1 1 auto;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .course-top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .course-title{
-      font-weight:900;
-      font-size:13px;
-      color:#273a55;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .course-meta{
-      font-size:12px;
-      font-weight:800;
-      color:#7b8aa1;
-      flex:0 0 auto;
-      white-space:nowrap;
-    }
-    .course .bar{height:7px}
-    .course .bar > span{width:64%; background:linear-gradient(90deg, rgba(36,193,106,.95), rgba(36,193,106,.62))}
-    .chev{
-      width:30px;height:30px;border-radius:12px;
-      display:grid;place-items:center;
-      border:1px solid rgba(16,40,80,.10);
-      background:rgba(255,255,255,.75);
-      flex:0 0 auto;
-      color:#6b7a92;
-    }
-
-    .assistant{
-      padding:14px 16px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .bullets{
-      margin:0;
-      padding-left:16px;
-      color:#394b66;
-      font-weight:700;
-      font-size:13px;
-      line-height:1.55;
-    }
-    .bullets li{margin:6px 0}
-    .ask{
-      margin-top:2px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .ask input{
-      flex:1 1 auto;
-      height:40px;
-      border-radius:12px;
-      border:1px solid rgba(16,40,80,.10);
-      background:#ffffff;
-      padding:0 12px;
-      font:700 13px/1 Inter,system-ui;
-      color:#35455f;
-      outline:0;
-    }
-    .ask input::placeholder{color:#a2afc2; font-weight:700}
-    .ask .btn{
-      height:40px;
-      padding:0 14px;
-      border-radius:12px;
-      font-weight:900;
-      min-width:74px;
-    }
-
-    .phone-stage{
-      display:flex;
-      justify-content:flex-start;
-      padding-left:110px;
-    }
-    .phone{
-      width:290px;
-      border-radius:42px;
-      background:linear-gradient(180deg,#0a0f1c,#1a2234);
-      box-shadow:0 30px 90px rgba(15,32,67,.28);
-      padding:12px;
-      border:1px solid rgba(255,255,255,.10);
-    }
-    .phone .bezel{
-      background:linear-gradient(180deg,#f8fbff,#edf5ff);
-      border-radius:34px;
-      overflow:hidden;
-      border:1px solid rgba(0,0,0,.10);
-      position:relative;
-      min-height:560px;
-    }
-    .notch{
-      position:absolute;
-      left:50%;
-      top:10px;
-      transform:translateX(-50%);
-      width:140px;
-      height:26px;
-      border-radius:18px;
-      background:#0a0f1c;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
-      z-index:3;
-    }
-    .m-top{
-      padding:18px 16px 10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      font-weight:900;
-    }
-    .m-brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      color:#1b2a44;
-    }
-    .m-logo{
-      width:26px;height:26px;border-radius:9px;
-      display:grid;place-items:center;
-      background:rgba(28,100,255,.12);
-      border:1px solid rgba(28,100,255,.18);
-    }
-    .m-dot{
-      width:10px;height:10px;border-radius:999px;
-      background:#ff3b30;
-      box-shadow:0 0 0 6px rgba(255,59,48,.15);
-    }
-    .m-wave{
-      position:absolute;
-      left:0; right:0;
-      top:62px;
-      height:140px;
-      background:
-        radial-gradient(320px 140px at 68% 48%, rgba(28,100,255,.16), rgba(28,100,255,0) 65%),
-        radial-gradient(380px 160px at 92% 60%, rgba(28,100,255,.12), rgba(28,100,255,0) 72%);
-      pointer-events:none;
-      opacity:.9;
-    }
-    .m-main{
-      position:relative;
-      padding:8px 14px 14px;
-    }
-    .m-hero h2{
-      margin:0;
-      font-size:22px;
-      font-weight:900;
-      letter-spacing:-.3px;
-    }
-    .m-hero p{
-      margin:6px 0 10px;
-      color:#5f6e86;
-      font-weight:800;
-    }
-    .m-card{
-      border-radius:20px;
-      background:#fff;
-      border:1px solid rgba(16,40,80,.10);
-      box-shadow:0 12px 22px rgba(18,35,70,.10);
-      overflow:hidden;
-      margin:10px 0;
-    }
-    .m-card .card-h{padding:12px 12px; font-size:13px}
-    .m-card .task{padding:12px 12px 12px}
-    .m-card .btn{height:34px;border-radius:11px;font-size:12px}
-    .m-card .row{border-radius:14px}
-    .m-card .list{padding:10px}
-    .m-bottom{
-      margin-top:10px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .m-bottom input{
-      flex:1 1 auto;
-      height:40px;
-      border-radius:14px;
-      border:1px solid rgba(16,40,80,.10);
-      background:#fff;
-      padding:0 12px;
-      font:800 13px/1 Inter,system-ui;
-      outline:0;
-      color:#35455f;
-    }
-    .m-bottom button{
-      height:40px;
-      padding:0 14px;
-      border-radius:14px;
-      border:1px solid rgba(28,100,255,.28);
-      background:linear-gradient(180deg,var(--blue2),var(--blue3));
-      color:#fff;
-      font-weight:900;
-      font-size:13px;
-      box-shadow:0 12px 18px rgba(28,100,255,.22);
-      cursor:pointer;
-    }
-
     @media (max-width: 980px){
-      .desktop-inner{grid-template-columns: 1fr}
+      .shell{grid-template-columns:1fr}
       .sidebar{display:none}
-      .search{width:100%}
-      .grid{grid-template-columns:1fr}
-      .phone-stage{padding-left:0; justify-content:center}
+      .search{max-width:none}
+      .card{max-width:none}
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="desktop" aria-label="Dashboard">
-      <div class="desktop-inner">
-        <aside class="sidebar">
-          <div class="brand">
-            <div class="logo" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M21 3L10 14" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
-                <path d="M21 3L14 21L10 14L3 10L21 3Z" stroke="white" stroke-width="2.4" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div>Soundboard</div>
+  <div class="app">
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M21 3L10 14" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+              <path d="M21 3L14 21L10 14L3 10L21 3Z" stroke="white" stroke-width="2.4" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>Kenneth Study Hub</div>
+        </div>
+
+        <nav class="nav" aria-label="Sidebar">
+          <a class="active" href="#">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-9.5Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+            Dashboard
+          </a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <div class="topbar">
+          <div class="search" role="search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10.5 18.2a7.7 7.7 0 1 1 0-15.4 7.7 7.7 0 0 1 0 15.4Z" stroke="#8ea0bb" stroke-width="2"/>
+              <path d="M16.8 16.8 21 21" stroke="#8ea0bb" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <input placeholder="Search..." />
           </div>
 
-          <nav class="nav" aria-label="Sidebar">
-            <a class="active" href="#">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-9.5Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+          <div class="rightbar">
+            <div class="pill">
+              <div class="avatar">K</div>
+              <div>Kenneth</div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M7 10l5 5 5-5" stroke="#6e7b92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              Dashboard
-            </a>
-          </nav>
-
-          <div class="sidebar-bottom" aria-hidden="true">
-            <div class="sb-ic">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M4 7h16M4 12h16M4 17h16" stroke="white" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <div class="sb-ic">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M12 21s7-4.4 7-10a7 7 0 1 0-14 0c0 5.6 7 10 7 10Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="sb-ic">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="white" stroke-width="2"/>
-                <path d="M19.4 15a8 8 0 0 0 .1-6l2-1.2-2-3.5-2.3 1a8.2 8.2 0 0 0-5.2-3L11.6 0h-4L7.2 2.3a8.2 8.2 0 0 0-5.2 3l-2.3-1-2 3.5L0 9a8 8 0 0 0 .1 6L-2 16.2l2 3.5 2.3-1a8.2 8.2 0 0 0 5.2 3L7.6 24h4l.4-2.3a8.2 8.2 0 0 0 5.2-3l2.3 1 2-3.5L19.4 15Z" fill="white" opacity=".06"/>
-              </svg>
-            </div>
-          </div>
-        </aside>
-
-        <main class="content">
-          <div class="topbar">
-            <div class="search" role="search">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M10.5 18.2a7.7 7.7 0 1 1 0-15.4 7.7 7.7 0 0 1 0 15.4Z" stroke="#8ea0bb" stroke-width="2"/>
-                <path d="M16.8 16.8 21 21" stroke="#8ea0bb" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-              <input placeholder="Search..." />
-            </div>
-
-            <div class="rightbar">
-              <div class="bell" aria-label="Notifications">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M12 22a2.5 2.5 0 0 0 2.4-2H9.6A2.5 2.5 0 0 0 12 22Z" fill="#6e7b92"/>
-                  <path d="M18 16H6c1.4-1.6 2-3 2-6a4 4 0 1 1 8 0c0 3 0.6 4.4 2 6Z" stroke="#6e7b92" stroke-width="2" stroke-linejoin="round"/>
-                </svg>
-              </div>
-
-              <div class="user" aria-label="User">
-                <div class="avatar">A</div>
-                <div>Decksbot</div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M7 10l5 5 5-5" stroke="#6e7b92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div class="wave" aria-hidden="true"></div>
-
-          <div class="main">
-            <div class="hero">
-              <h1>Welcome back, Alex!</h1>
-              <p>Ready to study?</p>
-            </div>
-
-            <div class="grid">
-              <div>
-                <div class="card">
-                  <div class="card-h">
-                    <div>Today's Tasks</div>
-                    <div style="width:22px"></div>
-                  </div>
-                  <div class="task">
-                    <div class="task-row">
-                      <div class="task-left">
-                        <div class="doc" aria-hidden="true">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                            <path d="M7 3h7l3 3v15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="#1e8f55" stroke-width="2"/>
-                            <path d="M14 3v5h5" stroke="#1e8f55" stroke-width="2" stroke-linejoin="round"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <div class="task-title">Placeholder Dashboard Task</div>
-                          <div class="task-sub">Due: placeholder date</div>
-                        </div>
-                      </div>
-                      <div class="due">Due Today</div>
-                    </div>
-
-                    <div class="bar"><span></span></div>
-
-                    <button class="btn" type="button">Continue</button>
-                  </div>
-                </div>
-
-                <div class="section-title">Recent Courses</div>
-
-                <div class="card">
-                  <div class="courses">
-                    <div class="course">
-                      <div class="thumb" aria-hidden="true"></div>
-                      <div class="course-mid">
-                        <div class="course-top">
-                          <div class="course-title">Placeholder Course</div>
-                          <div class="course-meta">20 Lessons</div>
-                        </div>
-                        <div class="bar"><span></span></div>
-                      </div>
-                      <div class="chev" aria-hidden="true">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <path d="M10 7l5 5-5 5" stroke="#6b7a92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                      </div>
-                    </div>
-
-                    <div class="course">
-                      <div class="thumb alt" aria-hidden="true"></div>
-                      <div class="course-mid">
-                        <div class="course-top">
-                          <div class="course-title">Placeholder Course</div>
-                          <div class="course-meta">15 Lessons</div>
-                        </div>
-                        <div class="bar"><span style="width:52%"></span></div>
-                      </div>
-                      <div class="chev" aria-hidden="true">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <path d="M10 7l5 5-5 5" stroke="#6b7a92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div class="card">
-                  <div class="card-h">
-                    <div class="chip">
-                      <span class="ic" aria-hidden="true">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <path d="M9 11.5 12 14.5 20 6.5" stroke="#1c64ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h9" stroke="#1c64ff" stroke-width="2.2" stroke-linejoin="round" opacity=".6"/>
-                        </svg>
-                      </span>
-                      Upcoming Quizzes
-                    </div>
-                    <div style="width:22px"></div>
-                  </div>
-
-                  <div class="list">
-                    <div class="row">
-                      <div class="row-left">
-                        <div class="mini" aria-hidden="true" style="background:rgba(255,159,45,.16);border-color:rgba(255,159,45,.22)">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                            <path d="M7 3h10v18H7z" stroke="#b56510" stroke-width="2"/>
-                            <path d="M9 7h6M9 11h6" stroke="#b56510" stroke-width="2" stroke-linecap="round"/>
-                          </svg>
-                        </div>
-                        <div style="min-width:0">
-                          <div class="row-title">Placeholder Quiz</div>
-                          <div class="row-sub">2 lessons</div>
-                        </div>
-                      </div>
-                      <div class="row-right">Dec 15</div>
-                    </div>
-
-                    <div class="row">
-                      <div class="row-left">
-                        <div class="mini" aria-hidden="true" style="background:rgba(28,100,255,.12);border-color:rgba(28,100,255,.18)">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                            <path d="M20 7 10 17l-5-5" stroke="#1c64ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-                          </svg>
-                        </div>
-                        <div style="min-width:0">
-                          <div class="row-title">Placeholder Quiz</div>
-                          <div class="row-sub">2 lessons</div>
-                        </div>
-                      </div>
-                      <div class="row-right">Dec 18</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div style="height:14px"></div>
-
-                <div class="card">
-                  <div class="card-h">
-                    <div class="chip">
-                      <span class="ic" aria-hidden="true">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <path d="M12 2v20M2 12h20" stroke="#1c64ff" stroke-width="2.4" stroke-linecap="round"/>
-                        </svg>
-                      </span>
-                      AI Study Assistant
-                    </div>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M8 10l4 4 4-4" stroke="#8ea0bb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </div>
-                  <div class="assistant">
-                    <ul class="bullets">
-                      <li>How can I help you today?</li>
-                      <li><i>Explain a placeholder concept</i></li>
-                      <li><i>Create a placeholder quiz</i></li>
-                    </ul>
-                    <div class="ask">
-                      <input placeholder="Ask a question..." />
-                      <button class="btn" type="button">Ask</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-    </section>
-
-    <div class="phone-stage" aria-label="Mobile preview">
-      <div class="phone">
-        <div class="bezel">
-          <div class="notch"></div>
-          <div class="m-wave"></div>
-
-          <div class="m-top">
-            <div class="m-brand">
-              <div class="m-logo" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M21 3L10 14" stroke="#1c64ff" stroke-width="2.4" stroke-linecap="round"/>
-                  <path d="M21 3L14 21L10 14L3 10L21 3Z" stroke="#1c64ff" stroke-width="2.4" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <div>Soundboard</div>
-            </div>
-            <div class="m-dot" aria-hidden="true"></div>
-          </div>
-
-          <div class="m-main">
-            <div class="m-hero">
-              <h2>Hi, Alex</h2>
-              <p>Time to Study!</p>
-            </div>
-
-            <div class="m-card">
-              <div class="card-h">
-                <div>Today's Tasks</div>
-                <div style="width:22px"></div>
-              </div>
-              <div class="task">
-                <div class="task-row">
-                  <div class="task-left">
-                    <div class="doc" aria-hidden="true">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path d="M7 3h7l3 3v15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="#1e8f55" stroke-width="2"/>
-                        <path d="M14 3v5h5" stroke="#1e8f55" stroke-width="2" stroke-linejoin="round"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <div class="task-title">Placeholder Task</div>
-                      <div class="task-sub">Due: placeholder</div>
-                    </div>
-                  </div>
-                  <div class="due">Due Today</div>
-                </div>
-                <div class="bar"><span></span></div>
-                <button class="btn" type="button">Continue</button>
-              </div>
-            </div>
-
-            <div class="m-card">
-              <div class="card-h">
-                <div class="chip">
-                  <span class="ic" aria-hidden="true">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                      <path d="M9 11.5 12 14.5 20 6.5" stroke="#1c64ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h9" stroke="#1c64ff" stroke-width="2.2" stroke-linejoin="round" opacity=".6"/>
-                    </svg>
-                  </span>
-                  Upcoming Quizzes
-                </div>
-                <div style="width:22px"></div>
-              </div>
-              <div class="list">
-                <div class="row">
-                  <div class="row-left">
-                    <div class="mini" aria-hidden="true" style="background:rgba(255,159,45,.16);border-color:rgba(255,159,45,.22)">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path d="M7 3h10v18H7z" stroke="#b56510" stroke-width="2"/>
-                        <path d="M9 7h6M9 11h6" stroke="#b56510" stroke-width="2" stroke-linecap="round"/>
-                      </svg>
-                    </div>
-                    <div style="min-width:0">
-                      <div class="row-title">Placeholder Quiz</div>
-                      <div class="row-sub">2 lessons</div>
-                    </div>
-                  </div>
-                  <div class="row-right">Dec 15</div>
-                </div>
-
-                <div class="row">
-                  <div class="row-left">
-                    <div class="mini" aria-hidden="true" style="background:rgba(28,100,255,.12);border-color:rgba(28,100,255,.18)">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 7 10 17l-5-5" stroke="#1c64ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </div>
-                    <div style="min-width:0">
-                      <div class="row-title">Placeholder Quiz</div>
-                      <div class="row-sub">2 lessons</div>
-                    </div>
-                  </div>
-                  <div class="row-right">Dec 18</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="m-card">
-              <div class="card-h">
-                <div>My Courses</div>
-                <div style="width:22px"></div>
-              </div>
-              <div class="list">
-                <div class="row">
-                  <div class="row-left">
-                    <div class="mini" aria-hidden="true" style="background:rgba(36,193,106,.14);border-color:rgba(36,193,106,.22)">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path d="M4 6l8-3 8 3-8 3-8-3Z" stroke="#1e8f55" stroke-width="2" stroke-linejoin="round"/>
-                        <path d="M4 10l8 3 8-3" stroke="#1e8f55" stroke-width="2" stroke-linejoin="round"/>
-                        <path d="M4 14l8 3 8-3" stroke="#1e8f55" stroke-width="2" stroke-linejoin="round"/>
-                      </svg>
-                    </div>
-                    <div style="min-width:0">
-                      <div class="row-title">Placeholder Course</div>
-                      <div class="row-sub">20 lessons • 75% complete</div>
-                    </div>
-                  </div>
-                  <div class="row-right">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M8 10l4 4 4-4" stroke="#8ea0bb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="row-left">
-                    <div class="mini" aria-hidden="true" style="background:rgba(255,159,45,.14);border-color:rgba(255,159,45,.22)">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path d="M7 3h10v18H7z" stroke="#b56510" stroke-width="2"/>
-                        <path d="M9 7h6M9 11h6" stroke="#b56510" stroke-width="2" stroke-linecap="round"/>
-                      </svg>
-                    </div>
-                    <div style="min-width:0">
-                      <div class="row-title">Placeholder Course</div>
-                      <div class="row-sub">15 lessons • 50% complete</div>
-                    </div>
-                  </div>
-                  <div class="row-right">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M8 10l4 4 4-4" stroke="#8ea0bb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="m-bottom">
-              <input placeholder="Ask me anything..." />
-              <button type="button">Send</button>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
+        <div class="wave" aria-hidden="true"></div>
+
+        <div class="main">
+          <div class="hero">
+            <h1>Welcome back, Kenneth!</h1>
+            <p>Ready to study?</p>
+          </div>
+
+          <div class="card" aria-label="Recent Note">
+            <div class="card-h">
+              <div>Recent Note</div>
+              <div style="width:22px"></div>
+            </div>
+
+            <div class="note">
+              <div class="note-row">
+                <div class="note-left">
+                  <div class="doc" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <path d="M7 3h7l3 3v15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="#1e8f55" stroke-width="2"/>
+                      <path d="M14 3v5h5" stroke="#1e8f55" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div style="min-width:0">
+                    <div class="note-title">Placeholder Note Title</div>
+                    <div class="note-sub">Last edited: placeholder</div>
+                  </div>
+                </div>
+                <div class="tag">Updated</div>
+              </div>
+
+              <div class="bar"><span></span></div>
+
+              <button class="btn" type="button">Open</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   </div>
 </body>
 </html>
