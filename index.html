@@ -190,7 +190,6 @@
     }
 
     .search input::placeholder{color:#a2afc2; font-weight:900}
-
     [data-theme="dark"] .search input::placeholder{color:rgba(220,235,255,.38)}
 
     .rightbar{
@@ -746,7 +745,6 @@
     }
 
     [data-theme="dark"] .overlay{background:rgba(0,0,0,.40)}
-
     .overlay.open{display:block}
 
     .settings{
@@ -1534,9 +1532,10 @@
       overlay.classList.remove("open");
       settings.classList.remove("open");
     };
-    
+
     const isValidUsername = (u) => /^[a-zA-Z0-9._-]{3,24}$/.test(u) && !u.includes("@");
     const usernameToEmail = (u) => `${u.toLowerCase()}@example.com`;
+
     const route = () => (location.hash || "#dashboard").replace("#","");
 
     const setActiveNav = (name) => {
@@ -1921,8 +1920,10 @@
       if (!hasConfig) return;
       const username = (usernameInput.value || "").trim();
       const password = passwordInput.value || "";
+
       if (!isValidUsername(username)) return setAuthError("Username must be 3–24 chars and only use letters, numbers, dot, underscore, hyphen (no spaces, no @).");
       if (!password || password.length < 6) return setAuthError("Password must be at least 6 characters.");
+
       setAuthError("");
       const email = usernameToEmail(username);
 
@@ -2213,4 +2214,3 @@
   </script>
 </body>
 </html>
-
