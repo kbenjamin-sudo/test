@@ -1,39 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyOS</title>
+    <title>Your App</title>
     <script>
         let authReady = false;
 
-        // Auth initialization fix
-        function initAuth() {
-            // Logic to initialize authentication
-            authReady = true; // Example of changing the flag
+        // Simulate auth initialization process
+        function initializeAuth() {
+            // Your authentication logic here
+            authReady = true;
         }
 
-        window.addEventListener('beforeunload', (event) => {
-            // Handle tab close or refresh
-            if (!authReady) {
-                event.preventDefault();
-                event.returnValue = ''; // Standard message
+        window.addEventListener('beforeunload', function(event) {
+            if (authReady) {
+                // Perform final save logic here
+                console.log('Final save before unload.');
             }
         });
 
-        function saveNote() {
-            if (authReady) {
-                // Logic to save note
-            } else {
-                alert('Cannot save note until authentication is ready.');
+        function saveData() {
+            if (!authReady) {
+                console.log('Autosave suppressed until auth completes.');
+                return;
             }
+            // Your save logic here
+            console.log('Data saved!');
         }
 
-        window.onload = initAuth;
+        // Initialize authentication on page load
+        window.onload = initializeAuth;
     </script>
 </head>
 <body>
-    <h1>Welcome to StudyOS</h1>
-    <button onclick="saveNote()">Save Note</button>
+    <h1>Welcome to Your App</h1>
+    <p>Your content goes here.</p>
 </body>
 </html>
