@@ -6,7 +6,8 @@
   <title>Kenneth Study Hub • Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <style>
     :root{
       --bg1:#cfe0f2;
@@ -22,10 +23,38 @@
       --blue3:#1b5fe6;
       --green:#24c16a;
       --orange:#ff9f2d;
+      --red:#ff3b30;
       --r1:18px;
       --r2:24px;
+      --glass:rgba(255,255,255,.65);
+      --glass2:rgba(255,255,255,.78);
+      --bgApp:linear-gradient(180deg,#f8fbff,#eef5ff);
+      --contentBg:linear-gradient(180deg,#f7fbff 0%, #f0f6ff 55%, #eaf2ff 100%);
+      --fieldBg:#ffffff;
+      --fieldInk:#35455f;
+      --pillInk:#2a3b56;
     }
+
+    [data-theme="dark"]{
+      --bg1:#0b1020;
+      --bg2:#0a1226;
+      --ink:#e9f0ff;
+      --muted:#a9b6cf;
+      --card:rgba(16,24,44,.92);
+      --stroke:rgba(220,235,255,.12);
+      --shadow:0 24px 70px rgba(0,0,0,.55);
+      --softshadow:0 10px 22px rgba(0,0,0,.35);
+      --glass:rgba(12,18,34,.62);
+      --glass2:rgba(12,18,34,.78);
+      --bgApp:linear-gradient(180deg,rgba(10,16,32,.96),rgba(10,18,38,.96));
+      --contentBg:linear-gradient(180deg,rgba(10,16,32,.96) 0%, rgba(10,18,38,.96) 55%, rgba(9,18,44,.96) 100%);
+      --fieldBg:rgba(10,16,32,.95);
+      --fieldInk:#dce8ff;
+      --pillInk:#dce8ff;
+    }
+
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -39,19 +68,24 @@
       justify-content:center;
       padding:42px 18px 64px;
     }
+
     .app{
       width:min(1120px,100%);
       border-radius:26px;
       box-shadow:var(--shadow);
       overflow:hidden;
       border:1px solid rgba(255,255,255,.55);
-      background:linear-gradient(180deg,#f8fbff,#eef5ff);
+      background:var(--bgApp);
+      display:none;
+      position:relative;
     }
+
     .shell{
       display:grid;
       grid-template-columns: 260px 1fr;
       min-height:560px;
     }
+
     .sidebar{
       position:relative;
       padding:22px 18px;
@@ -59,17 +93,25 @@
         radial-gradient(480px 360px at 50% 0%, rgba(255,255,255,.10), rgba(255,255,255,0) 60%),
         linear-gradient(180deg,#0a2c5c,#0b3f86 45%, #0b5ab7);
     }
+
+    [data-theme="dark"] .sidebar{
+      background:
+        radial-gradient(480px 360px at 50% 0%, rgba(255,255,255,.08), rgba(255,255,255,0) 60%),
+        linear-gradient(180deg,#071a3a,#0b2a61 45%, #0b3f86);
+    }
+
     .brand{
       display:flex;
       align-items:center;
       gap:12px;
       padding:10px 12px;
       color:#fff;
-      font-weight:800;
+      font-weight:900;
       letter-spacing:.2px;
       font-size:18px;
       line-height:1.1;
     }
+
     .logo{
       width:28px;height:28px;border-radius:8px;
       display:grid;place-items:center;
@@ -77,6 +119,7 @@
       border:1px solid rgba(255,255,255,.18);
       flex:0 0 auto;
     }
+
     .nav{
       margin-top:18px;
       padding:6px;
@@ -84,6 +127,7 @@
       flex-direction:column;
       gap:10px;
     }
+
     .nav a{
       text-decoration:none;
       color:rgba(255,255,255,.92);
@@ -92,23 +136,27 @@
       gap:12px;
       padding:12px 12px;
       border-radius:14px;
-      font-weight:700;
+      font-weight:800;
       font-size:14px;
       border:1px solid rgba(255,255,255,0);
       transition:.18s ease;
       user-select:none;
     }
+
     .nav a.active{
       background:linear-gradient(180deg, rgba(63,150,255,.55), rgba(34,120,255,.32));
       border:1px solid rgba(255,255,255,.22);
       box-shadow:0 10px 18px rgba(0,0,0,.14);
     }
+
     .nav a:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.18)}
+
     .content{
       position:relative;
-      background:linear-gradient(180deg,#f7fbff 0%, #f0f6ff 55%, #eaf2ff 100%);
+      background:var(--contentBg);
       border-left:1px solid rgba(12,32,70,.08);
     }
+
     .topbar{
       display:flex;
       align-items:center;
@@ -116,35 +164,84 @@
       padding:18px 22px 12px;
       gap:16px;
     }
+
     .search{
       flex:1 1 auto;
       max-width:520px;
       display:flex;
       align-items:center;
       gap:10px;
-      background:#ffffff;
+      background:var(--fieldBg);
       border:1px solid var(--stroke);
       border-radius:14px;
       padding:10px 14px;
       box-shadow:0 8px 18px rgba(18,35,70,.06);
     }
+
+    [data-theme="dark"] .search{box-shadow:0 8px 18px rgba(0,0,0,.22)}
+
     .search input{
       border:0;
       outline:0;
       width:100%;
-      font:600 13px/1 Inter,system-ui;
-      color:#35455f;
+      font:800 13px/1 Inter,system-ui;
+      color:var(--fieldInk);
+      background:transparent;
     }
-    .search input::placeholder{color:#a2afc2; font-weight:700}
+
+    .search input::placeholder{color:#a2afc2; font-weight:900}
+
+    [data-theme="dark"] .search input::placeholder{color:rgba(220,235,255,.38)}
+
     .rightbar{
       display:flex;
       align-items:center;
-      gap:14px;
-      color:#6e7b92;
-      font-weight:700;
+      gap:10px;
+      color:var(--muted);
+      font-weight:800;
       font-size:13px;
       flex:0 0 auto;
     }
+
+    .iconbtn{
+      width:34px;height:34px;
+      border-radius:14px;
+      display:grid;place-items:center;
+      background:var(--glass);
+      border:1px solid var(--stroke);
+      box-shadow:0 8px 16px rgba(18,35,70,.06);
+      cursor:pointer;
+      user-select:none;
+    }
+
+    [data-theme="dark"] .iconbtn{box-shadow:0 8px 16px rgba(0,0,0,.25)}
+
+    .savepill{
+      height:34px;
+      padding:0 12px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      background:var(--glass);
+      border:1px solid var(--stroke);
+      box-shadow:0 8px 16px rgba(18,35,70,.06);
+      user-select:none;
+      max-width:220px;
+    }
+
+    [data-theme="dark"] .savepill{box-shadow:0 8px 16px rgba(0,0,0,.25)}
+
+    .dot{
+      width:8px;height:8px;border-radius:999px;
+      background:#9aa8bd;
+      flex:0 0 auto;
+    }
+
+    .dot.ok{background:var(--green)}
+    .dot.warn{background:var(--orange)}
+    .dot.bad{background:var(--red)}
+
     .pill{
       height:34px;
       padding:0 12px;
@@ -152,18 +249,27 @@
       display:flex;
       align-items:center;
       gap:10px;
-      background:rgba(255,255,255,.65);
+      background:var(--glass);
       border:1px solid var(--stroke);
       box-shadow:0 8px 16px rgba(18,35,70,.06);
+      cursor:pointer;
+      user-select:none;
+      position:relative;
+      color:var(--pillInk);
+      font-weight:900;
     }
+
+    [data-theme="dark"] .pill{box-shadow:0 8px 16px rgba(0,0,0,.25)}
+
     .avatar{
       width:26px;height:26px;border-radius:999px;
       background:linear-gradient(180deg,#ffd2a8,#ff9fb8);
       display:grid;place-items:center;
       color:#1b1f2a;
-      font-weight:900;
+      font-weight:950;
       font-size:12px;
     }
+
     .wave{
       position:absolute;
       left:0; right:0;
@@ -182,10 +288,13 @@
                           radial-gradient(460px 160px at 80% 60%, #000 55%, transparent 70%),
                           radial-gradient(560px 190px at 95% 60%, #000 55%, transparent 73%);
     }
+
     .main{
       position:relative;
       padding:12px 22px 26px;
+      padding-bottom:96px;
     }
+
     .hero{
       margin-top:6px;
       display:flex;
@@ -193,17 +302,20 @@
       gap:6px;
       padding:4px 4px 14px;
     }
+
     .hero h1{
       margin:0;
       font-size:32px;
       letter-spacing:-.6px;
-      font-weight:850;
+      font-weight:950;
     }
+
     .hero p{
       margin:0;
-      color:#5f6e86;
-      font-weight:650;
+      color:var(--muted);
+      font-weight:800;
     }
+
     .card{
       background:var(--card);
       border:1px solid var(--stroke);
@@ -212,34 +324,44 @@
       overflow:hidden;
       max-width:720px;
     }
+
     .card-h{
       display:flex;
       align-items:center;
       justify-content:space-between;
       padding:14px 16px;
-      font-weight:850;
-      color:#2a3b56;
-      background:linear-gradient(180deg,#ffffff,#fbfdff);
+      font-weight:950;
+      color:var(--pillInk);
+      background:linear-gradient(180deg, var(--glass2), rgba(255,255,255,0));
       border-bottom:1px solid rgba(16,40,80,.06);
     }
+
+    [data-theme="dark"] .card-h{
+      background:linear-gradient(180deg, rgba(12,18,34,.70), rgba(12,18,34,.25));
+      border-bottom:1px solid rgba(220,235,255,.10);
+    }
+
     .note{
       padding:14px 16px 16px;
       display:flex;
       flex-direction:column;
       gap:12px;
     }
+
     .note-row{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
       gap:12px;
     }
+
     .note-left{
       display:flex;
       gap:10px;
       align-items:flex-start;
       min-width:0;
     }
+
     .doc{
       width:22px;height:22px;border-radius:7px;
       display:grid;place-items:center;
@@ -247,43 +369,56 @@
       border:1px solid rgba(36,193,106,.22);
       flex:0 0 auto;
     }
+
     .note-title{
-      font-weight:850;
+      font-weight:950;
       font-size:14px;
-      color:#253750;
+      color:var(--pillInk);
       margin-top:1px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
       max-width:420px;
     }
+
     .note-sub{
       font-size:12px;
-      color:#93a1b6;
-      font-weight:650;
+      color:rgba(120,140,170,.95);
+      font-weight:850;
       margin-top:3px;
     }
+
+    [data-theme="dark"] .note-sub{color:rgba(220,235,255,.55)}
+
     .tag{
       font-size:12px;
-      font-weight:900;
+      font-weight:950;
       color:var(--orange);
       margin-top:2px;
       white-space:nowrap;
     }
+
     .bar{
       height:8px;
       border-radius:999px;
-      background:#eef2f8;
+      background:rgba(120,140,170,.18);
       border:1px solid rgba(16,40,80,.06);
       overflow:hidden;
     }
+
+    [data-theme="dark"] .bar{
+      background:rgba(220,235,255,.10);
+      border:1px solid rgba(220,235,255,.10);
+    }
+
     .bar > span{
       display:block;
       height:100%;
-      width:42%;
+      width:0%;
       background:linear-gradient(90deg, rgba(36,193,106,.95), rgba(36,193,106,.72));
       border-radius:999px;
     }
+
     .btn{
       margin-left:auto;
       display:inline-flex;
@@ -295,23 +430,743 @@
       border:1px solid rgba(28,100,255,.28);
       background:linear-gradient(180deg,var(--blue2),var(--blue3));
       color:#fff;
-      font-weight:900;
+      font-weight:950;
       font-size:13px;
       box-shadow:0 12px 18px rgba(28,100,255,.22);
       cursor:pointer;
       user-select:none;
     }
+
     .btn:active{transform:translateY(1px)}
+
+    .page{display:none}
+    .page.active{display:block}
+
+    .notes{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:14px;
+      align-items:stretch;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:20px;
+      box-shadow:var(--softshadow);
+      overflow:hidden;
+      min-height:420px;
+    }
+
+    .panel-h{
+      padding:12px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid rgba(16,40,80,.06);
+      background:linear-gradient(180deg, var(--glass2), rgba(255,255,255,0));
+    }
+
+    [data-theme="dark"] .panel-h{
+      background:linear-gradient(180deg, rgba(12,18,34,.70), rgba(12,18,34,.25));
+      border-bottom:1px solid rgba(220,235,255,.10);
+    }
+
+    .panel-h .title{
+      font-weight:950;
+      color:var(--pillInk);
+      font-size:13px;
+    }
+
+    .panel-h .actions{display:flex;gap:8px}
+
+    .sbtn{
+      height:34px;
+      padding:0 12px;
+      border-radius:12px;
+      border:1px solid rgba(16,40,80,.10);
+      background:var(--glass);
+      cursor:pointer;
+      font:950 12px/1 Inter,system-ui;
+      color:var(--pillInk);
+      user-select:none;
+    }
+
+    .sbtn:disabled{opacity:.55;cursor:not-allowed}
+
+    .sbtn.primary{
+      border:1px solid rgba(28,100,255,.28);
+      background:linear-gradient(180deg,var(--blue2),var(--blue3));
+      color:#fff;
+      box-shadow:0 12px 18px rgba(28,100,255,.18);
+    }
+
+    .sbtn.danger{
+      border:1px solid rgba(255,59,48,.28);
+      background:linear-gradient(180deg, rgba(255,59,48,.92), rgba(214,48,42,.92));
+      color:#fff;
+      box-shadow:0 12px 18px rgba(255,59,48,.12);
+    }
+
+    .list{
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:auto;
+      max-height:520px;
+    }
+
+    .item{
+      padding:10px 10px;
+      border-radius:16px;
+      border:1px solid rgba(16,40,80,.06);
+      background:linear-gradient(180deg, var(--glass2), rgba(255,255,255,0));
+      cursor:pointer;
+      user-select:none;
+    }
+
+    [data-theme="dark"] .item{border:1px solid rgba(220,235,255,.10)}
+
+    .item.active{
+      border-color:rgba(28,100,255,.22);
+      box-shadow:0 10px 18px rgba(28,100,255,.10);
+    }
+
+    .item .t{
+      font-weight:950;
+      color:var(--pillInk);
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .item .s{
+      margin-top:3px;
+      font-weight:900;
+      color:rgba(120,140,170,.95);
+      font-size:11px;
+    }
+
+    [data-theme="dark"] .item .s{color:rgba(220,235,255,.55)}
+
+    .editor{
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      height:100%;
+    }
+
+    .field{
+      width:100%;
+      border-radius:14px;
+      border:1px solid rgba(16,40,80,.10);
+      background:var(--fieldBg);
+      padding:12px 12px;
+      font:900 14px/1.2 Inter,system-ui;
+      color:var(--fieldInk);
+      outline:0;
+    }
+
+    .area{
+      flex:1 1 auto;
+      min-height:280px;
+      resize:none;
+      border-radius:18px;
+      border:1px solid rgba(16,40,80,.10);
+      background:var(--fieldBg);
+      padding:12px 12px;
+      font:800 13px/1.5 Inter,system-ui;
+      color:var(--fieldInk);
+      outline:0;
+    }
+
+    .empty{
+      padding:14px 12px;
+      border-radius:18px;
+      border:1px dashed rgba(16,40,80,.14);
+      background:var(--glass);
+      color:var(--muted);
+      font-weight:900;
+      font-size:13px;
+    }
+
+    .toastwrap{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      z-index:999;
+      pointer-events:none;
+    }
+
+    .toast{
+      pointer-events:auto;
+      width:min(360px, calc(100vw - 36px));
+      border-radius:18px;
+      border:1px solid rgba(16,40,80,.10);
+      background:var(--card);
+      box-shadow:var(--softshadow);
+      padding:12px 12px;
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+    }
+
+    .toast .b{
+      width:10px;height:10px;border-radius:999px;
+      margin-top:4px;
+      flex:0 0 auto;
+      background:#9aa8bd;
+    }
+
+    .toast.ok .b{background:var(--green)}
+    .toast.bad .b{background:var(--red)}
+
+    .toast .txt{
+      font-weight:950;
+      color:var(--pillInk);
+      font-size:13px;
+      line-height:1.3;
+    }
+
+    .auth{
+      width:min(520px,100%);
+      border-radius:26px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.55);
+      background:var(--bgApp);
+      display:none;
+    }
+
+    .auth-top{
+      padding:18px 18px 14px;
+      background:
+        radial-gradient(480px 220px at 65% 40%, rgba(28,100,255,.18), rgba(28,100,255,0) 66%),
+        linear-gradient(180deg, var(--glass2), rgba(255,255,255,0));
+      border-bottom:1px solid rgba(16,40,80,.06);
+    }
+
+    [data-theme="dark"] .auth-top{
+      background:
+        radial-gradient(480px 220px at 65% 40%, rgba(28,100,255,.22), rgba(28,100,255,0) 66%),
+        linear-gradient(180deg, rgba(12,18,34,.70), rgba(12,18,34,.25));
+      border-bottom:1px solid rgba(220,235,255,.10);
+    }
+
+    .auth-top .h{
+      margin:10px 0 0;
+      font-size:22px;
+      font-weight:950;
+      letter-spacing:-.4px;
+      color:var(--pillInk);
+    }
+
+    .auth-top .p{
+      margin:8px 0 0;
+      font-weight:900;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .auth-body{
+      padding:16px 18px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .label{
+      font-weight:950;
+      font-size:12px;
+      color:rgba(90,110,140,.95);
+    }
+
+    [data-theme="dark"] .label{color:rgba(220,235,255,.62)}
+
+    .auth-row{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .auth-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:4px;
+    }
+
+    .linkbtn{
+      border:0;
+      background:transparent;
+      color:#1c64ff;
+      font-weight:950;
+      cursor:pointer;
+      padding:0;
+      font-size:13px;
+    }
+
+    .err{
+      display:none;
+      padding:10px 10px;
+      border-radius:14px;
+      background:rgba(255,59,48,.08);
+      border:1px solid rgba(255,59,48,.18);
+      color:#8a1f1b;
+      font-weight:950;
+      font-size:13px;
+    }
+
+    .configerr{
+      margin-top:10px;
+      padding:10px 10px;
+      border-radius:14px;
+      background:rgba(255,159,45,.10);
+      border:1px solid rgba(255,159,45,.20);
+      color:#7b3b00;
+      font-weight:950;
+      font-size:13px;
+      display:none;
+    }
+
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.18);
+      display:none;
+      z-index:900;
+    }
+
+    [data-theme="dark"] .overlay{background:rgba(0,0,0,.40)}
+
+    .overlay.open{display:block}
+
+    .settings{
+      position:fixed;
+      right:18px;
+      top:18px;
+      width:min(420px, calc(100vw - 36px));
+      border-radius:22px;
+      background:var(--card);
+      border:1px solid var(--stroke);
+      box-shadow:var(--shadow);
+      display:none;
+      z-index:950;
+      overflow:hidden;
+    }
+
+    .settings.open{display:block}
+
+    .settings-h{
+      padding:14px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px solid rgba(16,40,80,.06);
+      background:linear-gradient(180deg, var(--glass2), rgba(255,255,255,0));
+    }
+
+    [data-theme="dark"] .settings-h{border-bottom:1px solid rgba(220,235,255,.10)}
+
+    .settings-h .t{
+      font-weight:950;
+      color:var(--pillInk);
+      letter-spacing:-.2px;
+    }
+
+    .settings-b{
+      padding:14px 14px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 12px;
+      border-radius:18px;
+      border:1px solid rgba(16,40,80,.08);
+      background:linear-gradient(180deg, var(--glass2), rgba(255,255,255,0));
+    }
+
+    [data-theme="dark"] .row{border:1px solid rgba(220,235,255,.10)}
+
+    .row .lt{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
+
+    .row .lt .a{
+      font-weight:950;
+      color:var(--pillInk);
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .row .lt .b{
+      font-weight:900;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .seg{
+      display:flex;
+      border-radius:14px;
+      border:1px solid rgba(16,40,80,.10);
+      overflow:hidden;
+      background:var(--glass);
+    }
+
+    .seg button{
+      border:0;
+      background:transparent;
+      padding:10px 12px;
+      font:950 12px/1 Inter,system-ui;
+      color:var(--pillInk);
+      cursor:pointer;
+      user-select:none;
+      min-width:76px;
+    }
+
+    .seg button.active{
+      background:linear-gradient(180deg,var(--blue2),var(--blue3));
+      color:#fff;
+    }
+
+    .nerd{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding:12px 12px;
+      border-radius:18px;
+      border:1px dashed rgba(16,40,80,.18);
+      background:var(--glass);
+    }
+
+    [data-theme="dark"] .nerd{border:1px dashed rgba(220,235,255,.22)}
+
+    .nerdTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .nerdTop .t{
+      font-weight:950;
+      color:var(--pillInk);
+      font-size:13px;
+    }
+
+    .pinrow{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .pinrow input{
+      height:36px;
+      border-radius:12px;
+      border:1px solid rgba(16,40,80,.12);
+      background:var(--fieldBg);
+      color:var(--fieldInk);
+      font:950 12px/1 Inter,system-ui;
+      padding:0 10px;
+      width:120px;
+      outline:0;
+    }
+
+    .nerdGrid{
+      display:none;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+
+    .nerdGrid.open{display:grid}
+
+    .nerdGrid .fieldSm{
+      height:38px;
+      border-radius:12px;
+      border:1px solid rgba(16,40,80,.12);
+      background:var(--fieldBg);
+      color:var(--fieldInk);
+      font:900 12px/1 Inter,system-ui;
+      padding:0 10px;
+      outline:0;
+      width:100%;
+    }
+
+    .musicbar{
+      position:absolute;
+      left:22px;
+      right:22px;
+      bottom:18px;
+      border-radius:22px;
+      border:1px solid var(--stroke);
+      background:var(--glass);
+      box-shadow:var(--softshadow);
+      display:none;
+      overflow:hidden;
+    }
+
+    .musicbar.open{display:block}
+
+    .mbTop{
+      padding:12px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid rgba(16,40,80,.06);
+      background:linear-gradient(180deg, var(--glass2), rgba(255,255,255,0));
+    }
+
+    [data-theme="dark"] .mbTop{border-bottom:1px solid rgba(220,235,255,.10)}
+
+    .mbTop .left{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .mbTitle{
+      font-weight:950;
+      color:var(--pillInk);
+      letter-spacing:-.2px;
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:520px;
+    }
+
+    .mbSub{
+      font-weight:900;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .mbCtrls{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex:0 0 auto;
+    }
+
+    .progWrap{
+      padding:10px 12px 12px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+    }
+
+    .timeRow{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      font-weight:900;
+      color:rgba(120,140,170,.95);
+      font-size:12px;
+    }
+
+    [data-theme="dark"] .timeRow{color:rgba(220,235,255,.55)}
+
+    .range{
+      width:100%;
+      accent-color:#1c64ff;
+    }
+
+    .mbBody{
+      display:grid;
+      grid-template-columns: 1fr 260px;
+      gap:10px;
+      padding:0 12px 12px;
+    }
+
+    .plist{
+      display:flex;
+      gap:8px;
+      overflow:auto;
+      padding-bottom:2px;
+    }
+
+    .pillItem{
+      flex:0 0 auto;
+      padding:10px 10px;
+      border-radius:16px;
+      border:1px solid rgba(16,40,80,.08);
+      background:linear-gradient(180deg, var(--glass2), rgba(255,255,255,0));
+      cursor:pointer;
+      user-select:none;
+      min-width:220px;
+      max-width:320px;
+    }
+
+    [data-theme="dark"] .pillItem{border:1px solid rgba(220,235,255,.10)}
+
+    .pillItem.active{
+      border-color:rgba(28,100,255,.22);
+      box-shadow:0 10px 18px rgba(28,100,255,.10);
+    }
+
+    .pillItem .t{
+      font-weight:950;
+      color:var(--pillInk);
+      font-size:12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .pillItem .s{
+      margin-top:4px;
+      font-weight:900;
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .mbHint{
+      border-radius:16px;
+      border:1px dashed rgba(16,40,80,.18);
+      background:var(--glass);
+      padding:10px 10px;
+      color:var(--muted);
+      font-weight:900;
+      font-size:12px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    [data-theme="dark"] .mbHint{border:1px dashed rgba(220,235,255,.22)}
+
     @media (max-width: 980px){
       .shell{grid-template-columns:1fr}
       .sidebar{display:none}
       .search{max-width:none}
       .card{max-width:none}
+      .notes{grid-template-columns:1fr}
+      .panel{min-height:auto}
+      .list{max-height:280px}
+      .musicbar{left:14px;right:14px;bottom:14px}
+      .mbBody{grid-template-columns:1fr}
+      .mbTitle{max-width:100%}
+      .main{padding-bottom:120px}
     }
   </style>
+
+  <script>
+    window.SUPABASE_URL = "https://fpxusnrhgnwogvticdbe.supabase.co";
+    window.SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_KEY_HERE";
+  </script>
 </head>
-<body>
-  <div class="app">
+
+<body data-theme="light">
+  <div id="toastwrap" class="toastwrap"></div>
+
+  <div id="overlay" class="overlay"></div>
+
+  <div id="settings" class="settings" aria-label="Settings">
+    <div class="settings-h">
+      <div class="t">Settings</div>
+      <button id="settingsClose" class="sbtn" type="button" style="height:34px;border-radius:14px;">Close</button>
+    </div>
+    <div class="settings-b">
+      <div class="row">
+        <div class="lt">
+          <div class="a">Theme</div>
+          <div class="b">Light or Dark mode</div>
+        </div>
+        <div class="seg" role="tablist" aria-label="Theme">
+          <button id="themeLight" type="button" class="active">Light</button>
+          <button id="themeDark" type="button">Dark</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="lt">
+          <div class="a">Hotkeys</div>
+          <div class="b">P hides music bar • M mutes/unmutes</div>
+        </div>
+        <div style="font-weight:950;color:var(--pillInk);font-size:12px;">On</div>
+      </div>
+
+      <div class="nerd" aria-label="Settings for nerds">
+        <div class="nerdTop">
+          <div class="t">Settings for nerds</div>
+          <div class="pinrow">
+            <input id="pin" inputmode="numeric" placeholder="PIN" type="password" />
+            <button id="pinBtn" class="sbtn primary" type="button" style="height:36px;border-radius:12px;">Enter</button>
+          </div>
+        </div>
+
+        <div id="nerdGrid" class="nerdGrid">
+          <input id="sfxNav" class="fieldSm" placeholder="SFX nav URL" />
+          <input id="sfxClick" class="fieldSm" placeholder="SFX click URL" />
+          <input id="sfxSave" class="fieldSm" placeholder="SFX save URL" />
+          <input id="sfxError" class="fieldSm" placeholder="SFX error URL" />
+          <button id="saveSfx" class="sbtn" type="button" style="grid-column:1 / -1;height:38px;border-radius:14px;">Save SFX URLs</button>
+        </div>
+
+        <div id="nerdHint" class="empty" style="display:block;">Enter PIN 9999 to unlock the music bar and SFX settings.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="authShell" class="auth">
+    <div class="auth-top">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="logo" aria-hidden="true" style="background:rgba(28,100,255,.12);border-color:rgba(28,100,255,.18);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M21 3L10 14" stroke="#1c64ff" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M21 3L14 21L10 14L3 10L21 3Z" stroke="#1c64ff" stroke-width="2.4" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div style="font-weight:950;color:var(--pillInk);">Kenneth Study Hub</div>
+      </div>
+      <h1 id="authTitle" class="h">Log in</h1>
+      <p id="authSub" class="p">Use your username + password.</p>
+    </div>
+
+    <div class="auth-body">
+      <div id="configErr" class="configerr"></div>
+      <div id="authErr" class="err"></div>
+
+      <div class="auth-row">
+        <div class="label">Username</div>
+        <input id="username" class="field" autocomplete="username" placeholder="kenneth" />
+      </div>
+
+      <div class="auth-row">
+        <div class="label">Password</div>
+        <input id="password" class="field" type="password" autocomplete="current-password" placeholder="••••••••" />
+      </div>
+
+      <div class="auth-actions">
+        <button id="authSubmit" class="sbtn primary" type="button" style="height:40px;border-radius:14px;padding:0 14px;">Log in</button>
+        <button id="authToggle" class="linkbtn" type="button">Need an account? Sign up</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="appShell" class="app">
     <div class="shell">
       <aside class="sidebar">
         <div class="brand">
@@ -325,11 +1180,20 @@
         </div>
 
         <nav class="nav" aria-label="Sidebar">
-          <a class="active" href="#">
+          <a id="navDashboard" class="active" href="#dashboard" data-nav="dashboard">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-9.5Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
             </svg>
             Dashboard
+          </a>
+
+          <a id="navNotes" href="#notes" data-nav="notes">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7 3h7l3 3v15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="white" stroke-width="2" />
+              <path d="M14 3v5h5" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M9 12h6M9 16h6" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Notes
           </a>
         </nav>
       </aside>
@@ -341,16 +1205,33 @@
               <path d="M10.5 18.2a7.7 7.7 0 1 1 0-15.4 7.7 7.7 0 0 1 0 15.4Z" stroke="#8ea0bb" stroke-width="2"/>
               <path d="M16.8 16.8 21 21" stroke="#8ea0bb" stroke-width="2" stroke-linecap="round"/>
             </svg>
-            <input placeholder="Search..." />
+            <input id="search" placeholder="Search..." />
           </div>
 
           <div class="rightbar">
-            <div class="pill">
-              <div class="avatar">K</div>
-              <div>Kenneth</div>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M7 10l5 5 5-5" stroke="#6e7b92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <div id="savePill" class="savepill" style="display:none;">
+              <div id="saveDot" class="dot"></div>
+              <div id="saveText" style="font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Saved</div>
+            </div>
+
+            <div id="bell" class="iconbtn" aria-label="Notifications" title="Notifications">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 22a2.5 2.5 0 0 0 2.4-2H9.6A2.5 2.5 0 0 0 12 22Z" fill="#6e7b92"/>
+                <path d="M18 16H6c1.4-1.6 2-3 2-6a4 4 0 1 1 8 0c0 3 0.6 4.4 2 6Z" stroke="#6e7b92" stroke-width="2" stroke-linejoin="round"/>
               </svg>
+            </div>
+
+            <div id="gear" class="iconbtn" aria-label="Settings" title="Settings">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="#6e7b92" stroke-width="2"/>
+                <path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.3-2-3.5-2.3.6a7.6 7.6 0 0 0-1.7-1L15 3h-6l-.4 2.8a7.6 7.6 0 0 0-1.7 1L4.6 6.2 2.6 9.7 4.6 11a7.9 7.9 0 0 0 0 2l-2 1.3 2 3.5 2.3-.6a7.6 7.6 0 0 0 1.7 1L9 21h6l.4-2.8a7.6 7.6 0 0 0 1.7-1l2.3.6 2-3.5-2-1.3Z" stroke="#6e7b92" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <div id="userPill" class="pill" aria-label="User">
+              <div class="avatar" id="userAvatar">K</div>
+              <div id="userName">Kenneth</div>
+              <button id="logoutBtn" class="sbtn" type="button" style="height:30px;border-radius:12px;padding:0 10px;">Log out</button>
             </div>
           </div>
         </div>
@@ -358,42 +1239,977 @@
         <div class="wave" aria-hidden="true"></div>
 
         <div class="main">
-          <div class="hero">
-            <h1>Welcome back, Kenneth!</h1>
-            <p>Ready to study?</p>
-          </div>
-
-          <div class="card" aria-label="Recent Note">
-            <div class="card-h">
-              <div>Recent Note</div>
-              <div style="width:22px"></div>
+          <section id="pageDashboard" class="page active">
+            <div class="hero">
+              <h1 id="welcome">Welcome back, Kenneth!</h1>
+              <p>Ready to study?</p>
             </div>
 
-            <div class="note">
-              <div class="note-row">
-                <div class="note-left">
-                  <div class="doc" aria-hidden="true">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                      <path d="M7 3h7l3 3v15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="#1e8f55" stroke-width="2"/>
-                      <path d="M14 3v5h5" stroke="#1e8f55" stroke-width="2" stroke-linejoin="round"/>
-                    </svg>
-                  </div>
-                  <div style="min-width:0">
-                    <div class="note-title">Placeholder Note Title</div>
-                    <div class="note-sub">Last edited: placeholder</div>
-                  </div>
-                </div>
-                <div class="tag">Updated</div>
+            <div class="card" aria-label="Recent Note">
+              <div class="card-h">
+                <div>Recent Note</div>
+                <div style="width:22px"></div>
               </div>
 
-              <div class="bar"><span></span></div>
+              <div class="note">
+                <div class="note-row">
+                  <div class="note-left">
+                    <div class="doc" aria-hidden="true">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M7 3h7l3 3v15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="#1e8f55" stroke-width="2"/>
+                        <path d="M14 3v5h5" stroke="#1e8f55" stroke-width="2" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <div style="min-width:0">
+                      <div id="dashNoteTitle" class="note-title">No notes yet</div>
+                      <div id="dashNoteSub" class="note-sub">Create your first note in Notes.</div>
+                    </div>
+                  </div>
+                  <div id="dashTag" class="tag" style="display:none;">Updated</div>
+                </div>
 
-              <button class="btn" type="button">Open</button>
+                <div class="bar"><span id="dashBar"></span></div>
+
+                <button id="dashOpen" class="btn" type="button">Open</button>
+              </div>
+            </div>
+          </section>
+
+          <section id="pageNotes" class="page">
+            <div class="hero">
+              <h1>Notes</h1>
+              <p>Your notes autosave. Ctrl+S / Cmd+S saves instantly.</p>
+            </div>
+
+            <div class="notes">
+              <div class="panel">
+                <div class="panel-h">
+                  <div class="title">Your Notes</div>
+                  <div class="actions">
+                    <button id="newNote" class="sbtn primary" type="button">New</button>
+                    <button id="deleteNote" class="sbtn danger" type="button" disabled>Delete</button>
+                  </div>
+                </div>
+                <div id="notesList" class="list"></div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-h">
+                  <div class="title">Editor</div>
+                  <div class="actions">
+                    <button id="retrySave" class="sbtn" type="button" style="display:none;">Retry</button>
+                  </div>
+                </div>
+                <div class="editor">
+                  <input id="noteTitle" class="field" placeholder="Title" disabled />
+                  <textarea id="noteContent" class="area" placeholder="Write here..." disabled></textarea>
+                  <div id="editorEmpty" class="empty">Select a note or press “New”.</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div id="musicBar" class="musicbar" aria-label="Music bar">
+            <div class="mbTop">
+              <div class="left">
+                <div id="mbTitle" class="mbTitle">Music locked</div>
+                <div id="mbSub" class="mbSub">Open Settings and enter PIN 9999</div>
+              </div>
+              <div class="mbCtrls">
+                <button id="mbPrev" class="sbtn" type="button" style="height:34px;border-radius:14px;" disabled>Prev</button>
+                <button id="mbPlay" class="sbtn primary" type="button" style="height:34px;border-radius:14px;" disabled>Play</button>
+                <button id="mbNext" class="sbtn" type="button" style="height:34px;border-radius:14px;" disabled>Next</button>
+              </div>
+            </div>
+
+            <div class="progWrap">
+              <div class="bar" style="height:10px;"><span id="mbProg"></span></div>
+              <div class="timeRow">
+                <div id="mbTime">0:00</div>
+                <div id="mbDur">0:00</div>
+              </div>
+              <div>
+                <div class="label" style="margin-bottom:6px;">Volume</div>
+                <input id="mbVol" class="range" type="range" min="0" max="100" value="80" disabled />
+              </div>
+            </div>
+
+            <div class="mbBody">
+              <div id="mbList" class="plist"></div>
+              <div class="mbHint">
+                <div style="font-weight:950;color:var(--pillInk);">Hotkeys</div>
+                <div>P toggles this bar</div>
+                <div>M mutes/unmutes</div>
+              </div>
             </div>
           </div>
+
         </div>
       </main>
     </div>
   </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const el = (id) => document.getElementById(id);
+    const supabaseUrl = (window.SUPABASE_URL || "").trim();
+    const supabaseAnonKey = (window.SUPABASE_ANON_KEY || "").trim();
+    const hasConfig = !!supabaseUrl && !!supabaseAnonKey;
+    const supabase = hasConfig ? createClient(supabaseUrl, supabaseAnonKey) : null;
+
+    const toastwrap = el("toastwrap");
+    const overlay = el("overlay");
+    const settings = el("settings");
+    const settingsClose = el("settingsClose");
+    const gear = el("gear");
+
+    const themeLight = el("themeLight");
+    const themeDark = el("themeDark");
+
+    const pin = el("pin");
+    const pinBtn = el("pinBtn");
+    const nerdGrid = el("nerdGrid");
+    const nerdHint = el("nerdHint");
+
+    const sfxNav = el("sfxNav");
+    const sfxClick = el("sfxClick");
+    const sfxSave = el("sfxSave");
+    const sfxError = el("sfxError");
+    const saveSfx = el("saveSfx");
+
+    const authShell = el("authShell");
+    const appShell = el("appShell");
+    const configErr = el("configErr");
+    const authErr = el("authErr");
+    const authTitle = el("authTitle");
+    const authSub = el("authSub");
+    const authSubmit = el("authSubmit");
+    const authToggle = el("authToggle");
+    const usernameInput = el("username");
+    const passwordInput = el("password");
+
+    const navDashboard = el("navDashboard");
+    const navNotes = el("navNotes");
+    const pageDashboard = el("pageDashboard");
+    const pageNotes = el("pageNotes");
+
+    const savePill = el("savePill");
+    const saveDot = el("saveDot");
+    const saveText = el("saveText");
+
+    const bell = el("bell");
+    const logoutBtn = el("logoutBtn");
+    const userName = el("userName");
+    const userAvatar = el("userAvatar");
+    const welcome = el("welcome");
+
+    const dashNoteTitle = el("dashNoteTitle");
+    const dashNoteSub = el("dashNoteSub");
+    const dashTag = el("dashTag");
+    const dashBar = el("dashBar");
+    const dashOpen = el("dashOpen");
+
+    const notesList = el("notesList");
+    const newNoteBtn = el("newNote");
+    const deleteNoteBtn = el("deleteNote");
+    const retrySaveBtn = el("retrySave");
+    const noteTitle = el("noteTitle");
+    const noteContent = el("noteContent");
+    const editorEmpty = el("editorEmpty");
+
+    const musicBar = el("musicBar");
+    const mbTitle = el("mbTitle");
+    const mbSub = el("mbSub");
+    const mbPrev = el("mbPrev");
+    const mbPlay = el("mbPlay");
+    const mbNext = el("mbNext");
+    const mbProg = el("mbProg");
+    const mbTime = el("mbTime");
+    const mbDur = el("mbDur");
+    const mbVol = el("mbVol");
+    const mbList = el("mbList");
+
+    const MUSIC_TRACKS = [
+      { id:"autumn-one-way", title:"autumn! - one way (instrumental)", url:"https://fpxusnrhgnwogvticdbe.supabase.co/storage/v1/object/public/Music/autumn!%20-%20one%20way%20(instrumental).mp3" },
+      { id:"free-jaydes-pluggnb-self", title:"free jaydes pluggnb type beat self", url:"https://fpxusnrhgnwogvticdbe.supabase.co/storage/v1/object/public/Music/free%20jaydes%20%20pluggnb%20type%20beat%20self.mp3" },
+      { id:"free-jaydes-convenience-3", title:"free jaydes type beat convenience 3", url:"https://fpxusnrhgnwogvticdbe.supabase.co/storage/v1/object/public/Music/free%20jaydes%20type%20beat%20convenience%203.mp3" },
+      { id:"wastenotime", title:"wastenotime", url:"https://fpxusnrhgnwogvticdbe.supabase.co/storage/v1/object/public/Music/wastenotime.mp3" },
+      { id:"topoppgen-lotus", title:"Topoppgen - Lotus (Instrumental) Type beat", url:"https://fpxusnrhgnwogvticdbe.supabase.co/storage/v1/object/public/Music/Topoppgen-Lotus%20(Instrumental)%20Type%20beat.mp3" },
+      { id:"kyle-richh-drive-me-crazy", title:"Kyle Richh x Sdot Go - Drive me crazyOblivious (official instrumental)", url:"https://fpxusnrhgnwogvticdbe.supabase.co/storage/v1/object/public/Music/Kyle%20Richh%20x%20Sdot%20Go%20-%20Drive%20me%20crazyOblivious%20(official%20instrumental).mp3" },
+      { id:"jaydes-who-can-i-trust", title:"jaydes - who can i trust ft. rich amiri (instrumental)", url:"https://fpxusnrhgnwogvticdbe.supabase.co/storage/v1/object/public/Music/jaydes-who%20can%20i%20trust%20ft.rich%20amiri%20(instrumental).mp3" },
+      { id:"jaydes-convenience-fixed", title:"jaydes - convenience (fixed instrumental)", url:"https://fpxusnrhgnwogvticdbe.supabase.co/storage/v1/object/public/Music/jaydes%20%20convenience%20(fixed%20instrumental).mp3" }
+    ];
+
+    const state = {
+      mode: "login",
+      session: null,
+      profile: null,
+      notes: [],
+      activeId: null,
+      draft: { title:"", content:"" },
+      dirty: false,
+      saveTimer: null,
+      musicUnlocked: localStorage.getItem("ks_music_unlocked") === "1",
+      musicVisible: localStorage.getItem("ks_music_visible") !== "0",
+      muted: localStorage.getItem("ks_muted") === "1",
+      sfx: {
+        nav: localStorage.getItem("ks_sfx_nav") || "",
+        click: localStorage.getItem("ks_sfx_click") || "",
+        save: localStorage.getItem("ks_sfx_save") || "",
+        error: localStorage.getItem("ks_sfx_error") || ""
+      },
+      music: {
+        tracks: MUSIC_TRACKS,
+        index: Math.max(0, Math.min(MUSIC_TRACKS.length - 1, Number(localStorage.getItem("ks_music_idx") || "0"))),
+        volume: Math.max(0, Math.min(100, Number(localStorage.getItem("ks_music_vol") || "80"))),
+        playing: false,
+        wasPlayingBeforeMute: false
+      },
+      theme: (localStorage.getItem("ks_theme") || "light") === "dark" ? "dark" : "light"
+    };
+
+    const musicAudio = new Audio();
+    musicAudio.preload = "metadata";
+
+    const escapeHtml = (s) => String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+
+    const showToast = (kind, msg) => {
+      const node = document.createElement("div");
+      node.className = `toast ${kind}`;
+      node.innerHTML = `<div class="b"></div><div class="txt">${escapeHtml(msg)}</div>`;
+      toastwrap.appendChild(node);
+      setTimeout(() => {
+        node.style.opacity = "0";
+        node.style.transform = "translateY(6px)";
+        node.style.transition = "180ms ease";
+        setTimeout(() => node.remove(), 220);
+      }, 2600);
+    };
+
+    const setConfigError = (msg) => {
+      configErr.style.display = msg ? "block" : "none";
+      configErr.textContent = msg || "";
+    };
+
+    const setAuthError = (msg) => {
+      authErr.style.display = msg ? "block" : "none";
+      authErr.textContent = msg || "";
+    };
+
+    const setSaveState = (kind, label) => {
+      savePill.style.display = "flex";
+      saveDot.className = "dot";
+      if (kind === "saved") saveDot.classList.add("ok");
+      if (kind === "saving") saveDot.classList.add("warn");
+      if (kind === "error") saveDot.classList.add("bad");
+      saveText.textContent = label;
+    };
+
+    const playSfx = async (key) => {
+      if (state.muted) return;
+      const url = (state.sfx && state.sfx[key]) ? state.sfx[key].trim() : "";
+      if (!url) return;
+      try {
+        const a = new Audio(url);
+        a.volume = 0.9;
+        await a.play();
+      } catch {}
+    };
+
+    const applyTheme = (t) => {
+      state.theme = t === "dark" ? "dark" : "light";
+      localStorage.setItem("ks_theme", state.theme);
+      document.body.setAttribute("data-theme", state.theme);
+      themeLight.classList.toggle("active", state.theme === "light");
+      themeDark.classList.toggle("active", state.theme === "dark");
+    };
+
+    const openSettings = () => {
+      overlay.classList.add("open");
+      settings.classList.add("open");
+    };
+
+    const closeSettings = () => {
+      overlay.classList.remove("open");
+      settings.classList.remove("open");
+    };
+
+    const usernameToEmail = (u) => `${u.toLowerCase()}@studyo.local`;
+    const route = () => (location.hash || "#dashboard").replace("#","");
+
+    const setActiveNav = (name) => {
+      navDashboard.classList.toggle("active", name === "dashboard");
+      navNotes.classList.toggle("active", name === "notes");
+    };
+
+    const showPage = (name) => {
+      pageDashboard.classList.toggle("active", name === "dashboard");
+      pageNotes.classList.toggle("active", name === "notes");
+      setActiveNav(name);
+    };
+
+    const formatUpdated = (iso) => {
+      if (!iso) return "";
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return "";
+      const now = new Date();
+      const sameDay = d.toDateString() === now.toDateString();
+      const opts = sameDay ? { hour:"numeric", minute:"2-digit" } : { month:"short", day:"numeric" };
+      return d.toLocaleString(undefined, opts);
+    };
+
+    const applyUserUI = () => {
+      const u = state.profile?.username || "Kenneth";
+      userName.textContent = u;
+      userAvatar.textContent = (u[0] || "K").toUpperCase();
+      welcome.textContent = `Welcome back, ${u}!`;
+    };
+
+    const setMode = (mode) => {
+      state.mode = mode;
+      setAuthError("");
+      authTitle.textContent = mode === "signup" ? "Sign up" : "Log in";
+      authSub.textContent = mode === "signup" ? "Pick a username + password." : "Use your username + password.";
+      authSubmit.textContent = mode === "signup" ? "Sign up" : "Log in";
+      authToggle.textContent = mode === "signup" ? "Already have an account? Log in" : "Need an account? Sign up";
+    };
+
+    const loadProfile = async () => {
+      const uid = state.session?.user?.id;
+      if (!uid) return;
+      const { data, error } = await supabase.from("profiles").select("id,username,created_at").eq("id", uid).maybeSingle();
+      if (error) showToast("bad","Failed to load profile.");
+      state.profile = data || null;
+    };
+
+    const ensureProfile = async (uid, username) => {
+      const { data: existing, error: qerr } = await supabase.from("profiles").select("id").eq("username", username).maybeSingle();
+      if (qerr) return { ok:false, msg:"Profile check failed." };
+      if (existing && existing.id !== uid) return { ok:false, msg:"Username is taken." };
+      const { error } = await supabase.from("profiles").upsert({ id: uid, username }, { onConflict: "id" });
+      if (error) return { ok:false, msg:"Failed to save profile." };
+      return { ok:true };
+    };
+
+    const setEditorEnabled = (enabled) => {
+      noteTitle.disabled = !enabled;
+      noteContent.disabled = !enabled;
+      deleteNoteBtn.disabled = !enabled;
+      editorEmpty.style.display = enabled ? "none" : "block";
+    };
+
+    const renderNotesList = () => {
+      notesList.innerHTML = "";
+      if (!state.notes.length) {
+        const n = document.createElement("div");
+        n.className = "empty";
+        n.textContent = "No notes yet. Press “New” to create one.";
+        notesList.appendChild(n);
+        return;
+      }
+      for (const n of state.notes) {
+        const item = document.createElement("div");
+        item.className = "item";
+        if (n.id === state.activeId) item.classList.add("active");
+        const title = (n.title || "").trim() || "Untitled";
+        const upd = formatUpdated(n.updated_at);
+        item.innerHTML = `<div class="t">${escapeHtml(title)}</div><div class="s">${escapeHtml(upd ? `Updated ${upd}` : "")}</div>`;
+        item.addEventListener("click", () => selectNote(n.id, true));
+        notesList.appendChild(item);
+      }
+    };
+
+    const refreshDashboardRecent = () => {
+      const recent = state.notes[0];
+      if (!recent) {
+        dashNoteTitle.textContent = "No notes yet";
+        dashNoteSub.textContent = "Create your first note in Notes.";
+        dashTag.style.display = "none";
+        dashBar.style.width = "0%";
+        return;
+      }
+      dashNoteTitle.textContent = (recent.title || "").trim() || "Untitled";
+      dashNoteSub.textContent = formatUpdated(recent.updated_at) ? `Last edited: ${formatUpdated(recent.updated_at)}` : "Last edited: just now";
+      dashTag.style.display = "block";
+      dashBar.style.width = "72%";
+    };
+
+    const loadNotes = async () => {
+      const uid = state.session?.user?.id;
+      if (!uid) return;
+      notesList.innerHTML = `<div class="empty">Loading…</div>`;
+      const { data, error } = await supabase.from("notes").select("id,title,content,updated_at").eq("user_id", uid).order("updated_at", { ascending:false });
+      if (error) {
+        showToast("bad","Failed to load notes.");
+        notesList.innerHTML = `<div class="empty">Couldn’t load notes.</div>`;
+        return;
+      }
+      state.notes = data || [];
+      if (state.activeId && !state.notes.find((n) => n.id === state.activeId)) {
+        state.activeId = null;
+        setEditorEnabled(false);
+      }
+      renderNotesList();
+      refreshDashboardRecent();
+    };
+
+    const localDraftKey = (id) => {
+      const uid = state.session?.user?.id || "anon";
+      return `ks_draft_${uid}_${id}`;
+    };
+
+    const setDraft = (title, content) => {
+      state.draft = { title, content };
+      noteTitle.value = title;
+      noteContent.value = content;
+    };
+
+    const selectNote = (id, fromClick) => {
+      const found = state.notes.find((n) => n.id === id);
+      if (!found) return;
+      state.activeId = id;
+      setEditorEnabled(true);
+      const raw = localStorage.getItem(localDraftKey(id));
+      if (raw) {
+        try{
+          const d = JSON.parse(raw);
+          if (typeof d?.title === "string" && typeof d?.content === "string") {
+            setDraft(d.title, d.content);
+            state.dirty = true;
+            setSaveState("saving","Unsaved changes");
+          } else {
+            setDraft(found.title || "", found.content || "");
+            state.dirty = false;
+            setSaveState("saved","Saved");
+          }
+        } catch {
+          setDraft(found.title || "", found.content || "");
+          state.dirty = false;
+          setSaveState("saved","Saved");
+        }
+      } else {
+        setDraft(found.title || "", found.content || "");
+        state.dirty = false;
+        setSaveState("saved","Saved");
+      }
+      retrySaveBtn.style.display = "none";
+      renderNotesList();
+      if (fromClick) playSfx("nav");
+    };
+
+    const createNote = async () => {
+      const uid = state.session?.user?.id;
+      if (!uid) return;
+      const { data, error } = await supabase.from("notes").insert({ user_id: uid, title:"", content:"" }).select("id,title,content,updated_at").single();
+      if (error) {
+        showToast("bad","Couldn’t create note.");
+        playSfx("error");
+        return;
+      }
+      state.notes = [data, ...state.notes];
+      state.activeId = data.id;
+      setEditorEnabled(true);
+      setDraft("", "");
+      state.dirty = false;
+      setSaveState("saved","Saved");
+      retrySaveBtn.style.display = "none";
+      renderNotesList();
+      refreshDashboardRecent();
+      playSfx("click");
+    };
+
+    const deleteNote = async () => {
+      const id = state.activeId;
+      if (!id) return;
+      const ok = confirm("Delete this note?");
+      if (!ok) return;
+      const { error } = await supabase.from("notes").delete().eq("id", id);
+      if (error) {
+        showToast("bad","Delete failed.");
+        playSfx("error");
+        return;
+      }
+      localStorage.removeItem(localDraftKey(id));
+      state.notes = state.notes.filter((n) => n.id !== id);
+      state.activeId = null;
+      setEditorEnabled(false);
+      renderNotesList();
+      refreshDashboardRecent();
+      setSaveState("saved","Saved");
+      showToast("ok","Deleted.");
+      playSfx("click");
+    };
+
+    const scheduleSave = () => {
+      if (!state.activeId) return;
+      state.dirty = true;
+      localStorage.setItem(localDraftKey(state.activeId), JSON.stringify(state.draft));
+      retrySaveBtn.style.display = "none";
+      if (!navigator.onLine) {
+        setSaveState("error","Offline");
+        return;
+      }
+      setSaveState("saving","Saving…");
+      clearTimeout(state.saveTimer);
+      state.saveTimer = setTimeout(() => saveNow(false), 900);
+    };
+
+    const saveNow = async (manual) => {
+      const uid = state.session?.user?.id;
+      const id = state.activeId;
+      if (!uid || !id) return;
+
+      if (!navigator.onLine) {
+        setSaveState("error","Offline");
+        retrySaveBtn.style.display = "inline-flex";
+        showToast("bad","You’re offline. Changes kept locally.");
+        playSfx("error");
+        return;
+      }
+
+      const payload = { id, user_id: uid, title: state.draft.title ?? "", content: state.draft.content ?? "" };
+      setSaveState("saving","Saving…");
+      retrySaveBtn.style.display = "none";
+
+      const { data, error } = await supabase.from("notes").upsert(payload, { onConflict:"id" }).select("id,title,content,updated_at").single();
+      if (error) {
+        setSaveState("error","Save failed");
+        retrySaveBtn.style.display = "inline-flex";
+        showToast("bad","Save failed. Draft kept locally.");
+        playSfx("error");
+        return;
+      }
+
+      state.dirty = false;
+      localStorage.removeItem(localDraftKey(id));
+      state.notes = state.notes.map((n) => (n.id === id ? data : n)).sort((a,b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+      setSaveState("saved","Saved");
+      renderNotesList();
+      refreshDashboardRecent();
+      if (manual) showToast("ok","Saved.");
+      playSfx("save");
+    };
+
+    const padTime = (sec) => {
+      if (!Number.isFinite(sec) || sec < 0) sec = 0;
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${String(s).padStart(2,"0")}`;
+    };
+
+    const applyMusicVolume = () => {
+      musicAudio.volume = Math.max(0, Math.min(1, state.music.volume / 100));
+    };
+
+    const setMusicUI = (lockedText) => {
+      if (!state.musicUnlocked) {
+        mbTitle.textContent = "Music locked";
+        mbSub.textContent = lockedText || "Open Settings and enter PIN 9999";
+        mbPrev.disabled = true;
+        mbPlay.disabled = true;
+        mbNext.disabled = true;
+        mbVol.disabled = true;
+        mbProg.style.width = "0%";
+        mbTime.textContent = "0:00";
+        mbDur.textContent = "0:00";
+        mbList.innerHTML = "";
+        return;
+      }
+
+      const tr = state.music.tracks[state.music.index];
+      mbTitle.textContent = tr ? tr.title : "No tracks";
+      mbSub.textContent = state.muted ? "Muted (press M)" : (state.music.playing ? "Playing" : "Paused");
+      mbPrev.disabled = !tr;
+      mbPlay.disabled = !tr;
+      mbNext.disabled = !tr;
+      mbVol.disabled = !tr;
+      mbVol.value = String(state.music.volume);
+
+      mbList.innerHTML = "";
+      for (let i=0;i<state.music.tracks.length;i++){
+        const t = state.music.tracks[i];
+        const p = document.createElement("div");
+        p.className = "pillItem";
+        if (i === state.music.index) p.classList.add("active");
+        p.innerHTML = `<div class="t">${escapeHtml(t.title)}</div><div class="s">Tap to play</div>`;
+        p.addEventListener("click", async () => {
+          if (state.muted) return;
+          state.music.index = i;
+          localStorage.setItem("ks_music_idx", String(i));
+          await loadTrack(true);
+          setMusicUI();
+          playSfx("click");
+        });
+        mbList.appendChild(p);
+      }
+    };
+
+    const loadTrack = async (autoplay) => {
+      const tr = state.music.tracks[state.music.index];
+      if (!tr) return;
+      applyMusicVolume();
+      musicAudio.src = tr.url;
+      musicAudio.currentTime = 0;
+      state.music.playing = false;
+      setMusicUI();
+      try{ await musicAudio.load(); } catch {}
+      if (autoplay) await playMusic();
+    };
+
+    const playMusic = async () => {
+      if (!state.musicUnlocked) return;
+      if (state.muted) return;
+      const tr = state.music.tracks[state.music.index];
+      if (!tr) return;
+      try{
+        applyMusicVolume();
+        await musicAudio.play();
+        state.music.playing = true;
+      } catch {
+        state.music.playing = false;
+        showToast("bad","Browser blocked autoplay. Press Play.");
+      }
+      setMusicUI();
+    };
+
+    const pauseMusic = () => {
+      try{ musicAudio.pause(); } catch {}
+      state.music.playing = false;
+      setMusicUI();
+    };
+
+    const nextTrack = async () => {
+      if (!state.musicUnlocked) return;
+      if (!state.music.tracks.length) return;
+      state.music.index = (state.music.index + 1) % state.music.tracks.length;
+      localStorage.setItem("ks_music_idx", String(state.music.index));
+      await loadTrack(true);
+      setMusicUI();
+    };
+
+    const prevTrack = async () => {
+      if (!state.musicUnlocked) return;
+      if (!state.music.tracks.length) return;
+      state.music.index = (state.music.index - 1 + state.music.tracks.length) % state.music.tracks.length;
+      localStorage.setItem("ks_music_idx", String(state.music.index));
+      await loadTrack(true);
+      setMusicUI();
+    };
+
+    const setMusicVisibility = (visible) => {
+      state.musicVisible = !!visible;
+      localStorage.setItem("ks_music_visible", state.musicVisible ? "1" : "0");
+      musicBar.classList.toggle("open", state.musicVisible);
+    };
+
+    const setMuted = async (muted) => {
+      state.muted = !!muted;
+      localStorage.setItem("ks_muted", state.muted ? "1" : "0");
+      if (state.muted) {
+        state.music.wasPlayingBeforeMute = state.music.playing;
+        pauseMusic();
+      } else {
+        if (state.music.wasPlayingBeforeMute) await playMusic();
+      }
+      setMusicUI();
+      showToast("ok", state.muted ? "Muted" : "Unmuted");
+    };
+
+    const authSubmitHandler = async () => {
+      if (!hasConfig) return;
+      const username = (usernameInput.value || "").trim();
+      const password = passwordInput.value || "";
+      if (!username || username.length < 3) return setAuthError("Username must be at least 3 characters.");
+      if (!password || password.length < 6) return setAuthError("Password must be at least 6 characters.");
+      setAuthError("");
+      const email = usernameToEmail(username);
+
+      if (state.mode === "signup") {
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) return setAuthError(error.message || "Sign up failed.");
+        const uid = data.user?.id;
+        if (!uid) return setAuthError("Sign up failed.");
+        const r = await ensureProfile(uid, username);
+        if (!r.ok) return setAuthError(r.msg);
+        showToast("ok","Account created. You can log in now.");
+        setMode("login");
+        playSfx("nav");
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return setAuthError(error.message || "Login failed.");
+      state.session = data.session;
+      authShell.style.display = "none";
+      appShell.style.display = "block";
+      await loadProfile();
+      if (!state.profile) {
+        const uid = state.session?.user?.id;
+        if (uid) await ensureProfile(uid, username);
+        await loadProfile();
+      }
+      await loadNotes();
+      applyUserUI();
+      showPage(route() === "notes" ? "notes" : "dashboard");
+      refreshDashboardRecent();
+      showToast("ok","Logged in.");
+      playSfx("nav");
+    };
+
+    const logout = async () => {
+      pauseMusic();
+      await supabase.auth.signOut();
+      state.session = null;
+      state.profile = null;
+      state.notes = [];
+      state.activeId = null;
+      state.draft = { title:"", content:"" };
+      state.dirty = false;
+      renderNotesList();
+      setEditorEnabled(false);
+      authShell.style.display = "block";
+      appShell.style.display = "none";
+      showToast("ok","Logged out.");
+      playSfx("nav");
+    };
+
+    const onHashChange = () => {
+      const r = route();
+      if (!state.session) {
+        location.hash = "#dashboard";
+        return;
+      }
+      if (r !== "notes" && r !== "dashboard") {
+        location.hash = "#dashboard";
+        return;
+      }
+      showPage(r);
+      if (r === "notes") setSaveState(state.dirty ? "saving" : "saved", state.dirty ? "Unsaved changes" : "Saved");
+      playSfx("nav");
+    };
+
+    const requireAuth = async () => {
+      if (!hasConfig) {
+        setConfigError("Missing Supabase config. Set SUPABASE_URL and SUPABASE_ANON_KEY in index.html.");
+        authShell.style.display = "block";
+        appShell.style.display = "none";
+        return;
+      }
+      const { data } = await supabase.auth.getSession();
+      state.session = data.session;
+      if (!state.session) {
+        authShell.style.display = "block";
+        appShell.style.display = "none";
+        return;
+      }
+      authShell.style.display = "none";
+      appShell.style.display = "block";
+      await loadProfile();
+      await loadNotes();
+      applyUserUI();
+      showPage(route() === "notes" ? "notes" : "dashboard");
+      refreshDashboardRecent();
+    };
+
+    const boot = async () => {
+      applyTheme(state.theme);
+      setMusicVisibility(state.musicVisible);
+
+      sfxNav.value = state.sfx.nav;
+      sfxClick.value = state.sfx.click;
+      sfxSave.value = state.sfx.save;
+      sfxError.value = state.sfx.error;
+
+      if (!state.musicUnlocked) {
+        nerdGrid.classList.remove("open");
+        nerdHint.style.display = "block";
+      } else {
+        nerdGrid.classList.add("open");
+        nerdHint.style.display = "none";
+      }
+
+      setMode("login");
+      setMusicUI();
+
+      authToggle.addEventListener("click", () => setMode(state.mode === "signup" ? "login" : "signup"));
+      authSubmit.addEventListener("click", authSubmitHandler);
+
+      usernameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") authSubmitHandler(); });
+      passwordInput.addEventListener("keydown", (e) => { if (e.key === "Enter") authSubmitHandler(); });
+
+      themeLight.addEventListener("click", () => { applyTheme("light"); playSfx("click"); });
+      themeDark.addEventListener("click", () => { applyTheme("dark"); playSfx("click"); });
+
+      gear.addEventListener("click", () => { openSettings(); playSfx("click"); });
+      settingsClose.addEventListener("click", () => { closeSettings(); playSfx("click"); });
+      overlay.addEventListener("click", () => closeSettings());
+
+      pinBtn.addEventListener("click", async () => {
+        const v = (pin.value || "").trim();
+        if (v !== "9999") {
+          showToast("bad","Wrong PIN.");
+          playSfx("error");
+          return;
+        }
+        state.musicUnlocked = true;
+        localStorage.setItem("ks_music_unlocked","1");
+        nerdGrid.classList.add("open");
+        nerdHint.style.display = "none";
+        setMusicUI("Unlocked");
+        if (!musicBar.classList.contains("open")) setMusicVisibility(true);
+        await loadTrack(false);
+        showToast("ok","Music unlocked.");
+        playSfx("save");
+      });
+
+      saveSfx.addEventListener("click", () => {
+        state.sfx.nav = (sfxNav.value || "").trim();
+        state.sfx.click = (sfxClick.value || "").trim();
+        state.sfx.save = (sfxSave.value || "").trim();
+        state.sfx.error = (sfxError.value || "").trim();
+        localStorage.setItem("ks_sfx_nav", state.sfx.nav);
+        localStorage.setItem("ks_sfx_click", state.sfx.click);
+        localStorage.setItem("ks_sfx_save", state.sfx.save);
+        localStorage.setItem("ks_sfx_error", state.sfx.error);
+        showToast("ok","SFX saved.");
+        playSfx("save");
+      });
+
+      bell.addEventListener("click", () => { showToast("ok","No notifications."); playSfx("click"); });
+      logoutBtn.addEventListener("click", logout);
+
+      dashOpen.addEventListener("click", () => {
+        location.hash = "#notes";
+        const first = state.notes[0];
+        if (first) selectNote(first.id, false);
+        playSfx("click");
+      });
+
+      newNoteBtn.addEventListener("click", createNote);
+      deleteNoteBtn.addEventListener("click", deleteNote);
+      retrySaveBtn.addEventListener("click", () => saveNow(true));
+
+      noteTitle.addEventListener("input", () => {
+        if (!state.activeId) return;
+        state.draft.title = noteTitle.value;
+        scheduleSave();
+      });
+
+      noteContent.addEventListener("input", () => {
+        if (!state.activeId) return;
+        state.draft.content = noteContent.value;
+        scheduleSave();
+      });
+
+      mbPrev.addEventListener("click", async () => { if (state.muted) return; await prevTrack(); playSfx("click"); });
+      mbNext.addEventListener("click", async () => { if (state.muted) return; await nextTrack(); playSfx("click"); });
+      mbPlay.addEventListener("click", async () => {
+        if (!state.musicUnlocked) return;
+        if (state.muted) return;
+        if (state.music.playing) { pauseMusic(); }
+        else { await playMusic(); }
+        playSfx("click");
+      });
+
+      mbVol.addEventListener("input", () => {
+        state.music.volume = Number(mbVol.value);
+        localStorage.setItem("ks_music_vol", String(state.music.volume));
+        applyMusicVolume();
+      });
+
+      window.addEventListener("hashchange", onHashChange);
+
+      document.addEventListener("keydown", async (e) => {
+        const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+        const typing = tag === "input" || tag === "textarea";
+        if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+          if (!state.session) return;
+          if (route() !== "notes") return;
+          if (!state.activeId) return;
+          e.preventDefault();
+          await saveNow(true);
+          return;
+        }
+        if (typing) return;
+        if (e.key === "p" || e.key === "P") {
+          if (!state.musicUnlocked) return;
+          setMusicVisibility(!musicBar.classList.contains("open"));
+          showToast("ok", musicBar.classList.contains("open") ? "Music bar shown" : "Music bar hidden");
+          playSfx("click");
+          return;
+        }
+        if (e.key === "m" || e.key === "M") {
+          await setMuted(!state.muted);
+          return;
+        }
+      });
+
+      musicAudio.addEventListener("timeupdate", () => {
+        if (!state.musicUnlocked) return;
+        const cur = musicAudio.currentTime || 0;
+        const dur = musicAudio.duration || 0;
+        const pct = dur > 0 ? (cur / dur) * 100 : 0;
+        mbProg.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+        mbTime.textContent = padTime(cur);
+        mbDur.textContent = padTime(dur);
+      });
+
+      musicAudio.addEventListener("loadedmetadata", () => {
+        mbDur.textContent = padTime(musicAudio.duration || 0);
+      });
+
+      musicAudio.addEventListener("ended", async () => {
+        if (!state.musicUnlocked) return;
+        if (state.muted) return;
+        await nextTrack();
+      });
+
+      musicAudio.addEventListener("error", () => {
+        showToast("bad","Track failed to load.");
+        playSfx("error");
+      });
+
+      if (!hasConfig) {
+        setConfigError("Missing Supabase config. Set SUPABASE_URL and SUPABASE_ANON_KEY in index.html.");
+        authShell.style.display = "block";
+        appShell.style.display = "none";
+        return;
+      }
+
+      supabase.auth.onAuthStateChange(async (_evt, session) => {
+        state.session = session;
+        if (!session) {
+          authShell.style.display = "block";
+          appShell.style.display = "none";
+          setEditorEnabled(false);
+          pauseMusic();
+          return;
+        }
+        authShell.style.display = "none";
+        appShell.style.display = "block";
+        await loadProfile();
+        await loadNotes();
+        applyUserUI();
+        showPage(route() === "notes" ? "notes" : "dashboard");
+        refreshDashboardRecent();
+      });
+
+      await requireAuth();
+
+      if (state.musicUnlocked) {
+        mbPrev.disabled = false;
+        mbPlay.disabled = false;
+        mbNext.disabled = false;
+        mbVol.disabled = false;
+        applyMusicVolume();
+        await loadTrack(false);
+        setMusicUI();
+      }
+    };
+
+    boot();
+  </script>
 </body>
 </html>
+
